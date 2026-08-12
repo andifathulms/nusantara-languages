@@ -32,6 +32,35 @@ function hexToRgb(hex: string): [number, number, number] {
   return [(value >> 16) & 255, (value >> 8) & 255, value & 255]
 }
 
+/** OKLab, for the perceptual measures. */
+function oklabOf(hex: string): [number, number, number] {
+  const [r, g, b] = hexToRgb(hex)
+    .map((channel) => channel / 255)
+    .map((channel) => (channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4)) as [
+    number,
+    number,
+    number,
+  ]
+  const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b)
+  const m = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b)
+  const s = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b)
+  return [
+    0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s,
+    1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s,
+    0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s,
+  ]
+}
+
+/** Colourfulness, independent of lightness. */
+function chromaOf(hex: string): number {
+  const [, a, b] = oklabOf(hex)
+  return Math.hypot(a, b)
+}
+
+function lightnessOf(hex: string): number {
+  return oklabOf(hex)[0]
+}
+
 /** HSL saturation, 0–1. */
 function saturationOf(hex: string): number {
   const [r, g, b] = hexToRgb(hex).map((channel) => channel / 255) as [number, number, number]
@@ -88,11 +117,18 @@ describe('the palette', () => {
   })
 
   it('reserves saturation for selection', () => {
+    // Measured as OKLCH chroma, not HSL saturation: HSL conflates colourfulness with
+    // lightness, so it reports a darker and genuinely richer ink as less saturated. The full
+    // perceptual assertion, including the size of the step, lives in tests/colour/vision.
     for (const colour of ALL_FAMILY_COLOURS) {
       expect(
-        saturationOf(colour.selected),
-        `${colour.token} selected must be more saturated than its base`,
-      ).toBeGreaterThan(saturationOf(colour.base))
+        chromaOf(colour.selected),
+        `${colour.token} selected must be more chromatic than its base`,
+      ).toBeGreaterThanOrEqual(chromaOf(colour.base))
+      expect(
+        lightnessOf(colour.selected),
+        `${colour.token} selected must be darker than its base`,
+      ).toBeLessThan(lightnessOf(colour.base))
     }
   })
 

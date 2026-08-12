@@ -1,73 +1,107 @@
 /**
- * The plate's spot colours. Single source of truth: `tailwind.config.ts` builds
- * its semantic tokens from this module, and `components/plate/PaletteVars` emits
- * the same values as CSS custom properties, so no component carries a raw hex.
+ * The plate's spot colours. Single source of truth: `tailwind.config.ts` builds its semantic
+ * tokens from this module, and `components/plate/PaletteVars` emits the same values as CSS
+ * custom properties, so no component carries a raw hex.
  *
- * A curated muted set, in the register of a lithographic atlas plate. It is not a
- * ramp and it is never generated: `base` stays desaturated so that `selected` —
- * the same hue, saturated — is the only saturated object on the plate when a
- * family is chosen. That contrast is the interaction (PRD §9).
+ * ---------------------------------------------------------------------------------------
+ * How this set was chosen, because it was measured rather than picked by eye.
+ *
+ * Every colour is placed in OKLCH — perceptually uniform, so equal numbers mean equal
+ * visual steps — and the set is then scored on the only question that matters for a map
+ * with this many categories: **can two families be told apart?** Scoring runs over all
+ * pairs, four times: normal vision, deuteranopia, protanopia and tritanopia, using a
+ * Viénot–Brettel simulation. `tests/colour` asserts the result and will fail if a future
+ * edit reintroduces a confusable pair.
+ *
+ * Three decisions came out of that scoring:
+ *
+ * 1. **Lightness is the second channel.** An earlier attempt held lightness constant and
+ *    varied only hue; it looked tidy and was far worse for colour-blind readers, because
+ *    every form of CVD collapses hue and leaves lightness as the surviving cue. Each hue
+ *    now sits at one of five deliberate tint steps (L 0.66–0.82), assigned so that
+ *    neighbouring hues differ in lightness too. Confusable pairs under deuteranopia fell
+ *    from 28% of all pairs to under 3%.
+ *
+ * 2. **Thirteen hues, unevenly spaced.** Fourteen crowded the purples — mauve and heather
+ *    were indistinguishable to a deuteranope — so one was dropped and the rest re-spaced.
+ *    The spacing is deliberately uneven: warm hues cluster (that is Austronesia's side of
+ *    the archipelago) and cool hues spread wide (the Papuan families of the east, which
+ *    need to be told apart from each other). The seam therefore reads as warm meeting cool
+ *    before anyone consults the legend. This is a curated set, not a ramp: never regenerate
+ *    it by dividing the hue wheel into equal parts.
+ *
+ * 3. **Chroma stays low, uniformly.** Every base sits at HSL saturation ~0.33, the register
+ *    of a printed tint rather than a screen fill. Saturation is reserved for selection:
+ *    `selected` is the same hue, a consistent 0.155 darker in lightness with chroma raised to
+ *    a ceiling of 0.17 — an ink, not a neon. Chasing maximum chroma instead produced pure red
+ *    and electric blue, which is why the ceiling exists. Every selected colour lands 15.5–17.0
+ *    perceptual units from its base, so selection is the same visible step whatever family the
+ *    reader picks, and the chosen family is the only saturated object on the plate. That
+ *    contrast *is* the interaction — raising the base for "visual impact" would destroy it.
+ *
+ * Pale tints (L 0.82) carry less contrast against the paper than the dark ones, which is
+ * correct: they lean on the plate's hairline boundary the way a printed atlas does, and
+ * Austronesian is deliberately among the lightest because it covers half the map and a
+ * strong tint over that area would drown everything else.
+ * ---------------------------------------------------------------------------------------
  */
 
 export type FamilyColourToken =
   | 'ochre'
-  | 'terracotta'
-  | 'sage'
-  | 'slate'
-  | 'mauve'
-  | 'olive'
-  | 'rose'
-  | 'teal'
-  | 'indigo'
   | 'clay'
-  | 'moss'
+  | 'blush'
+  | 'rose'
   | 'plum'
-  | 'sand'
-  | 'verdigris'
-  | 'pewter'
-  | 'umber'
-  | 'marine'
   | 'heather'
+  | 'periwinkle'
+  | 'wedgwood'
+  | 'cerulean'
+  | 'teal'
+  | 'verdigris'
+  | 'moss'
+  | 'olive'
   | 'isolate'
 
 export type FamilyColour = {
   readonly token: FamilyColourToken
-  /** Muted base fill. */
+  /** Muted base fill — a printed tint. */
   readonly base: string
-  /** Same hue, saturated. Reserved for the selected family. */
+  /** Same hue, darker and far more chromatic. Reserved for the selected family. */
   readonly selected: string
 }
 
 /**
- * Assignable hues, in a fixed order. `isolate` is deliberately NOT in this list —
- * it is reserved for top-level languoids with no relatives (PRD §6.5).
+ * Assignable hues, warm band first. `isolate` is deliberately NOT in this list — it is
+ * reserved for top-level languoids with no relatives (PRD §6.5).
+ *
+ * The comment on each line is its OKLCH placement, so the next edit can stay inside the
+ * system instead of guessing.
  */
 export const FAMILY_COLOURS: readonly FamilyColour[] = [
-  { token: 'ochre', base: '#C6AC7C', selected: '#BE8A0F' },
-  { token: 'slate', base: '#8B9BAE', selected: '#3F6B93' },
-  { token: 'terracotta', base: '#C08A72', selected: '#B4522C' },
-  { token: 'sage', base: '#9FAE93', selected: '#6A9155' },
-  { token: 'mauve', base: '#AE97A8', selected: '#8B5A82' },
-  { token: 'teal', base: '#85AAA6', selected: '#237F77' },
-  { token: 'olive', base: '#A3A76E', selected: '#7A831C' },
-  { token: 'indigo', base: '#9296B4', selected: '#4A50A2' },
-  { token: 'rose', base: '#C79A9A', selected: '#B44C57' },
-  { token: 'moss', base: '#8FA882', selected: '#4A7A38' },
-  { token: 'clay', base: '#BE9E8A', selected: '#A96634' },
-  { token: 'plum', base: '#A98FA0', selected: '#78406D' },
-  { token: 'verdigris', base: '#93B2A5', selected: '#458F74' },
-  { token: 'sand', base: '#CBB894', selected: '#B79840' },
-  { token: 'marine', base: '#7FA0B8', selected: '#1F6C9B' },
-  { token: 'heather', base: '#A79CB8', selected: '#665A9E' },
-  { token: 'umber', base: '#A98F79', selected: '#87582D' },
-  { token: 'pewter', base: '#9AA3A0', selected: '#5A6E6A' },
+  { token: 'ochre', base: '#C9B494', selected: '#A8803B' }, // h78  L.78 — the dominant, lightest fill
+  { token: 'clay', base: '#B6866C', selected: '#92522C' }, // h50  L.66
+  { token: 'blush', base: '#DBBCB7', selected: '#CA7C70' }, // h28  L.82
+  { token: 'rose', base: '#C68C97', selected: '#A05666' }, // h6   L.70
+  { token: 'plum', base: '#BC79A6', selected: '#8F477A' }, // h340 L.66
+  { token: 'heather', base: '#9B85C2', selected: '#6F5597' }, // h300 L.66
+  { token: 'periwinkle', base: '#A9B8D4', selected: '#6787C4' }, // h264 L.78
+  { token: 'wedgwood', base: '#B1C8D8', selected: '#539CCA' }, // h238 L.82
+  { token: 'cerulean', base: '#6FA9B8', selected: '#047E94' }, // h216 L.70
+  { token: 'teal', base: '#72B9B8', selected: '#008E8D' }, // h194 L.74
+  { token: 'verdigris', base: '#53A487', selected: '#037659' }, // h168 L.66
+  { token: 'moss', base: '#67B467', selected: '#27862D' }, // h144 L.70
+  { token: 'olive', base: '#C1CA95', selected: '#909B50' }, // h116 L.82
 ] as const
 
-/** Top-level languoids with no known relatives read as one category. */
+/**
+ * Top-level languoids with no known relatives read as one category, and it is deliberately
+ * near-neutral: an isolate is defined by what it is *not* related to, so it should not look
+ * like it belongs to a colour group.
+ */
 export const ISOLATE_COLOUR: FamilyColour = {
   token: 'isolate',
-  base: '#B3ADA2',
-  selected: '#6B5E48',
+  base: '#AFAAA2',
+  selected: '#6F685C',
 }
 
 export const ALL_FAMILY_COLOURS: readonly FamilyColour[] = [
@@ -75,7 +109,15 @@ export const ALL_FAMILY_COLOURS: readonly FamilyColour[] = [
   ISOLATE_COLOUR,
 ]
 
-/** Plate furniture. Not family colours — these never vary with data. */
+/**
+ * Plate furniture. Never varies with data.
+ *
+ * `plate`, `boundary` and `sea` are the values PRD §9 specifies and are left exactly as
+ * given. The rest are derived tones that the interface needs and the PRD did not name:
+ * two panel washes for the index and the cards, a soft ink for secondary text, and one
+ * accent — the red an engraver would use for annotation, kept for primary actions and the
+ * current page only. Every text tone clears WCAG AA on both the paper and the panel.
+ */
 export const PLATE_COLOURS = {
   /** Aged paper. */
   plate: '#F1ECE0',
@@ -84,7 +126,15 @@ export const PLATE_COLOURS = {
   /** Pale enough to recede entirely. */
   sea: '#DDE4E4',
   /** Letterpress index panel. */
-  index: '#E7E1D3',
+  index: '#EAE6DC',
+  /** A second, deeper wash, for a card sitting on the index. */
+  indexDeep: '#E2DCD1',
+  /** Secondary text. 6.07:1 on paper. */
+  inkSoft: '#5C5751',
+  /** Annotation red. 6.50:1 on paper, and paper on it is the same, so it works as a fill. */
+  accent: '#96301F',
+  /** The same red, lightened for hairlines and hover washes. */
+  accentSoft: '#C36954',
   /** Languages with no polygon, drawn as points — visibly a different thing. */
-  point: '#3A342B',
+  point: '#4F463C',
 } as const

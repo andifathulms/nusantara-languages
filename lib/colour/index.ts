@@ -35,24 +35,26 @@ export * from './palette'
  * languages cannot recolour the plate.
  */
 export const PINNED_FAMILY_COLOURS: Readonly<Record<string, FamilyColourToken>> = {
-  aust1307: 'ochre', // Austronesian — the warm anchor
-  nucl1709: 'slate', // Nuclear Trans New Guinea
-  timo1261: 'teal', // Timor-Alor-Pantar
-  lake1255: 'marine', // Lakes Plain
-  nort2923: 'verdigris', // North Halmahera
-  toro1256: 'moss', // Tor-Orya
-  geel1240: 'indigo', // Geelvink Bay
-  kwer1242: 'sage', // Greater Kwerba
-  sout3418: 'heather', // South Bird's Head
-  bord1247: 'pewter', // Border
-  nimb1257: 'plum', // Nimboranic
-  more1255: 'olive', // Yam
-  west1493: 'mauve', // West Bird's Head
-  sent1261: 'umber', // Sentanic
-  pauw1244: 'rose', // Pauwasi
-  anim1240: 'clay', // Anim
-  east1459: 'terracotta', // East Bird's Head
-  indo1319: 'sand', // Indo-European
+  // Austronesian gets the light warm tint: it holds 464 of the 726 languages and covers most
+  // of the archipelago, so a strong colour here would drown the map.
+  aust1307: 'ochre', // Austronesian
+
+  // The large Papuan families take the cool band, so the Austronesian–Papuan seam reads as
+  // warm meeting cool before anyone consults the legend.
+  nucl1709: 'cerulean', // Nuclear Trans New Guinea
+  timo1261: 'verdigris', // Timor-Alor-Pantar
+  lake1255: 'heather', // Lakes Plain
+  nort2923: 'plum', // North Halmahera — the seam runs through here
+  toro1256: 'teal', // Tor-Orya
+  geel1240: 'moss', // Geelvink Bay
+  kwer1242: 'periwinkle', // Greater Kwerba
+  bord1247: 'wedgwood', // Border
+
+  // Smaller units fill the remaining hues. Anything unpinned hashes into the same set.
+  sout3418: 'rose', // South Bird's Head
+  nimb1257: 'olive', // Nimboranic
+  more1255: 'clay', // Yam
+  west1493: 'blush', // West Bird's Head
 }
 
 /** FNV-1a. Chosen because it is short, stable, and has no dependency. */
