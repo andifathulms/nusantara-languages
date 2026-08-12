@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!--
+    The tab mark: four spot colours banded on aged paper, the way a printer's colour bar sits in
+    the margin of a plate. Values are copied from lib/colour/palette.ts — ochre (Austronesian),
+    cerulean and verdigris (the Papuan families), and the boundary ink.
+  -->
+  <rect width="32" height="32" fill="#F1ECE0" />
+  <rect x="4" y="5" width="24" height="5" fill="#C9B494" />
+  <rect x="4" y="11.5" width="24" height="5" fill="#6FA9B8" />
+  <rect x="4" y="18" width="24" height="5" fill="#53A487" />
+  <rect x="4" y="24.5" width="24" height="2.5" fill="#96301F" />
+  <rect x="4" y="5" width="24" height="22" fill="none" stroke="#2A2620" stroke-opacity="0.55" stroke-width="1" />
+</svg>

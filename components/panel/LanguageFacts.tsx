@@ -48,7 +48,7 @@ export function LanguageFacts({
 
         <Fact label={strings.panel.isoCode}>
           {detail.iso639P3 === null ? (
-            <span className="text-boundary/60">—</span>
+            <span className="text-ink-soft">—</span>
           ) : (
             <span className="font-mono">{detail.iso639P3}</span>
           )}
@@ -63,7 +63,7 @@ export function LanguageFacts({
 
         <Fact label={strings.panel.coordinates}>
           {/* [lon, lat] in WGS 84, formatted with hemisphere letters rather than a minus. */}
-          <span className="tabular font-mono text-sm">
+          <span className="figure text-body-s">
             {formatCoordinate([detail.lon, detail.lat])}
           </span>
         </Fact>
@@ -73,7 +73,7 @@ export function LanguageFacts({
             format(strings.panel.hasPolygon, { source: geometrySource ?? '' })
           ) : (
             <span>
-              {strings.panel.pointOnly}. <span className="text-boundary/70">{strings.plate.pointNote}</span>
+              {strings.panel.pointOnly}. <span className="text-ink-soft">{strings.plate.pointNote}</span>
             </span>
           )}
         </Fact>
@@ -85,7 +85,7 @@ export function LanguageFacts({
             ) : (
               detail.ancestry.map((step, index) => (
                 <span key={step.glottocode}>
-                  {index > 0 ? <span aria-hidden="true" className="text-boundary/50"> › </span> : null}
+                  {index > 0 ? <span aria-hidden="true" className="text-ink-soft"> › </span> : null}
                   <span>{step.name}</span>
                 </span>
               ))
@@ -95,21 +95,21 @@ export function LanguageFacts({
 
         <Fact label={strings.panel.altNames} wide>
           {detail.altNames.length === 0 ? (
-            <span className="text-boundary/65">{strings.panel.noAltNames}</span>
+            <span className="text-ink-soft">{strings.panel.noAltNames}</span>
           ) : (
             detail.altNames.join(' · ')
           )}
         </Fact>
       </dl>
 
-      <p className="border-l-2 border-boundary/40 pl-3 text-sm text-boundary/80">
+      <p className="caveat">
         {strings.panel.noSpeakerCount}
       </p>
 
       {compact ? (
         <Link
           href={localePath(locale, `bahasa/${detail.glottocode}`)}
-          className="index-label inline-block border border-boundary/40 px-2 py-1 hover:bg-boundary hover:text-plate"
+          className="btn"
         >
           {strings.panel.openLanguage}
         </Link>
@@ -118,18 +118,18 @@ export function LanguageFacts({
       {!compact && manifest !== undefined ? (
         <div className="rule pt-4">
           <h2 className="index-label">{strings.panel.sources}</h2>
-          <ul className="mt-2 space-y-2 text-sm">
+          <ul className="mt-2 space-y-2 text-body-s">
             {manifest.sources
               .filter((source) => source.decision === 'bundled')
               .map((source) => (
                 <li key={source.id}>
-                  <a href={source.homepage} className="underline" rel="noreferrer">
+                  <a href={source.homepage} className="link" rel="noreferrer">
                     {source.title}
                   </a>{' '}
-                  <span className="font-mono text-xs">
+                  <span className="figure text-micro">
                     {source.version} · {source.licence}
                   </span>
-                  <p className="text-boundary/75">{source.citation}</p>
+                  <p className="text-ink-soft">{source.citation}</p>
                 </li>
               ))}
           </ul>

@@ -53,13 +53,10 @@ export function TreeColumn({
   const visible = rows.filter((row) => isRowVisible(row.ancestors, open))
 
   return (
-    <aside
-      className="flex h-full min-h-0 flex-col border border-boundary/30 bg-index/60"
-      aria-label={strings.tree.title}
-    >
-      <div className="border-b border-boundary/25 px-3 py-2">
-        <h2 className="font-display text-base leading-tight">{strings.tree.title}</h2>
-        <p className="index-label">{strings.tree.subtitle}</p>
+    <aside className="sheet flex h-full min-h-0 flex-col" aria-label={strings.tree.title}>
+      <div className="border-b border-boundary/20 px-3 py-2.5">
+        <h2 className="font-display text-title-s leading-none">{strings.tree.title}</h2>
+        <p className="index-label mt-1">{strings.tree.subtitle}</p>
       </div>
 
       <div
@@ -67,7 +64,7 @@ export function TreeColumn({
         className="min-h-0 flex-1 overflow-y-auto px-1 py-1"
         onPointerLeave={() => onHover(null)}
       >
-        <ul role="tree" aria-label={strings.tree.title} className="text-sm">
+        <ul role="tree" aria-label={strings.tree.title}>
           {visible.map((row) => {
             const isScoped = scope !== null && (row.glottocode === scope || row.ancestors.includes(scope))
             const isExactScope = row.glottocode === scope
@@ -84,8 +81,8 @@ export function TreeColumn({
                 data-glottocode={row.glottocode}
               >
                 <div
-                  className={`flex items-baseline gap-1 rounded-sm px-1 ${
-                    isExactScope || isSelected ? 'bg-boundary/10' : ''
+                  className={`flex items-baseline gap-1.5 px-1 py-[0.1rem] transition-colors ${
+                    isExactScope || isSelected ? 'bg-accent/10' : 'hover:bg-boundary/5'
                   }`}
                   style={{ paddingLeft: `${row.depth * 0.7 + 0.25}rem` }}
                   onPointerEnter={() => onHover(row.glottocode)}
@@ -95,7 +92,7 @@ export function TreeColumn({
                       type="button"
                       onClick={() => onToggle(row.glottocode)}
                       aria-label={`${isOpen ? strings.tree.collapse : strings.tree.expand}: ${row.name}`}
-                      className="w-3 shrink-0 font-mono text-xs text-boundary/60 hover:text-boundary"
+                      className="w-3 shrink-0 font-mono text-micro text-ink-soft hover:text-accent"
                     >
                       {isOpen ? '−' : '+'}
                     </button>
@@ -116,16 +113,16 @@ export function TreeColumn({
                     onClick={() => onSelect(row)}
                     onFocus={() => onHover(row.glottocode)}
                     onBlur={() => onHover(null)}
-                    className={`min-w-0 flex-1 truncate text-left hover:underline ${
+                    className={`min-w-0 flex-1 truncate text-left text-body-s hover:text-accent ${
                       row.level === 'language' ? '' : 'font-medium'
-                    } ${isSelected ? 'underline' : ''}`}
+                    } ${isSelected ? 'text-accent underline' : ''}`}
                     title={row.name}
                   >
                     {row.name}
                   </button>
 
                   <span
-                    className="tabular shrink-0 font-mono text-[0.65rem] text-boundary/55"
+                    className="figure shrink-0 text-micro text-ink-soft"
                     title={
                       row.level === 'language'
                         ? row.withPolygon === 1
@@ -147,7 +144,7 @@ export function TreeColumn({
         </ul>
       </div>
 
-      <p className="border-t border-boundary/25 px-3 py-2 text-xs text-boundary/70">
+      <p className="border-t border-boundary/20 px-3 py-2 text-micro text-ink-soft">
         ▣ {strings.plate.geometryArea} · ○ {strings.plate.geometryPoint}
       </p>
     </aside>

@@ -56,13 +56,13 @@ export function SearchBox({ entries, strings, onChoose }: SearchBoxProps) {
             }
           }
         }}
-        className="mt-1 w-full border border-boundary/40 bg-plate px-2 py-1 font-label text-sm placeholder:text-boundary/45"
+        className="field mt-1"
       />
 
       {isOpen && query.length >= 2 ? (
-        <div className="absolute z-10 mt-1 w-full border border-boundary/40 bg-plate shadow-sm">
+        <div className="absolute z-20 mt-1 w-full border border-boundary/30 bg-plate shadow-lifted">
           {results.length === 0 ? (
-            <p className="px-2 py-2 text-sm text-boundary/70">{strings.search.noResults}</p>
+            <p className="px-2 py-2 text-body-s text-ink-soft">{strings.search.noResults}</p>
           ) : (
             <>
               <p className="index-label px-2 pt-1">
@@ -77,19 +77,19 @@ export function SearchBox({ entries, strings, onChoose }: SearchBoxProps) {
                         onChoose(result.entry.glottocode)
                         setIsOpen(false)
                       }}
-                      className="flex w-full items-baseline gap-2 px-2 py-1 text-left text-sm hover:bg-boundary/10"
+                      className="flex w-full items-baseline gap-2 px-2 py-1 text-left text-body-s hover:bg-accent/10"
                     >
                       <span className="min-w-0 flex-1 truncate">{result.entry.name}</span>
                       {result.matched === 'altName' ? (
-                        <span className="truncate text-xs text-boundary/65">
+                        <span className="truncate text-micro text-ink-soft">
                           {result.matchedText}
                         </span>
                       ) : null}
-                      <span className="shrink-0 font-mono text-xs text-boundary/60">
+                      <span className="figure shrink-0 text-micro text-ink-soft">
                         {result.entry.glottocode}
                       </span>
                       <span
-                        className="shrink-0 font-mono text-[0.65rem] text-boundary/55"
+                        className="figure shrink-0 text-micro text-ink-soft"
                         title={
                           result.entry.hasPolygon
                             ? strings.plate.geometryArea
@@ -99,7 +99,7 @@ export function SearchBox({ entries, strings, onChoose }: SearchBoxProps) {
                         {result.entry.hasPolygon ? '▣' : '○'}
                       </span>
                     </button>
-                    <p className="px-2 pb-1 text-xs text-boundary/60">{result.entry.familyName}</p>
+                    <p className="px-2 pb-1 text-micro text-ink-soft">{result.entry.familyName}</p>
                   </li>
                 ))}
               </ul>

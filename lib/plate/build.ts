@@ -173,6 +173,11 @@ export type BuildPlateInput = {
   readonly colours: ColourAssignment
   readonly frame: BoundingBox
   readonly width: number
+  /**
+   * Decimal places kept in the path data. 1 for the interactive plate; 0 for a still, where the
+   * extra precision is invisible and costs a quarter of the page weight.
+   */
+  readonly pathDecimals?: number
 }
 
 export function buildPlateModel(input: BuildPlateInput): PlateModel {
@@ -208,7 +213,7 @@ export function buildPlateModel(input: BuildPlateInput): PlateModel {
     areas.push({
       ...common,
       type: 'area',
-      d: toPathData(entry.geometry, projection),
+      d: toPathData(entry.geometry, projection, input.pathDecimals ?? 1),
       labelX,
       labelY,
       area: (bounds[2] - bounds[0]) * (bounds[3] - bounds[1]),

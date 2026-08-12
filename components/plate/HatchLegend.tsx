@@ -23,26 +23,26 @@ export function HatchLegend({ strings, coverage, enabled, onToggle }: HatchLegen
   const counts = new Map(coverage.aes.map((entry) => [entry.status, entry.count]))
 
   return (
-    <section className="mt-4 border border-boundary/30 bg-index/70 p-4">
+    <section className="sheet-quiet p-4 sm:p-5">
       <div className="flex items-baseline justify-between gap-4">
         <h2 className="index-label">{strings.panel.endangerment}</h2>
-        <label className="flex items-baseline gap-2 text-sm">
+        <label className="flex items-center gap-2 text-body-s">
           <input
             type="checkbox"
             checked={enabled}
             onChange={onToggle}
-            className="accent-boundary"
+            className="h-4 w-4 accent-accent"
           />
           {strings.plate.hatchingToggle}
         </label>
       </div>
 
-      <ul className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-sm">
+      <ul className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5 text-body-s">
         {AES_STATUSES.map((status) => (
           <li key={status} className="flex items-baseline gap-2">
             <HatchSwatch step={aesStep(status)} />
             <span>{strings.aes[status] ?? status}</span>
-            <span className="tabular font-mono text-xs text-boundary/65">
+            <span className="figure text-micro text-ink-soft">
               {counts.get(status) ?? 0}
             </span>
           </li>
@@ -51,14 +51,14 @@ export function HatchLegend({ strings, coverage, enabled, onToggle }: HatchLegen
           <li className="flex items-baseline gap-2">
             <HatchSwatch step={0} />
             <span>{strings.aes.unknown}</span>
-            <span className="tabular font-mono text-xs text-boundary/65">
+            <span className="figure text-micro text-ink-soft">
               {counts.get('unknown') ?? 0}
             </span>
           </li>
         ) : null}
       </ul>
 
-      <p className="mt-3 text-sm text-boundary/75">
+      <p className="mt-3 text-body-s text-ink-soft">
         {format(strings.plate.hatchingNote, { total: coverage.languages })}
       </p>
     </section>

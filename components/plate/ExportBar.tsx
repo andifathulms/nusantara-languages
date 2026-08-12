@@ -74,23 +74,23 @@ export function ExportBar({ strings, getPlate, slug, scale = 2 }: ExportBarProps
   }
 
   return (
-    <div className="mt-4 flex flex-wrap items-center gap-2">
+    <div className="flex flex-wrap items-center gap-2">
       <button
         type="button"
         onClick={() => void exportPng()}
         disabled={state === 'working'}
-        className="index-label border border-boundary/40 px-2 py-1 hover:bg-boundary hover:text-plate disabled:opacity-60"
+        className="btn disabled:opacity-60"
       >
         {strings.export.png}
       </button>
       <button
         type="button"
         onClick={() => void copyLink()}
-        className="index-label border border-boundary/40 px-2 py-1 hover:bg-boundary hover:text-plate"
+        className="btn"
       >
         {state === 'copied' ? strings.export.copied : strings.export.copyLink}
       </button>
-      <span aria-live="polite" className="text-sm text-boundary/70">
+      <span aria-live="polite" className="text-body-s text-accent">
         {state === 'failed' ? strings.export.failed : ''}
       </span>
     </div>
