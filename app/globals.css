@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Plate furniture only. Family colours are emitted as custom properties by
+ * components/plate/PaletteVars.tsx from lib/colour/palette.ts, so the palette has exactly
+ * one source and nothing here restates a hex.
+ */
+
+@layer base {
+  html {
+    /* Aged paper, from the `plate` token. */
+    background-color: theme('colors.plate');
+    color: theme('colors.boundary');
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    font-family: theme('fontFamily.display');
+    /* A faint fibre, in the register of a lithographic plate. Two hairline washes, no
+       image, no request. */
+    background-image:
+      repeating-linear-gradient(
+        90deg,
+        rgb(42 38 32 / 0.014) 0px,
+        rgb(42 38 32 / 0.014) 1px,
+        transparent 1px,
+        transparent 3px
+      ),
+      repeating-linear-gradient(
+        0deg,
+        rgb(42 38 32 / 0.01) 0px,
+        rgb(42 38 32 / 0.01) 1px,
+        transparent 1px,
+        transparent 4px
+      );
+  }
+
+  :focus-visible {
+    outline: 2px solid theme('colors.boundary');
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background-color: rgb(42 38 32 / 0.14);
+  }
+}
+
+@layer components {
+  /* Letterpress index panel: small caps, tight tracking, tabular figures on counts. */
+  .index-label {
+    @apply font-label text-micro uppercase tracking-[0.14em] text-boundary/70;
+  }
+
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .rule {
+    @apply border-t border-boundary/25;
+  }
+
+  /* The plate's own frame — a printed plate carries a border. */
+  .plate-frame {
+    box-shadow:
+      inset 0 0 0 1px rgb(42 38 32 / 0.5),
+      inset 0 0 0 4px theme('colors.plate'),
+      inset 0 0 0 5px rgb(42 38 32 / 0.25);
+  }
+}
+
+/*
+ * One orchestrated moment: territories rising to full saturation as a branch is hovered,
+ * everything else falling back. Nothing else animates.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .plate-shape {
+    transition:
+      fill 140ms ease-out,
+      fill-opacity 140ms ease-out;
+  }
+}
