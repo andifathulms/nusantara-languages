@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { MakerSignature } from './MakerSignature'
 import { dictionary, localePath, type Locale, LOCALES } from '@/lib/i18n'
 
 /**
@@ -88,9 +89,15 @@ export function SiteFooter({ locale }: { locale: Locale }) {
   const strings = dictionary(locale)
   return (
     <footer className="mt-16 border-t border-boundary/20">
-      <div className="mx-auto grid max-w-plate gap-4 px-4 py-8 text-body-s text-ink-soft sm:grid-cols-2 sm:px-6">
-        <p>{strings.plate.attribution}</p>
-        <p className="sm:text-right">{strings.home.personalProject}</p>
+      {/* One seam, two kinds of statement. Left: the licence attribution and the affiliation
+          disclaimer — obligations. Right: the maker's mark — personal credit. Kept apart by
+          position rather than by a second rule, so the footer stays a single bottom bar. */}
+      <div className="mx-auto flex max-w-plate flex-col gap-6 px-4 py-8 sm:flex-row sm:items-end sm:justify-between sm:gap-10 sm:px-6">
+        <div className="max-w-prose space-y-1 text-body-s text-ink-soft">
+          <p>{strings.plate.attribution}</p>
+          <p>{strings.home.personalProject}</p>
+        </div>
+        <MakerSignature className="shrink-0" />
       </div>
     </footer>
   )
