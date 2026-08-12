@@ -3,7 +3,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Plate } from './Plate'
 import { IndexPanel } from './IndexPanel'
+import { HatchLegend } from './HatchLegend'
+import { ExportBar } from './ExportBar'
+import { PlateToolbar } from './PlateToolbar'
 import { TreeColumn } from '@/components/tree/TreeColumn'
+import { LanguageFacts } from '@/components/panel/LanguageFacts'
 import {
   NO_SELECTION,
   openAncestry,
@@ -11,10 +15,6 @@ import {
   toggleOpen,
   type PlateSelection,
 } from '@/lib/plate/select'
-import { LanguageFacts } from '@/components/panel/LanguageFacts'
-import { HatchLegend } from './HatchLegend'
-import { SearchBox } from './SearchBox'
-import { ExportBar } from './ExportBar'
 import { parseViewHash, toViewHash } from '@/lib/plate/hash'
 import type { SearchEntry } from '@/lib/search'
 import type { PlateModel, TreeRow } from '@/lib/plate/build'
@@ -25,13 +25,16 @@ import { format, type Dictionary, type Locale } from '@/lib/i18n'
  * The linkage. This is the product.
  *
  * Hover a branch in the tree -> `scope` becomes that branch -> every shape whose ancestry
- * contains it saturates, everything else falls back. Click a territory on the plate ->
- * the language's ancestry is opened, so its row becomes visible, and the column scrolls to
- * it. Both directions run through the same two pieces of state and the same pure functions
- * in lib/plate/select; there is no second code path.
+ * contains it saturates, everything else falls back. Click a territory on the plate -> the
+ * language's ancestry is opened, so its row becomes visible, and the column scrolls to it. Both
+ * directions run through the same two pieces of state and the same pure functions in
+ * lib/plate/select; there is no second code path.
  *
- * Hover wins over selection while it lasts, so exploring the tree never costs the reader
- * the selection they made.
+ * Hover wins over selection while it lasts, so exploring never costs the reader their choice.
+ *
+ * Layout: the tree sits beside the plate on a wide screen, because the binding only works when
+ * both are visible at once. Below `lg` there is no width for that, so the two become tabs — a
+ * stacked tree under a map would put the linkage off-screen, which is worse than a switch.
  */
 
 type PlateViewProps = {
@@ -45,15 +48,16 @@ type PlateViewProps = {
   readonly initialSelection?: PlateSelection
   readonly initialHatching?: boolean
   /**
-   * A guided view's standing emphasis: the isolates, the most endangered, the Papuan side of
-   * the seam. Hover or a selection overrides it, so a guided view is a starting point rather
-   * than a mode the reader is stuck in.
+   * A guided view's standing emphasis. Hover or a selection overrides it, so a guided view is a
+   * starting point rather than a mode the reader is stuck in.
    */
   readonly emphasis?: readonly string[]
   /** Whether the URL hash carries the view. Off inside a guided view, which owns its URL. */
   readonly syncHash?: boolean
   /** Names the exported file: `nusantara-<slug>-<date>.png`. */
   readonly slug?: string
+  /** Worked examples for the toolbar, as `[label, glottocode]`. */
+  readonly examples?: readonly { readonly label: string; readonly glottocode: string }[]
 }
 
 export function PlateView({
@@ -68,6 +72,7 @@ export function PlateView({
   emphasis,
   syncHash = false,
   slug = 'peta',
+  examples = [],
 }: PlateViewProps) {
   const [hovered, setHovered] = useState<string | null>(null)
   const [selection, setSelection] = useState<PlateSelection>(initialSelection)
@@ -76,6 +81,7 @@ export function PlateView({
   )
   const [scrollTo, setScrollTo] = useState<string | null>(null)
   const [hatching, setHatching] = useState(initialHatching)
+  const [tab, setTab] = useState<'map' | 'tree'>('map')
   const plateRef = useRef<SVGSVGElement | null>(null)
 
   const emphasisSet = useMemo(
@@ -108,16 +114,18 @@ export function PlateView({
     [model],
   )
 
-  // The hash is read once on mount, so a shared link opens on the view it names, and written
-  // as the reader changes it. replaceState rather than a push: the plate is one page, and the
-  // back button should leave it rather than walk a history of hovers.
+  // The hash is read once on mount, so a shared link opens on the view it names, and written as
+  // the reader changes it. replaceState rather than a push: the plate is one page, and the back
+  // button should leave it rather than walk a history of clicks.
   useEffect(() => {
     if (!syncHash) return
     const state = parseViewHash(window.location.hash)
     const named = state.selection
     if (named.kind !== 'none') {
       setSelection(named)
-      setOpen((current) => openAncestry(current, [...ancestryOf(named.glottocode), named.glottocode]))
+      setOpen((current) =>
+        openAncestry(current, [...ancestryOf(named.glottocode), named.glottocode]),
+      )
       setScrollTo(named.glottocode)
     }
     if (state.hatching) setHatching(true)
@@ -128,10 +136,12 @@ export function PlateView({
   useEffect(() => {
     if (!syncHash) return
     const hash = toViewHash({ selection, hatching })
-    const url = `${window.location.pathname}${window.location.search}${hash}`
-    window.history.replaceState(null, '', url)
+    window.history.replaceState(
+      null,
+      '',
+      `${window.location.pathname}${window.location.search}${hash}`,
+    )
   }, [syncHash, selection, hatching])
-
 
   /** Clicking a territory: select it, open its ancestry, scroll the tree to it. */
   const selectFromPlate = useCallback(
@@ -158,20 +168,17 @@ export function PlateView({
     setScrollTo(null)
   }, [])
 
-  const selectBranch = useCallback(
-    (glottocode: string) => {
-      setSelection((current) =>
-        current.kind === 'branch' && current.glottocode === glottocode
-          ? NO_SELECTION
-          : { kind: 'branch', glottocode },
-      )
-      // Selecting a family in the legend opens it in the tree too — the two views are one
-      // object, so a selection made in either has to be visible in both.
-      setOpen((current) => new Set([...current, glottocode]))
-      setScrollTo(glottocode)
-    },
-    [],
-  )
+  const selectBranch = useCallback((glottocode: string) => {
+    setSelection((current) =>
+      current.kind === 'branch' && current.glottocode === glottocode
+        ? NO_SELECTION
+        : { kind: 'branch', glottocode },
+    )
+    // Selecting a family anywhere opens it in the tree too — the two views are one object, so a
+    // choice made in either has to be visible in both.
+    setOpen((current) => new Set([...current, glottocode]))
+    setScrollTo(glottocode)
+  }, [])
 
   const toggle = useCallback((glottocode: string) => {
     setOpen((current) => toggleOpen(current, glottocode))
@@ -183,6 +190,8 @@ export function PlateView({
   }, [])
 
   const scopedRow = scope === null ? null : model.rows.find((row) => row.glottocode === scope)
+  const selectedDetail = selectedLanguage === null ? undefined : model.details[selectedLanguage]
+
   const announcement =
     selection.kind === 'none'
       ? strings.a11y.announceCleared
@@ -197,116 +206,126 @@ export function PlateView({
             count:
               model.rows.find((row) => row.glottocode === selection.glottocode)?.languageCount ?? 0,
           })
-  const selectedDetail = selectedLanguage === null ? undefined : model.details[selectedLanguage]
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_20rem] xl:grid-cols-[minmax(0,1fr)_24rem]">
-      <div className="min-w-0">
-        <div className="mb-3 max-w-sm">
-          <SearchBox entries={searchEntries} strings={strings} onChoose={selectFromPlate} />
-        </div>
+    <div className="space-y-4">
+      <PlateToolbar
+        strings={strings}
+        entries={searchEntries}
+        onChoose={selectFromPlate}
+        onSelectBranch={selectBranch}
+        examples={examples}
+        hatching={hatching}
+        onToggleHatching={() => setHatching((current) => !current)}
+        selectionLabel={scopedRow?.name ?? selectedDetail?.name ?? null}
+        selectionCount={scopedRow?.languageCount ?? null}
+        onClear={clear}
+      />
 
-        <Plate
-          plateRef={plateRef}
-          model={model}
-          scope={scope}
-          selectedLanguage={selectedLanguage}
-          onHover={setHovered}
-          onSelect={selectFromPlate}
-          label={`${strings.plate.title} — ${format(strings.plate.coverage, {
-            withPolygon: coverage.withPolygon,
-            total: coverage.languages,
-            percent: coverage.polygonPercent,
-          })}`}
-          showHatching={hatching}
-          emphasis={emphasisSet}
-        />
-
-        <p className="mt-2 flex flex-wrap items-baseline gap-x-3 text-sm text-boundary/75">
-          {scopedRow !== undefined && scopedRow !== null ? (
-            <>
-              <span className="index-label">{strings.plate.selectedFamily}</span>
-              <span className="font-display text-base text-boundary">{scopedRow.name}</span>
-              <span className="tabular font-mono text-xs">
-                {format(strings.tree.languages, { count: scopedRow.languageCount })} ·{' '}
-                {scopedRow.withPolygon} {strings.plate.geometryArea}
-              </span>
-            </>
-          ) : (
-            strings.plate.hint
-          )}
-        </p>
-
-        <ExportBar strings={strings} getPlate={() => plateRef.current} slug={slug} />
-
-        {/* Announced for a reader who is not looking at the plate: the linkage is visual, so
-            the selection has to be said out loud as well as drawn. */}
-        <p aria-live="polite" className="sr-only">
-          {announcement}
-        </p>
-
-        {/* The panel for the selected language, above the index: it is the answer to the
-            click that produced it, so it belongs next to the plate rather than on another
-            page. The language page carries the same facts plus every citation. */}
-        {selectedDetail !== undefined ? (
-          <section
-            className="mt-4 border border-boundary/30 bg-index/70 p-4"
-            aria-label={selectedDetail.name}
+      {/* Tabs below lg only: the tree has to be beside the plate when there is room for it. */}
+      <div className="flex gap-1 lg:hidden" role="tablist" aria-label={strings.plate.title}>
+        {(['map', 'tree'] as const).map((candidate) => (
+          <button
+            key={candidate}
+            type="button"
+            role="tab"
+            aria-selected={tab === candidate}
+            onClick={() => setTab(candidate)}
+            className={`btn flex-1 justify-center ${
+              tab === candidate ? 'border-boundary bg-boundary text-plate' : ''
+            }`}
           >
-            <div className="flex items-baseline justify-between gap-4">
-              <h2 className="font-display text-2xl leading-tight">{selectedDetail.name}</h2>
-              <button
-                type="button"
-                onClick={clear}
-                className="index-label border border-boundary/40 px-2 py-1 hover:bg-boundary hover:text-plate"
-              >
-                {strings.panel.close}
-              </button>
-            </div>
-            <div className="mt-3">
-              <LanguageFacts
-                detail={selectedDetail}
-                strings={strings}
-                locale={locale}
-                manifest={manifest}
-                compact
-              />
-            </div>
-          </section>
-        ) : null}
-
-        <IndexPanel
-          legend={model.legend}
-          coverage={coverage}
-          strings={strings}
-          scope={scope}
-          onHover={setHovered}
-          onSelect={selectBranch}
-          onClear={clear}
-          hasSelection={selection.kind !== 'none'}
-        />
-
-        <HatchLegend
-          strings={strings}
-          coverage={coverage}
-          enabled={hatching}
-          onToggle={() => setHatching((current) => !current)}
-        />
+            {candidate === 'map' ? strings.guide.tabMap : strings.guide.tabTree}
+          </button>
+        ))}
       </div>
 
-      {/* Beside the plate, not beneath it: the linkage only works when both are visible. */}
-      <div className="lg:sticky lg:top-4 lg:h-[calc(100dvh-2rem)]">
-        <TreeColumn
-          rows={model.rows}
-          strings={strings}
-          open={open}
-          scope={scope}
-          selected={selection.kind === 'none' ? null : selection.glottocode}
-          onToggle={toggle}
-          onHover={setHovered}
-          onSelect={selectFromTree}
-          scrollTo={scrollTo}
-        />
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_21rem] xl:grid-cols-[minmax(0,1fr)_25rem]">
+        <div className={`min-w-0 space-y-4 ${tab === 'map' ? '' : 'hidden lg:block'}`}>
+          <Plate
+            plateRef={plateRef}
+            model={model}
+            scope={scope}
+            selectedLanguage={selectedLanguage}
+            onHover={setHovered}
+            onSelect={selectFromPlate}
+            label={`${strings.plate.title} — ${format(strings.plate.coverage, {
+              withPolygon: coverage.withPolygon,
+              total: coverage.languages,
+              percent: coverage.polygonPercent,
+            })}`}
+            showHatching={hatching}
+            emphasis={emphasisSet}
+          />
+
+          <ExportBar strings={strings} getPlate={() => plateRef.current} slug={slug} />
+
+          <p aria-live="polite" className="sr-only">
+            {announcement}
+          </p>
+
+          {/* The panel answers the click that produced it, so it sits with the plate. */}
+          {selectedDetail !== undefined ? (
+            <section className="sheet p-4 sm:p-5" aria-label={selectedDetail.name}>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="index-label">
+                    {selectedDetail.ancestry[0]?.name ?? strings.tree.isolate}
+                  </p>
+                  <h2 className="mt-0.5 font-display text-title-m">{selectedDetail.name}</h2>
+                </div>
+                <button type="button" onClick={clear} className="btn shrink-0">
+                  {strings.panel.close}
+                </button>
+              </div>
+              <div className="mt-4">
+                <LanguageFacts
+                  detail={selectedDetail}
+                  strings={strings}
+                  locale={locale}
+                  manifest={manifest}
+                  compact
+                />
+              </div>
+            </section>
+          ) : null}
+
+          <IndexPanel
+            legend={model.legend}
+            coverage={coverage}
+            strings={strings}
+            scope={scope}
+            onHover={setHovered}
+            onSelect={selectBranch}
+            onClear={clear}
+            hasSelection={selection.kind !== 'none'}
+          />
+
+          <HatchLegend
+            strings={strings}
+            coverage={coverage}
+            enabled={hatching}
+            onToggle={() => setHatching((current) => !current)}
+          />
+        </div>
+
+        <div
+          className={`lg:sticky lg:top-4 lg:h-[calc(100dvh-2rem)] ${
+            tab === 'tree' ? 'h-[70dvh]' : 'hidden lg:block'
+          }`}
+        >
+          <TreeColumn
+            rows={model.rows}
+            strings={strings}
+            open={open}
+            scope={scope}
+            selected={selection.kind === 'none' ? null : selection.glottocode}
+            onToggle={toggle}
+            onHover={setHovered}
+            onSelect={selectFromTree}
+            scrollTo={scrollTo}
+          />
+        </div>
       </div>
     </div>
   )

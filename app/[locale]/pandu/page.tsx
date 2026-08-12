@@ -43,23 +43,22 @@ export default function GuidedIndexPage({ params }: { params: { locale: string }
     <>
       <SiteHeader locale={locale} current="pandu" />
 
-      <main className="mx-auto max-w-[76ch] px-5 py-10">
-        <h1 className="font-display text-4xl leading-tight">{strings.guided.title}</h1>
-        <p className="mt-3 text-lg text-boundary/85">{strings.guided.lead}</p>
+      <main className="mx-auto max-w-plate px-4 py-10 sm:px-6">
+        <h1 className="font-display text-title-l">{strings.guided.title}</h1>
+        <p className="mt-3 max-w-prose text-lead text-ink-soft">{strings.guided.lead}</p>
 
-        <ul className="mt-8 space-y-6">
+        <ul className="mt-8 grid gap-4 md:grid-cols-3">
           {views.map((view) => (
-            <li key={view.id} className="border-t border-boundary/25 pt-5">
-              <h2 className="font-display text-2xl leading-tight">{view.title}</h2>
-              <p className="mt-2 text-boundary/85">{view.body}</p>
-              <p className="tabular mt-2 font-mono text-sm text-boundary/70">
-                {format(strings.guided.emphasised, { count: view.count })}
-              </p>
+            <li key={view.id}>
               <Link
                 href={localePath(locale, `pandu/${view.id}`)}
-                className="index-label mt-3 inline-block border border-boundary px-3 py-1 hover:bg-boundary hover:text-plate"
+                className="sheet group flex h-full flex-col p-5 transition-shadow hover:shadow-lifted"
               >
-                {strings.guided.open}
+                <h2 className="font-display text-title-s group-hover:text-accent">{view.title}</h2>
+                <p className="mt-2 flex-1 text-body-s text-ink-soft">{view.body}</p>
+                <p className="figure mt-4 text-micro text-ink-soft">
+                  {format(strings.guided.emphasised, { count: view.count })}
+                </p>
               </Link>
             </li>
           ))}

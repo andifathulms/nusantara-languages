@@ -78,16 +78,16 @@ export default function LanguagePage({
     <>
       <SiteHeader locale={locale} current="peta" />
 
-      <main className="mx-auto max-w-[76ch] px-5 py-8">
+      <main className="mx-auto max-w-prose px-4 py-10 sm:px-6">
         <p className="index-label">
           {family === undefined ? strings.tree.isolate : family.name}
         </p>
-        <h1 className="mt-1 font-display text-4xl leading-tight">{detail.name}</h1>
+        <h1 className="mt-1 font-display text-title-l">{detail.name}</h1>
 
         <p className="mt-4">
           <Link
             href={`${localePath(locale, 'peta')}#bahasa=${detail.glottocode}`}
-            className="underline"
+            className="link"
           >
             {strings.nav.plate}
           </Link>
@@ -102,8 +102,8 @@ export default function LanguagePage({
           />
         </div>
 
-        <p className="mt-8 text-sm text-boundary/75">
-          <Link href={localePath(locale, 'metode')} className="underline">
+        <p className="mt-10 text-body-s text-ink-soft">
+          <Link href={localePath(locale, 'metode')} className="link">
             {strings.method.title}
           </Link>
         </p>

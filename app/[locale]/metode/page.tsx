@@ -30,12 +30,12 @@ export default function MethodPage({ params }: { params: { locale: string } }) {
     <>
       <SiteHeader locale={locale} current="metode" />
 
-      <main className="mx-auto max-w-[76ch] px-5 py-10">
-        <h1 className="font-display text-4xl leading-tight">{strings.method.title}</h1>
-        <p className="mt-3 text-lg text-boundary/85">{strings.method.lead}</p>
+      <main className="mx-auto max-w-prose px-4 py-10 sm:px-6">
+        <h1 className="font-display text-title-l">{strings.method.title}</h1>
+        <p className="mt-3 text-lead text-ink-soft">{strings.method.lead}</p>
 
         <section className="mt-10">
-          <h2 className="font-display text-2xl">{strings.method.coverage}</h2>
+          <h2 className="font-display text-title-m">{strings.method.coverage}</h2>
           <dl className="mt-4 grid grid-cols-2 gap-y-4 sm:grid-cols-4">
             {[
               { term: locale === 'id' ? 'Bahasa' : 'Languages', value: coverage.languages },
@@ -64,7 +64,7 @@ export default function MethodPage({ params }: { params: { locale: string } }) {
             ].map((entry) => (
               <div key={entry.term}>
                 <dt className="index-label">{entry.term}</dt>
-                <dd className="tabular font-mono text-xl">
+                <dd className="figure text-title-s">
                   {typeof entry.value === 'number'
                     ? entry.value.toLocaleString(locale)
                     : entry.value}
@@ -93,10 +93,10 @@ export default function MethodPage({ params }: { params: { locale: string } }) {
         </section>
 
         <section className="mt-10">
-          <h2 className="font-display text-2xl">{strings.method.notClaimed}</h2>
+          <h2 className="font-display text-title-m">{strings.method.notClaimed}</h2>
           <ul className="mt-4 space-y-3">
             {strings.method.claims.map((claim) => (
-              <li key={claim} className="border-l-2 border-boundary/40 pl-4">
+              <li key={claim} className="caveat">
                 {claim}
               </li>
             ))}
@@ -104,39 +104,39 @@ export default function MethodPage({ params }: { params: { locale: string } }) {
         </section>
 
         <section className="mt-10">
-          <h2 className="font-display text-2xl">{strings.method.sources}</h2>
+          <h2 className="font-display text-title-m">{strings.method.sources}</h2>
           <ul className="mt-4 space-y-5">
             {bundled.map((source) => (
               <li key={source.id} className="border-t border-boundary/25 pt-4">
-                <h3 className="font-display text-lg leading-snug">
-                  <a href={source.homepage} className="underline" rel="noreferrer">
+                <h3 className="font-display text-title-s leading-snug">
+                  <a href={source.homepage} className="link" rel="noreferrer">
                     {source.title}
                   </a>
                 </h3>
-                <p className="mt-1 font-mono text-xs">
+                <p className="figure mt-1 text-micro">
                   {source.version} ·{' '}
-                  <a href={source.licenceUrl} className="underline" rel="noreferrer">
+                  <a href={source.licenceUrl} className="link" rel="noreferrer">
                     {source.licence}
                   </a>
                   {source.role === undefined ? '' : ` · ${source.role}`}
                 </p>
                 {source.period !== undefined ? (
-                  <p className="mt-1 text-sm">
+                  <p className="mt-1 text-body-s">
                     <span className="index-label">{strings.method.period}</span>{' '}
                     {source.period.label} ({source.period.fromYear}–{source.period.toYear})
                   </p>
                 ) : null}
-                <p className="mt-1 text-sm text-boundary/80">{source.citation}</p>
+                <p className="mt-1 text-body-s text-ink-soft">{source.citation}</p>
               </li>
             ))}
           </ul>
-          <p className="mt-4 text-sm text-boundary/75">
+          <p className="mt-4 text-body-s text-ink-soft">
             <span className="index-label">{strings.method.nameProviders}</span>{' '}
             {manifest.nameProviders.join(', ')}
           </p>
-          <p className="mt-2 text-sm">
+          <p className="mt-2 text-body-s">
             <span className="index-label">{strings.method.licence}</span>{' '}
-            <a href={manifest.bundleLicenceUrl} className="underline" rel="noreferrer">
+            <a href={manifest.bundleLicenceUrl} className="link" rel="noreferrer">
               {manifest.bundleLicence}
             </a>
           </p>
@@ -145,65 +145,65 @@ export default function MethodPage({ params }: { params: { locale: string } }) {
         {/* Refusals are published, not hidden: the atlas this project was designed around is
             the one source it cannot ship, and the reason belongs on the page. */}
         <section className="mt-10">
-          <h2 className="font-display text-2xl">{strings.method.refused}</h2>
+          <h2 className="font-display text-title-m">{strings.method.refused}</h2>
           <ul className="mt-4 space-y-5">
             {refused.map((source) => (
               <li key={source.id} className="border-t border-boundary/25 pt-4">
-                <h3 className="font-display text-lg leading-snug">
-                  <a href={source.homepage} className="underline" rel="noreferrer">
+                <h3 className="font-display text-title-s leading-snug">
+                  <a href={source.homepage} className="link" rel="noreferrer">
                     {source.title}
                   </a>
                 </h3>
-                <p className="mt-1 font-mono text-xs">
+                <p className="figure mt-1 text-micro">
                   {source.version} ·{' '}
-                  <a href={source.licenceUrl} className="underline" rel="noreferrer">
+                  <a href={source.licenceUrl} className="link" rel="noreferrer">
                     {source.licence}
                   </a>
                 </p>
-                <p className="mt-1 text-sm text-boundary/80">{source.reason}</p>
+                <p className="mt-1 text-body-s text-ink-soft">{source.reason}</p>
               </li>
             ))}
           </ul>
         </section>
 
         <section className="mt-10">
-          <h2 className="font-display text-2xl">{strings.method.excluded}</h2>
+          <h2 className="font-display text-title-m">{strings.method.excluded}</h2>
           <ul className="mt-4 space-y-1">
             {coverage.excluded.map((entry) => (
               <li key={entry.reason} className="flex items-baseline justify-between gap-4">
                 <span>{entry.reason}</span>
-                <span className="tabular font-mono text-sm">{entry.count}</span>
+                <span className="figure text-body-s">{entry.count}</span>
               </li>
             ))}
           </ul>
         </section>
 
         <section className="mt-10">
-          <h2 className="font-display text-2xl">{strings.panel.endangerment}</h2>
+          <h2 className="font-display text-title-m">{strings.panel.endangerment}</h2>
           <ul className="mt-4 space-y-1">
             {coverage.aes
               .filter((entry) => entry.count > 0)
               .map((entry) => (
                 <li key={entry.status} className="flex items-baseline justify-between gap-4">
                   <span>{strings.aes[entry.status] ?? entry.status}</span>
-                  <span className="tabular font-mono text-sm">{entry.count}</span>
+                  <span className="figure text-body-s">{entry.count}</span>
                 </li>
               ))}
           </ul>
         </section>
 
         <section className="mt-10">
-          <h2 className="font-display text-2xl">{strings.plate.families}</h2>
+          <h2 className="font-display text-title-m">{strings.plate.families}</h2>
           <ul className="mt-4 space-y-1">
             {coverage.families.map((family) => (
               <li key={family.glottocode} className="flex items-baseline justify-between gap-4">
                 <span className="min-w-0 truncate">
                   {family.name}
                   {family.isIsolate ? (
-                    <span className="ml-2 text-sm text-boundary/65">{strings.tree.isolate}</span>
+                    <span className="ml-2 text-body-s text-ink-soft">{strings.tree.isolate}</span>
                   ) : null}
                 </span>
-                <span className="tabular shrink-0 font-mono text-sm text-boundary/75">
+                <span className="figure shrink-0 text-body-s text-ink-soft">
                   {family.withPolygon}/{family.languageCount}
                 </span>
               </li>
@@ -211,8 +211,8 @@ export default function MethodPage({ params }: { params: { locale: string } }) {
           </ul>
         </section>
 
-        <p className="mt-10 text-sm">
-          <Link href={localePath(locale, 'peta')} className="underline">
+        <p className="mt-10 text-body-s">
+          <Link href={localePath(locale, 'peta')} className="link">
             {strings.nav.plate}
           </Link>
         </p>

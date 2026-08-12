@@ -59,6 +59,30 @@ export type Dictionary = {
     /** Template. Placeholder: {total}. */
     readonly hatchingNote: string
   }
+  /**
+   * The layer that makes the map legible to someone who has never heard of a language family.
+   * Every string here is written for that reader, not for a linguist.
+   */
+  readonly guide: {
+    /** Template. Placeholder: {total}. */
+    readonly leadPlain: string
+    readonly linkage: string
+    readonly title: string
+    readonly colour: string
+    readonly colourNote: string
+    readonly point: string
+    readonly pointNote: string
+    readonly hatch: string
+    readonly hatchNote: string
+    readonly tryThis: string
+    readonly tryAustronesian: string
+    readonly trySeam: string
+    readonly tryIsolates: string
+    readonly tabMap: string
+    readonly tabTree: string
+    readonly whatIsFamily: string
+    readonly whatIsFamilyBody: string
+  }
   readonly tree: {
     readonly title: string
     readonly subtitle: string
@@ -185,6 +209,31 @@ const id: Dictionary = {
     hatchingToggle: 'tampilkan arsir',
     hatchingNote:
       'Kebertahanan digambarkan sebagai kerapatan arsir di atas warna rumpun, bukan sebagai warna tersendiri: warna sudah dipakai untuk rumpun, sehingga kedua lapisan dapat dibaca bersamaan. Status mengikuti AES Glottolog untuk {total} bahasa.',
+  },
+  guide: {
+    leadPlain:
+      '{total} bahasa daerah di Indonesia, diwarnai menurut rumpun keluarganya — bahasa-bahasa yang berasal dari satu nenek moyang yang sama.',
+    linkage:
+      'Arahkan kursor ke satu cabang pada pohon kekerabatan: seluruh wilayah rumpun itu menyala di peta. Klik satu wilayah, dan pohon membuka garis keturunan bahasa tersebut.',
+    title: 'Cara membaca peta ini',
+    colour: 'Warna menandai rumpun',
+    colourNote:
+      'Satu warna, satu rumpun. Warna tetap redup sampai Anda memilih satu rumpun — yang terpilih menjadi satu-satunya warna pekat di peta.',
+    point: 'Lingkaran berarti titik, bukan wilayah',
+    pointNote:
+      'Untuk bahasa yang tidak punya data wilayah, yang digambar hanyalah satu titik perkiraan. Titik tidak pernah dimekarkan menjadi wilayah.',
+    hatch: 'Arsir menandai kebertahanan',
+    hatchNote:
+      'Semakin rapat arsirnya, semakin dekat bahasa itu pada kepunahan. Arsir dipakai agar warna tetap bisa membawa rumpun.',
+    tryThis: 'Coba',
+    tryAustronesian: 'Rumpun Austronesia',
+    trySeam: 'Jahitan Austronesia–Papua',
+    tryIsolates: 'Bahasa isolat',
+    tabMap: 'Peta',
+    tabTree: 'Pohon',
+    whatIsFamily: 'Apa itu rumpun bahasa?',
+    whatIsFamilyBody:
+      'Rumpun bahasa adalah sekelompok bahasa yang terbukti berkembang dari satu bahasa purba yang sama — seperti keluarga yang punya nenek moyang bersama. Bahasa Jawa, Bali, Tagalog, dan Maori, misalnya, semuanya termasuk rumpun Austronesia. Pohon di halaman ini adalah silsilah itu.',
   },
   tree: {
     title: 'Pohon kekerabatan',
@@ -331,6 +380,31 @@ const en: Dictionary = {
     hatchingToggle: 'show hatching',
     hatchingNote:
       'Endangerment is drawn as hatch density over the family colour rather than as a colour of its own: hue already carries family, so the two layers stay readable at once. Status follows Glottolog AES for all {total} languages.',
+  },
+  guide: {
+    leadPlain:
+      '{total} regional languages of Indonesia, coloured by the family they belong to — languages that descend from a single common ancestor.',
+    linkage:
+      'Hover a branch of the genealogical tree and every territory in that family lights up on the map. Click a territory and the tree opens that language’s line of descent.',
+    title: 'How to read this map',
+    colour: 'Colour marks the family',
+    colourNote:
+      'One colour, one family. Colours stay muted until you choose a family — the one you choose becomes the only saturated thing on the map.',
+    point: 'A ring means a point, not a territory',
+    pointNote:
+      'Where no territory data exists, all that is drawn is one approximate point. A point is never inflated into an area.',
+    hatch: 'Hatching marks endangerment',
+    hatchNote:
+      'The denser the hatching, the closer the language is to extinction. Hatching is used so that colour can keep carrying family.',
+    tryThis: 'Try',
+    tryAustronesian: 'The Austronesian family',
+    trySeam: 'The Austronesian–Papuan seam',
+    tryIsolates: 'Isolates',
+    tabMap: 'Map',
+    tabTree: 'Tree',
+    whatIsFamily: 'What is a language family?',
+    whatIsFamilyBody:
+      'A language family is a group of languages shown to descend from one common ancestor language — a family in the genealogical sense. Javanese, Balinese, Tagalog and Māori all belong to Austronesian, for instance. The tree on this page is that genealogy.',
   },
   tree: {
     title: 'Genealogical tree',

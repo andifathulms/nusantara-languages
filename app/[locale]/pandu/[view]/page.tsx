@@ -74,19 +74,19 @@ export default function GuidedViewPage({
     <>
       <SiteHeader locale={locale} current="pandu" />
 
-      <main className="mx-auto max-w-[1600px] px-5 py-6">
-        <div className="max-w-[76ch]">
+      <main id="plate" className="mx-auto max-w-plate px-4 py-6 sm:px-6 sm:py-8">
+        <div className="max-w-prose">
           <p className="index-label">
             <Link href={localePath(locale, 'pandu')} className="hover:underline">
               {strings.guided.backToViews}
             </Link>
           </p>
-          <h1 className="mt-1 font-display text-3xl leading-tight">{copy.title}</h1>
-          <p className="mt-2 text-boundary/85">{copy.body}</p>
-          <p className="tabular mt-2 font-mono text-sm text-boundary/70">
+          <h1 className="mt-1 font-display text-title-l">{copy.title}</h1>
+          <p className="mt-3 text-lead text-ink-soft">{copy.body}</p>
+          <p className="figure mt-3 text-body-s text-ink-soft">
             {format(strings.guided.emphasised, { count: emphasis.length })}
           </p>
-          <p className="mt-2 text-sm text-boundary/70">{strings.guided.stillClickable}</p>
+          <p className="caveat mt-3">{strings.guided.stillClickable}</p>
         </div>
 
         <div className="mt-6">
@@ -98,6 +98,7 @@ export default function GuidedViewPage({
             manifest={bundle.manifest}
             emphasis={emphasis}
             initialHatching={view.hatching}
+            slug={params.view}
           />
         </div>
       </main>
