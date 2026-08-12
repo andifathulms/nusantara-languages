@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Plate } from './Plate'
 import { IndexPanel } from './IndexPanel'
 import { TreeColumn } from '@/components/tree/TreeColumn'
@@ -14,6 +14,7 @@ import {
 import { LanguageFacts } from '@/components/panel/LanguageFacts'
 import { HatchLegend } from './HatchLegend'
 import { SearchBox } from './SearchBox'
+import { ExportBar } from './ExportBar'
 import { parseViewHash, toViewHash } from '@/lib/plate/hash'
 import type { SearchEntry } from '@/lib/search'
 import type { PlateModel, TreeRow } from '@/lib/plate/build'
@@ -51,6 +52,8 @@ type PlateViewProps = {
   readonly emphasis?: readonly string[]
   /** Whether the URL hash carries the view. Off inside a guided view, which owns its URL. */
   readonly syncHash?: boolean
+  /** Names the exported file: `nusantara-<slug>-<date>.png`. */
+  readonly slug?: string
 }
 
 export function PlateView({
@@ -64,6 +67,7 @@ export function PlateView({
   initialHatching = false,
   emphasis,
   syncHash = false,
+  slug = 'peta',
 }: PlateViewProps) {
   const [hovered, setHovered] = useState<string | null>(null)
   const [selection, setSelection] = useState<PlateSelection>(initialSelection)
@@ -72,6 +76,7 @@ export function PlateView({
   )
   const [scrollTo, setScrollTo] = useState<string | null>(null)
   const [hatching, setHatching] = useState(initialHatching)
+  const plateRef = useRef<SVGSVGElement | null>(null)
 
   const emphasisSet = useMemo(
     () => (emphasis === undefined ? null : new Set(emphasis)),
@@ -178,6 +183,20 @@ export function PlateView({
   }, [])
 
   const scopedRow = scope === null ? null : model.rows.find((row) => row.glottocode === scope)
+  const announcement =
+    selection.kind === 'none'
+      ? strings.a11y.announceCleared
+      : selection.kind === 'language'
+        ? format(strings.a11y.announceLanguage, {
+            name: model.details[selection.glottocode]?.name ?? selection.glottocode,
+          })
+        : format(strings.a11y.announceBranch, {
+            name:
+              model.rows.find((row) => row.glottocode === selection.glottocode)?.name ??
+              selection.glottocode,
+            count:
+              model.rows.find((row) => row.glottocode === selection.glottocode)?.languageCount ?? 0,
+          })
   const selectedDetail = selectedLanguage === null ? undefined : model.details[selectedLanguage]
 
   return (
@@ -188,6 +207,7 @@ export function PlateView({
         </div>
 
         <Plate
+          plateRef={plateRef}
           model={model}
           scope={scope}
           selectedLanguage={selectedLanguage}
@@ -215,6 +235,14 @@ export function PlateView({
           ) : (
             strings.plate.hint
           )}
+        </p>
+
+        <ExportBar strings={strings} getPlate={() => plateRef.current} slug={slug} />
+
+        {/* Announced for a reader who is not looking at the plate: the linkage is visual, so
+            the selection has to be said out loud as well as drawn. */}
+        <p aria-live="polite" className="sr-only">
+          {announcement}
         </p>
 
         {/* The panel for the selected language, above the index: it is the answer to the

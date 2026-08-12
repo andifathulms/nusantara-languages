@@ -48,6 +48,27 @@ ones is a licence problem and a factual one.
 Code is MIT ([LICENSE](LICENSE)). The derived bundle is CC-BY-SA-4.0
 ([LICENSE-DATA.md](LICENSE-DATA.md)).
 
+## Measured, not assumed
+
+`pnpm bench:plate` gates the render budget, and these are the numbers it reports for the
+bundle that ships:
+
+| | measured | budget |
+|---|---|---|
+| Polygon vertices | 19,570 | 60,000 |
+| Path build (whole plate) | ~10 ms | 400 ms |
+| Hover hit-test, p95 | 0.01 ms | 2 ms |
+
+The vertex count is the one that decides the architecture: inside it, the plate is SVG and
+the browser hit-tests hover for free. Past it, the plate becomes canvas with an offscreen
+colour-index buffer.
+
+Payload, from the export: shared JS 87 KB, the plate page 99 KB first-load JS — inside the
+250 KB budget. The plate page's HTML is 1.79 MB raw / 307 KB gzipped, nearly all of it
+geometry, which is served as its own page payload rather than a runtime request. The model
+carries some redundancy that could be trimmed (ancestry names are repeated per language,
+~150 KB raw); it has not been, and the figure above is what ships today.
+
 ## Development
 
 ```bash

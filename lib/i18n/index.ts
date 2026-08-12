@@ -125,6 +125,16 @@ export type Dictionary = {
     readonly png: string
     readonly copyLink: string
     readonly copied: string
+    readonly failed: string
+  }
+  readonly a11y: {
+    readonly skipToPlate: string
+    readonly skipToTree: string
+    /** Template. Placeholders: {name}, {count}. */
+    readonly announceBranch: string
+    /** Template. Placeholder: {name}. */
+    readonly announceLanguage: string
+    readonly announceCleared: string
   }
 }
 
@@ -263,6 +273,14 @@ const id: Dictionary = {
     png: 'Unduh PNG',
     copyLink: 'Salin tautan tampilan ini',
     copied: 'Tautan disalin',
+    failed: 'Gagal. Coba lagi atau gunakan tangkapan layar.',
+  },
+  a11y: {
+    skipToPlate: 'Lewati ke peta',
+    skipToTree: 'Lewati ke pohon kekerabatan',
+    announceBranch: '{name} dipilih, {count} bahasa disorot',
+    announceLanguage: '{name} dipilih',
+    announceCleared: 'Pilihan dihapus',
   },
 }
 
@@ -401,6 +419,14 @@ const en: Dictionary = {
     png: 'Download PNG',
     copyLink: 'Copy a link to this view',
     copied: 'Link copied',
+    failed: 'That did not work. Try again, or take a screenshot.',
+  },
+  a11y: {
+    skipToPlate: 'Skip to the map',
+    skipToTree: 'Skip to the genealogical tree',
+    announceBranch: '{name} selected, {count} languages highlighted',
+    announceLanguage: '{name} selected',
+    announceCleared: 'Selection cleared',
   },
 }
 

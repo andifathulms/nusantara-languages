@@ -27,6 +27,8 @@ type PlateProps = {
   readonly showHatching: boolean
   /** A guided view's standing emphasis. Null when the reader is exploring freely. */
   readonly emphasis: ReadonlySet<string> | null
+  /** The view holds this so the PNG export can serialise the plate that is on screen. */
+  readonly plateRef?: React.Ref<SVGSVGElement>
 }
 
 const HATCH_IDS = ['hatch-1', 'hatch-2', 'hatch-3', 'hatch-4', 'hatch-5', 'hatch-6'] as const
@@ -124,9 +126,12 @@ export function Plate({
   label,
   showHatching,
   emphasis,
+  plateRef,
 }: PlateProps) {
   return (
     <svg
+      ref={plateRef}
+      id="plate"
       viewBox={model.viewBox}
       role="img"
       aria-label={label}

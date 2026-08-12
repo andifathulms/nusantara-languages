@@ -17,6 +17,14 @@ export function SiteHeader({ locale, current }: { locale: Locale; current?: stri
 
   return (
     <header className="border-b border-boundary/25">
+      {/* The plate is a graphic; the tree and the index are the keyboard path into the same
+          data, so both are reachable without tabbing through the chrome first. */}
+      <a
+        href="#plate"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-20 focus:bg-plate focus:px-3 focus:py-2 focus:underline"
+      >
+        {strings.a11y.skipToPlate}
+      </a>
       <div className="mx-auto flex max-w-[1600px] flex-wrap items-baseline gap-x-6 gap-y-2 px-5 py-3">
         <Link
           href={localePath(locale, 'peta')}
