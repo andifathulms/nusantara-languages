@@ -9,6 +9,7 @@
 
 import { createWriteStream, existsSync, mkdirSync, statSync } from 'node:fs'
 import { Readable } from 'node:stream'
+import type { ReadableStream as NodeReadableStream } from 'node:stream/web'
 import { pipeline } from 'node:stream/promises'
 import { dirname, join } from 'node:path'
 import { MANIFEST, gateSources, refusedSources } from '../lib/sources/manifest'
@@ -29,7 +30,10 @@ async function download(url: string, destination: string): Promise<number> {
     throw new Error(`${response.status} ${response.statusText} for ${url}`)
   }
   if (response.body === null) throw new Error(`empty body for ${url}`)
-  await pipeline(Readable.fromWeb(response.body), createWriteStream(destination))
+  await pipeline(
+    Readable.fromWeb(response.body as NodeReadableStream),
+    createWriteStream(destination),
+  )
   return statSync(destination).size
 }
 
