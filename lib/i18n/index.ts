@@ -52,6 +52,9 @@ export type Dictionary = {
     readonly languagesInFamily: string
     readonly index: string
     readonly attribution: string
+    /** Legend for the tree column's per-language mark. */
+    readonly geometryArea: string
+    readonly geometryPoint: string
   }
   readonly tree: {
     readonly title: string
@@ -160,6 +163,8 @@ const id: Dictionary = {
     languagesInFamily: '{count} bahasa',
     index: 'Indeks',
     attribution: 'Sumber: Glottolog 5.3 (CC-BY-4.0) dan Glottography (CC-BY-4.0).',
+    geometryArea: 'punya wilayah',
+    geometryPoint: 'hanya titik',
   },
   tree: {
     title: 'Pohon kekerabatan',
@@ -289,6 +294,8 @@ const en: Dictionary = {
     languagesInFamily: '{count} languages',
     index: 'Index',
     attribution: 'Sources: Glottolog 5.3 (CC-BY-4.0) and Glottography (CC-BY-4.0).',
+    geometryArea: 'has a territory',
+    geometryPoint: 'point only',
   },
   tree: {
     title: 'Genealogical tree',
