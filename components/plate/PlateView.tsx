@@ -256,6 +256,7 @@ export function PlateView({
             })}`}
             showHatching={hatching}
             emphasis={emphasisSet}
+            strings={strings}
           />
 
           <ExportBar strings={strings} getPlate={() => plateRef.current} slug={slug} />

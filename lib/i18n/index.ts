@@ -54,6 +54,12 @@ export type Dictionary = {
     readonly hatchingToggle: string
     /** Template. Placeholder: {total}. */
     readonly hatchingNote: string
+    readonly zoomIn: string
+    readonly zoomOut: string
+    readonly zoomReset: string
+    readonly fullscreen: string
+    readonly fullscreenExit: string
+    readonly panHint: string
   }
   /**
    * The layer that makes the map legible to someone who has never heard of a language family.
@@ -160,7 +166,7 @@ export type Dictionary = {
 
 const id: Dictionary = {
   localeName: 'Bahasa Indonesia',
-  siteTitle: 'Bahasa-Bahasa Nusantara',
+  siteTitle: 'Nusantara Languages',
   siteTagline: 'Peta rumpun bahasa Indonesia, bertaut dengan pohon kekerabatannya',
   siteDescription:
     'Peta wilayah bahasa di Indonesia, diwarnai menurut rumpun, dengan pohon klasifikasi genealogis di sampingnya dan keduanya saling bertaut. Data Glottolog dan Glottography.',
@@ -196,9 +202,16 @@ const id: Dictionary = {
     clearSelection: 'Hapus pilihan',
     selectedFamily: 'Rumpun terpilih',
     index: 'Indeks',
-    attribution: 'Sumber: Glottolog 5.3 (CC-BY-4.0) dan Glottography (CC-BY-4.0).',
+    attribution:
+      'Sumber: Glottolog 5.3 (CC-BY-4.0), Glottography (CC-BY-4.0), Natural Earth (domain publik).',
     geometryArea: 'punya wilayah',
     geometryPoint: 'hanya titik',
+    zoomIn: 'Perbesar',
+    zoomOut: 'Perkecil',
+    zoomReset: 'Kembali ke tampilan penuh',
+    fullscreen: 'Layar penuh',
+    fullscreenExit: 'Keluar dari layar penuh',
+    panHint: 'Seret untuk menggeser · gulir sambil menekan Ctrl untuk memperbesar',
     hatchingToggle: 'tampilkan arsir',
     hatchingNote:
       'Kebertahanan digambarkan sebagai kerapatan arsir di atas warna rumpun, bukan sebagai warna tersendiri: warna sudah dipakai untuk rumpun, sehingga kedua lapisan dapat dibaca bersamaan. Status mengikuti AES Glottolog untuk {total} bahasa.',
@@ -365,9 +378,16 @@ const en: Dictionary = {
     clearSelection: 'Clear selection',
     selectedFamily: 'Selected family',
     index: 'Index',
-    attribution: 'Sources: Glottolog 5.3 (CC-BY-4.0) and Glottography (CC-BY-4.0).',
+    attribution:
+      'Sources: Glottolog 5.3 (CC-BY-4.0), Glottography (CC-BY-4.0), Natural Earth (public domain).',
     geometryArea: 'has a territory',
     geometryPoint: 'point only',
+    zoomIn: 'Zoom in',
+    zoomOut: 'Zoom out',
+    zoomReset: 'Reset to the whole map',
+    fullscreen: 'Full screen',
+    fullscreenExit: 'Exit full screen',
+    panHint: 'Drag to pan · Ctrl-scroll to zoom',
     hatchingToggle: 'show hatching',
     hatchingNote:
       'Endangerment is drawn as hatch density over the family colour rather than as a colour of its own: hue already carries family, so the two layers stay readable at once. Status follows Glottolog AES for all {total} languages.',

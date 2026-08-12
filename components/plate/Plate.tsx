@@ -1,8 +1,22 @@
 'use client'
 
-import { memo } from 'react'
+import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import { isInScope, paintStateFor } from '@/lib/plate/select'
+import { PlateControls } from './PlateControls'
+import {
+  IDENTITY,
+  ZOOM_STEP,
+  counterScale,
+  limitsFor,
+  panBy,
+  pinchDistance,
+  toTransform,
+  zoomAt,
+  zoomBy,
+  type Viewport,
+} from '@/lib/plate/viewport'
 import type { PlateModel, PlateShape } from '@/lib/plate/build'
+import type { Dictionary } from '@/lib/i18n'
 
 /**
  * The plate. Flat spot colours, hairline boundaries, a 5° graticule for reference, and
@@ -33,6 +47,7 @@ type PlateProps = {
   readonly emphasis: ReadonlySet<string> | null
   /** The view holds this so the PNG export can serialise the plate that is on screen. */
   readonly plateRef?: React.Ref<SVGSVGElement>
+  readonly strings: Dictionary
 }
 
 const HATCH_IDS = ['hatch-1', 'hatch-2', 'hatch-3', 'hatch-4', 'hatch-5', 'hatch-6'] as const
@@ -63,6 +78,8 @@ function Area({
       className="plate-shape cursor-pointer"
     >
       <title>{shape.name}</title>
+      {/* A boundary stays a hairline at every zoom: language boundaries are gradients, and a
+          line that thickened as the reader zoomed would assert a sharpness that does not exist. */}
       <path
         d={shape.d}
         fill={fill}
@@ -70,6 +87,7 @@ function Area({
         stroke="var(--plate-boundary)"
         strokeWidth={isSelected ? 0.9 : 0.35}
         strokeOpacity={state === 'muted' ? 0.3 : 0.65}
+        vectorEffect="non-scaling-stroke"
       />
       {hatch !== undefined ? (
         <path d={shape.d} fill={`url(#${hatch})`} fillOpacity={state === 'muted' ? 0.25 : 0.7} />
@@ -84,12 +102,15 @@ function PointMark({
   shape,
   state,
   isSelected,
+  zoom,
   onHover,
   onSelect,
 }: {
   shape: PlateShape & { type: 'point' }
   state: 'base' | 'selected' | 'muted'
   isSelected: boolean
+  /** Current map scale, so the mark can hold its drawn size while the map grows under it. */
+  zoom: number
   onHover: (glottocode: string | null) => void
   onSelect: (glottocode: string) => void
 }) {
@@ -97,7 +118,7 @@ function PointMark({
   const size = isSelected ? 4.2 : 3
   return (
     <g
-      transform={`translate(${shape.x} ${shape.y})`}
+      transform={`translate(${shape.x} ${shape.y}) scale(${1 / zoom})`}
       onPointerEnter={() => onHover(shape.glottocode)}
       onPointerLeave={() => onHover(null)}
       onClick={() => onSelect(shape.glottocode)}
@@ -131,17 +152,174 @@ export function Plate({
   showHatching,
   emphasis,
   plateRef,
+  strings,
 }: PlateProps) {
+  const limits = limitsFor(model.width, model.height)
+  const [viewport, setViewport] = useState<Viewport>(IDENTITY)
+  const [isFullscreen, setIsFullscreen] = useState(false)
+  const [fullscreenAvailable, setFullscreenAvailable] = useState(false)
+  const frameRef = useRef<HTMLDivElement | null>(null)
+  const svgRef = useRef<SVGSVGElement | null>(null)
+
+  /** Live pointers, so one is a drag and two are a pinch. */
+  const pointers = useRef(new Map<number, { x: number; y: number }>())
+  const gesture = useRef<{ moved: boolean; lastDistance: number | null }>({
+    moved: false,
+    lastDistance: null,
+  })
+
+  useEffect(() => {
+    setFullscreenAvailable(typeof document !== 'undefined' && document.fullscreenEnabled)
+    const onChange = () => setIsFullscreen(document.fullscreenElement === frameRef.current)
+    document.addEventListener('fullscreenchange', onChange)
+    return () => document.removeEventListener('fullscreenchange', onChange)
+  }, [])
+
+  /** Screen pixels -> plate units. The SVG scales to its container, so this cannot be assumed. */
+  const toPlateUnits = useCallback(
+    (clientX: number, clientY: number) => {
+      const svg = svgRef.current
+      if (svg === null) return { x: 0, y: 0 }
+      const box = svg.getBoundingClientRect()
+      return {
+        x: ((clientX - box.left) / box.width) * model.width,
+        y: ((clientY - box.top) / box.height) * model.height,
+      }
+    },
+    [model.width, model.height],
+  )
+
+  const perPixel = useCallback(() => {
+    const svg = svgRef.current
+    if (svg === null) return 1
+    return model.width / Math.max(1, svg.getBoundingClientRect().width)
+  }, [model.width])
+
+  const onPointerDown = (event: React.PointerEvent<SVGSVGElement>) => {
+    pointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY })
+    gesture.current.moved = false
+    gesture.current.lastDistance = null
+    if (pointers.current.size === 1) event.currentTarget.setPointerCapture(event.pointerId)
+  }
+
+  const onPointerMove = (event: React.PointerEvent<SVGSVGElement>) => {
+    const previous = pointers.current.get(event.pointerId)
+    if (previous === undefined) return
+    const current = { x: event.clientX, y: event.clientY }
+    pointers.current.set(event.pointerId, current)
+
+    const points = [...pointers.current.values()]
+
+    if (points.length >= 2) {
+      // Pinch. Zoom about the midpoint so the gesture stays anchored between the fingers.
+      const [first, second] = points as [{ x: number; y: number }, { x: number; y: number }]
+      const distance = pinchDistance(first, second)
+      const last = gesture.current.lastDistance
+      gesture.current.lastDistance = distance
+      gesture.current.moved = true
+      if (last !== null && last > 0) {
+        const focal = toPlateUnits((first.x + second.x) / 2, (first.y + second.y) / 2)
+        setViewport((state) => zoomAt(state, focal, distance / last, limits))
+      }
+      return
+    }
+
+    if (viewport.scale <= 1.001) return
+    const deltaX = current.x - previous.x
+    const deltaY = current.y - previous.y
+    if (Math.abs(deltaX) > 3 || Math.abs(deltaY) > 3) gesture.current.moved = true
+    const ratio = perPixel()
+    setViewport((state) => panBy(state, deltaX * ratio, deltaY * ratio, limits))
+  }
+
+  const endPointer = (event: React.PointerEvent<SVGSVGElement>) => {
+    pointers.current.delete(event.pointerId)
+    if (pointers.current.size < 2) gesture.current.lastDistance = null
+  }
+
+  /** A drag must not also select whatever it started on. */
+  const guardedSelect = (glottocode: string) => {
+    if (gesture.current.moved) {
+      gesture.current.moved = false
+      return
+    }
+    onSelect(glottocode)
+  }
+
+  const onWheel = (event: React.WheelEvent<SVGSVGElement>) => {
+    // Plain scroll belongs to the page. Only an explicit zoom gesture zooms.
+    if (!event.ctrlKey && !event.metaKey) return
+    event.preventDefault()
+    const focal = toPlateUnits(event.clientX, event.clientY)
+    setViewport((state) => zoomAt(state, focal, event.deltaY < 0 ? 1.12 : 1 / 1.12, limits))
+  }
+
+  const onKeyDown = (event: React.KeyboardEvent<SVGSVGElement>) => {
+    const step = 40 * (model.width / 1600)
+    const actions: Record<string, () => void> = {
+      '+': () => setViewport((state) => zoomBy(state, ZOOM_STEP, limits)),
+      '=': () => setViewport((state) => zoomBy(state, ZOOM_STEP, limits)),
+      '-': () => setViewport((state) => zoomBy(state, 1 / ZOOM_STEP, limits)),
+      '0': () => setViewport(IDENTITY),
+      ArrowLeft: () => setViewport((state) => panBy(state, step, 0, limits)),
+      ArrowRight: () => setViewport((state) => panBy(state, -step, 0, limits)),
+      ArrowUp: () => setViewport((state) => panBy(state, 0, step, limits)),
+      ArrowDown: () => setViewport((state) => panBy(state, 0, -step, limits)),
+    }
+    const action = actions[event.key]
+    if (action === undefined) return
+    event.preventDefault()
+    action()
+  }
+
+  const toggleFullscreen = () => {
+    const frame = frameRef.current
+    if (frame === null) return
+    if (document.fullscreenElement === frame) void document.exitFullscreen()
+    else void frame.requestFullscreen?.()
+  }
+
+  const transform = toTransform(viewport)
+  const hairline = (width: number) => counterScale(viewport, width)
+
   return (
-    <svg
-      ref={plateRef}
-      id="plate"
-      viewBox={model.viewBox}
-      role="img"
-      aria-label={label}
-      className="plate-frame h-auto w-full bg-plate"
-      onPointerLeave={() => onHover(null)}
+    <div
+      ref={frameRef}
+      className={`relative bg-plate ${isFullscreen ? 'flex items-center justify-center p-4' : ''}`}
     >
+      <svg
+        ref={(node) => {
+          svgRef.current = node
+          if (typeof plateRef === 'function') plateRef(node)
+          else if (plateRef !== null && plateRef !== undefined) {
+            ;(plateRef as React.MutableRefObject<SVGSVGElement | null>).current = node
+          }
+        }}
+        id="plate"
+        viewBox={model.viewBox}
+        role="img"
+        aria-label={label}
+        tabIndex={0}
+        className={`plate-frame w-full bg-plate ${
+          isFullscreen ? 'h-full max-h-full' : 'h-auto'
+        } ${viewport.scale > 1.001 ? 'cursor-grab active:cursor-grabbing' : ''}`}
+        style={{
+          // At rest the page must scroll normally when a thumb crosses the map. Once the reader
+          // has zoomed in, the gestures are theirs: panning and pinching take over.
+          touchAction: viewport.scale > 1.001 ? 'none' : 'pan-y',
+        }}
+        onPointerLeave={() => onHover(null)}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={endPointer}
+        onPointerCancel={endPointer}
+        onWheel={onWheel}
+        onKeyDown={onKeyDown}
+        onDoubleClick={(event) => {
+          const focal = toPlateUnits(event.clientX, event.clientY)
+          setViewport((state) => zoomAt(state, focal, ZOOM_STEP, limits))
+        }}
+      >
       <defs>
         {/* Endangerment is hatch density over the family colour, never a competing hue: the
             two layers have to compose, and colour already carries family. */}
@@ -169,6 +347,10 @@ export function Plate({
         })}
       </defs>
 
+      {/* Everything that pans and zooms lives in this group. The plate's viewBox never changes,
+          so the attribution below stays pinned to the frame and the PNG export picks up whatever
+          view is on screen without any extra work. */}
+      <g transform={transform}>
       {/* The ground: coastline first, so every language area is drawn onto land rather than onto
           paper, and the gaps in coverage read as unrecorded rather than as sea. */}
       <g aria-hidden="true" className="pointer-events-none">
@@ -180,6 +362,7 @@ export function Plate({
             stroke="var(--plate-landEdge)"
             strokeWidth={land.kind === 'neighbour' ? 0.25 : 0.4}
             strokeOpacity={land.kind === 'neighbour' ? 0.35 : 0.6}
+            vectorEffect="non-scaling-stroke"
           />
         ))}
       </g>
@@ -196,6 +379,7 @@ export function Plate({
             y2={line.y2}
             stroke="var(--plate-boundary)"
             strokeWidth={line.degrees === 0 ? 0.5 : 0.28}
+            vectorEffect="non-scaling-stroke"
             strokeOpacity={line.degrees === 0 ? 0.3 : 0.16}
             strokeDasharray={line.degrees === 0 ? undefined : '3 4'}
           />
@@ -208,7 +392,7 @@ export function Plate({
               x={line.x1 + 3}
               y={model.height - 20}
               className="font-label"
-              fontSize={9}
+              fontSize={hairline(9)}
               fill="var(--plate-boundary)"
               fillOpacity={0.45}
             >
@@ -223,7 +407,7 @@ export function Plate({
               x={4}
               y={line.y1 - 3}
               className="font-label"
-              fontSize={9}
+              fontSize={hairline(9)}
               fill="var(--plate-boundary)"
               fillOpacity={0.45}
             >
@@ -243,7 +427,7 @@ export function Plate({
             isSelected={isSelected}
             showHatching={showHatching}
             onHover={onHover}
-            onSelect={onSelect}
+            onSelect={guardedSelect}
           />
         ) : (
           <MemoPointMark
@@ -251,8 +435,9 @@ export function Plate({
             shape={shape}
             state={state}
             isSelected={isSelected}
+            zoom={viewport.scale}
             onHover={onHover}
-            onSelect={onSelect}
+            onSelect={guardedSelect}
           />
         )
       })}
@@ -273,10 +458,10 @@ export function Plate({
               y={shape.labelY}
               textAnchor="middle"
               className="pointer-events-none font-label"
-              fontSize={11}
+              fontSize={hairline(11)}
               fill="var(--plate-boundary)"
               stroke="var(--plate-plate)"
-              strokeWidth={2.6}
+              strokeWidth={hairline(2.6)}
               paintOrder="stroke"
             >
               {shape.name}
@@ -284,8 +469,11 @@ export function Plate({
           ) : null,
         )}
 
+      </g>
+
       {/* Attribution is structural: it is inside the plate, and the PNG export renders this
-          same SVG, so it cannot be removed by a layout change. */}
+          same SVG, so it cannot be removed by a layout change. Outside the zoomable group, so it
+          stays put and stays the same size at any zoom. */}
       {/* Attribution sits on its own baseline below the degree labels — the two used to collide
           in the bottom-right corner. */}
       <text
@@ -299,7 +487,21 @@ export function Plate({
       >
         Glottolog 5.3 (CC-BY-4.0) · Glottography (CC-BY-4.0) · Natural Earth · CC-BY-SA-4.0
       </text>
-    </svg>
+      </svg>
+
+      <PlateControls
+        strings={strings}
+        scale={viewport.scale}
+        canZoomIn={viewport.scale < limits.maxScale - 0.001}
+        canZoomOut={viewport.scale > limits.minScale + 0.001}
+        isFullscreen={isFullscreen}
+        fullscreenAvailable={fullscreenAvailable}
+        onZoomIn={() => setViewport((state) => zoomBy(state, ZOOM_STEP, limits))}
+        onZoomOut={() => setViewport((state) => zoomBy(state, 1 / ZOOM_STEP, limits))}
+        onReset={() => setViewport(IDENTITY)}
+        onToggleFullscreen={toggleFullscreen}
+      />
+    </div>
   )
 }
 
