@@ -1,5 +1,7 @@
 # Nusantara Languages
 
+**Live: <https://andifathulms.github.io/nusantara-languages/>**
+
 **Seven hundred and fifty-six languages of Indonesia, coloured by family, with the
 genealogical tree beside the map and the two bound together.** Hover a branch and its
 territories light up; click a territory and the tree scrolls to it and opens its

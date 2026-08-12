@@ -4,12 +4,12 @@
 
 | | |
 |---|---|
-| **Status** | Draft — pre-implementation |
+| **Status** | M0–M5 shipped — [live](https://andifathulms.github.io/nusantara-languages/). See CLAUDE.md § Current state for what the licence gate changed. |
 | **Owner** | Andi Fathul Mukminin Salahuddin |
 | **Type** | Personal portfolio project, open source, educational |
 | **Deployment** | GitHub Pages (static export, no server, no runtime network) |
 | **Language** | Indonesian-first UI; English secondary |
-| **Primary data** | Glottolog (CC-BY-SA) + Glottography speaker-area polygons |
+| **Primary data** | Glottolog (CC-BY-4.0) + Glottography speaker-area polygons (CC-BY-4.0) |
 
 *Name: explanatory, as asked. Alternative: **Language Atlas**. Deliberately **not** "Peta Bahasa" — that is the name of Badan Bahasa's official product, and the resemblance would imply government affiliation. Same reasoning that keeps OIKN branding off everything here.*
 
@@ -44,6 +44,8 @@ That is cheap given the data and it is the reason to build this rather than yet 
 **Polygons are the thing that makes it beautiful, and they exist.** A revised digital edition of Wurm & Hattori's *Language Atlas of the Pacific Area* was published in *Scientific Data* as GeoJSON with every area linked to a Glottolog languoid, and the Glottography project publishes these as CLDF datasets with aggregated language-level and family-level speaker areas. Wurm & Hattori is the classic atlas for island Southeast Asia; Indonesia is covered thoroughly.
 
 **Verify the GeoJSON licence before bundling.** *Scientific Data* is open access and it is very likely CC-BY, but that is exactly the assumption that has cost this project family twice already. Licence gate at M0.
+
+> **Resolved at M0, and the assumption was wrong.** The Glottography release of Wurm & Hattori is **CC-BY-NC-4.0**, which cannot be carried into a CC-BY-SA-4.0 derived bundle. It is refused by the gate and the refusal is published on the method page. Polygons come from `asher2007world` and `schapper2020papuan` instead, both CC-BY-4.0 — so the map kept its territories, but the period is 1990–2020 rather than the early 1980s, and the plate says so. Glottolog itself declares CC-BY-4.0, not CC-BY-SA as assumed above; the derived bundle is still published under CC-BY-SA-4.0.
 
 **Speaker counts are the weak spot.** Glottolog does not carry reliable population figures. **Ethnologue does and is proprietary — do not use it, at any point, for any field.** Badan Bahasa publishes verified Indonesian counts; use them if their terms permit, and if not, ship without speaker numbers and say so. A map without counts is honest; a map with borrowed counts is a licence problem.
 

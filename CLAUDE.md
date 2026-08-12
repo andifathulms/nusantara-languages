@@ -153,4 +153,19 @@ The site states plainly that it is a personal project, that the distribution sho
 
 ## Current state
 
-M0 — not yet scaffolded. Next: the source pipeline with the licence gate, the Indonesia filter, polygon simplification, and the coverage report — then measure the render budget. **No UI work until the polygon licence is resolved and `bench:plate` clears.**
+**M0–M5 shipped.** Live at <https://andifathulms.github.io/nusantara-languages/>, deployed from `main` by Actions with the licence gate, the tests, `bench:plate` and a source-reproducibility check gating it.
+
+**The polygon licence question is resolved, and the answer changed the source list.** The Wurm & Hattori Glottography dataset (`Glottography/wurm1981pacific`) is **CC-BY-NC-4.0**. The non-commercial restriction cannot be carried into the CC-BY-SA-4.0 derived bundle, so it is recorded in the manifest as `decision: 'refused'` with its reason and published on the method page. Polygons come from two CC-BY-4.0 Glottography datasets instead: `asher2007world` (Asher & Moseley 2007) and `schapper2020papuan`.
+
+**Consequence for the copy: this is no longer a 1980s atlas.** The period is 1990–2020, derived from the manifest rather than hardcoded, and invariant 6 should be read as "the atlas period is stated on the plate, whatever the bundled sources say it is". If Wurm & Hattori ever becomes redistributable, adding it back is a manifest change plus a rebuild.
+
+The bundle: 726 languages, 421 with speaker areas (58%), 305 points only, 23 isolates, 56 top-level units, 19,570 vertices. Every one of those figures is read from `coverage.json`.
+
+`bench:plate` cleared at M0 with room to spare — 19,570 vertices against 60,000, hover p95 0.01 ms against 2 ms — so the plate is SVG and the canvas colour-index path was never needed.
+
+### Next, in rough order
+
+1. **Look at it on a real screen.** The plate has been verified structurally and in the exported HTML, never visually — no headless browser was available while it was built. Colour distinctness at 19 hues, hairline weights, and the tree column's density are all unchecked by eye.
+2. **Trim the page payload.** The plate page is 1.79 MB raw / 307 KB gzipped. `LanguageDetail.ancestry` repeats ancestor *names* per language (~150 KB raw) when the tree rows already carry them, and shapes/rows carry two CSS variable strings each where a colour token would do (~60 KB). Both are mechanical.
+3. **Check the palette under colour-vision deficiency.** PRD §13 asks for it and it has not been done.
+4. **Dialects, if ever.** Still out of scope, and the reasons in §5 have not changed.
