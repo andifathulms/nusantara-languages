@@ -26,6 +26,13 @@ export const COMPATIBLE_LICENCES = [
   'CC0-1.0',
   'CC-BY-4.0',
   'CC-BY-SA-4.0',
+  /**
+   * A public-domain dedication made in the source's own words rather than through a formal
+   * instrument — Natural Earth's is "Everything here is public domain." Recorded as what it
+   * actually is instead of relabelled CC0, because the gate's job is to state the terms
+   * accurately, and a dedication is not a licence.
+   */
+  'public-domain',
 ] as const
 
 /**
@@ -99,7 +106,7 @@ const BundledSource = z.object({
   licenceUrl: z.string().url(),
   homepage: z.string().url(),
   citation: z.string().min(1),
-  role: z.enum(['catalogue', 'geometry']),
+  role: z.enum(['catalogue', 'geometry', 'basemap']),
   /** What era the source describes. Rendered on the plate, not only the method page. */
   period: SourcePeriod,
   files: z.array(SourceFile).min(1),
@@ -135,6 +142,7 @@ export type Manifest = z.infer<typeof ManifestSchema>
 
 const GLOTTOLOG_CLDF = 'https://raw.githubusercontent.com/glottolog/glottolog-cldf'
 const GLOTTOGRAPHY = 'https://raw.githubusercontent.com/Glottography'
+const NATURAL_EARTH = 'https://raw.githubusercontent.com/nvkelso/natural-earth-vector'
 
 export const MANIFEST: Manifest = {
   bundleLicence: BUNDLE_LICENCE,
@@ -245,6 +253,35 @@ export const MANIFEST: Manifest = {
       ],
     },
     {
+      decision: 'bundled',
+      id: 'naturalearth',
+      title: 'Natural Earth vector, 1:10m cultural and physical',
+      version: 'v5.1.2',
+      licence: 'public-domain',
+      licenceUrl: 'https://www.naturalearthdata.com/about/terms-of-use/',
+      homepage: 'https://www.naturalearthdata.com',
+      citation:
+        'Made with Natural Earth. Free vector and raster map data @ naturalearthdata.com. Public domain.',
+      role: 'basemap',
+      period: {
+        label: 'garis pantai dan batas negara, edisi 2022',
+        fromYear: 2022,
+        toYear: 2022,
+      },
+      files: [
+        {
+          key: 'countries',
+          url: `${NATURAL_EARTH}/v5.1.2/geojson/ne_10m_admin_0_countries.geojson`,
+          path: 'naturalearth/countries.geojson',
+        },
+        {
+          key: 'minorIslands',
+          url: `${NATURAL_EARTH}/v5.1.2/geojson/ne_10m_minor_islands.geojson`,
+          path: 'naturalearth/minor-islands.geojson',
+        },
+      ],
+    },
+    {
       decision: 'refused',
       id: 'wurm1981pacific',
       title:
@@ -348,8 +385,9 @@ export function refusedSources(manifest: Manifest = MANIFEST): readonly RefusedS
 }
 
 /**
- * True when at least one geometry source cleared the gate. When false the project
- * falls back to a point map — a materially different product, and one the UI states.
+ * True when at least one *speaker-area* source cleared the gate. A basemap does not count: a
+ * coastline is not a language distribution, and the point-map fallback still depends on real
+ * geometry being available.
  */
 export function hasGeometrySource(manifest: Manifest = MANIFEST): boolean {
   const gate = gateSources(manifest)

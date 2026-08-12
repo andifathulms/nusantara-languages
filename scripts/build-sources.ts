@@ -29,8 +29,10 @@ import {
 import {
   DEFAULT_SIMPLIFY,
   INDONESIA_BBOX,
+  boundsOverlap,
   containsPosition,
   intersectsBounds,
+  ringBounds,
   simplifyGeometry,
   vertexCount,
   type Position,
@@ -47,6 +49,8 @@ import {
 import {
   AES_STATUSES,
   type AesStatus,
+  type BasemapShape,
+  type LandKind,
   type Coverage,
   type FamilyCoverage,
   type GeometryEntry,
@@ -85,6 +89,16 @@ const NAME_PROVIDERS = ['glottolog', 'multitree', 'elcat', 'wals'] as const
 const INDONESIAN_TRANSLATION_PROVIDER = 'lexvo'
 
 const MAX_ALT_NAMES = 8
+
+/**
+ * The basemap is background, so it is simplified far harder than a speaker area. At the plate's
+ * width one degree is about 34 px, so a 0.01° tolerance is a third of a pixel and a 0.02° island
+ * is sub-pixel — detail below that is cost without a reader ever seeing it.
+ */
+const BASEMAP_SIMPLIFY = { tolerance: 0.01, decimals: 3, minRingExtent: 0.02 } as const
+
+/** ISO 3166-1 alpha-3 for Indonesia, as Natural Earth's ADM0_A3 column carries it. */
+const INDONESIA_A3 = 'IDN'
 
 function fail(label: string, problems: readonly string[]): never {
   console.error(`\nsources:build refused: ${label}`)
@@ -280,6 +294,78 @@ function readGeometrySource(
   return { entries, problems }
 }
 
+// --------------------------------------------------------------------------------- basemap
+
+/**
+ * Drops rings that lie wholly outside the frame. Australia and New Guinea reach into the plate,
+ * and keeping their entire outlines to draw a sliver would cost more vertices than the whole
+ * Indonesian coastline. Rings that straddle the frame are kept intact and clipped by the SVG
+ * viewBox, which needs no geometry code to get right.
+ */
+function clipRingsToFrame(polygons: readonly (readonly Ring[])[]): Ring[][] {
+  return polygons
+    .map((rings) => rings.filter((ring) => boundsOverlap(ringBounds(ring), INDONESIA_BBOX)))
+    .filter((rings): rings is Ring[] => rings.length > 0)
+}
+
+function readBasemap(source: BundledSource): { shapes: BasemapShape[]; problems: string[] } {
+  const shapes: BasemapShape[] = []
+  const problems: string[] = []
+
+  const read = (key: string, classify: (properties: Record<string, unknown>) => LandKind | null) => {
+    const file = source.files.find((candidate) => candidate.key === key)
+    if (file === undefined) {
+      problems.push(`${source.id}: no "${key}" file declared`)
+      return
+    }
+    const collection = JSON.parse(raw(file.path)) as { features?: GeoJsonFeature[] }
+
+    for (const feature of collection.features ?? []) {
+      const properties = feature.properties ?? {}
+      const kind = classify(properties)
+      if (kind === null) continue
+
+      const geometry = feature.geometry
+      if (geometry === null) continue
+
+      let polygons: Ring[][]
+      if (geometry.type === 'Polygon') {
+        polygons = [toRings(geometry.coordinates as number[][][])]
+      } else if (geometry.type === 'MultiPolygon') {
+        polygons = (geometry.coordinates as number[][][][]).map((polygon) => toRings(polygon))
+      } else {
+        continue
+      }
+
+      const clipped = clipRingsToFrame(polygons)
+      if (clipped.length === 0) continue
+
+      const simplified = simplifyGeometry({ type: 'polygon', polygons: clipped }, BASEMAP_SIMPLIFY)
+      if (simplified === null || simplified.type !== 'polygon') continue
+
+      const name = properties.NAME
+      shapes.push({
+        kind,
+        name: typeof name === 'string' && name !== '' ? name : null,
+        geometry: simplified,
+      })
+    }
+  }
+
+  read('countries', (properties) =>
+    properties.ADM0_A3 === INDONESIA_A3 ? 'indonesia' : 'neighbour',
+  )
+  // No country attribution exists in this layer, so these are drawn as neutral land and the
+  // bundle makes no claim about which state they belong to.
+  read('minorIslands', () => 'island')
+
+  // Indonesia first, so its own coast is drawn over a neighbour's where the two meet.
+  const order: Record<LandKind, number> = { neighbour: 0, island: 1, indonesia: 2 }
+  shapes.sort((left, right) => order[left.kind] - order[right.kind])
+
+  return { shapes, problems }
+}
+
 // -------------------------------------------------------------------------------- build
 
 function stableJson(value: unknown, pretty: boolean): string {
@@ -402,6 +488,21 @@ function main(): void {
     left.glottocode.localeCompare(right.glottocode),
   )
 
+  // ---- The land under the plate.
+  const basemapSource = gate.bundled.find((candidate) => candidate.role === 'basemap')
+  let basemap: BasemapShape[] = []
+  if (basemapSource !== undefined) {
+    const read = readBasemap(basemapSource)
+    if (read.problems.length > 0) fail('basemap', read.problems)
+    basemap = read.shapes
+    const byKind = (kind: LandKind) => basemap.filter((shape) => shape.kind === kind).length
+    console.log(
+      `basemap: ${byKind('indonesia')} Indonesia, ${byKind('neighbour')} neighbouring, ` +
+        `${byKind('island')} minor islands, ` +
+        `${basemap.reduce((total, shape) => total + vertexCount(shape.geometry), 0)} vertices`,
+    )
+  }
+
   // ---- Languoids.
   const altNames = readAlternateNames(keepSet)
   const languoids: Languoid[] = kept.map((row) => {
@@ -490,6 +591,7 @@ function main(): void {
       (total, entry) => total + vertexCount(entry.geometry),
       0,
     ),
+    basemapVertices: basemap.reduce((total, shape) => total + vertexCount(shape.geometry), 0),
     periods,
     excluded: [...excluded.entries()]
       .map(([reason, count]) => ({ reason, count }))
@@ -532,6 +634,7 @@ function main(): void {
   mkdirSync(BUNDLE_DIR, { recursive: true })
   writeFileSync(join(BUNDLE_DIR, 'languoids.json'), stableJson(languoids, false))
   writeFileSync(join(BUNDLE_DIR, 'geometry.json'), stableJson(geometry, false))
+  writeFileSync(join(BUNDLE_DIR, 'basemap.json'), stableJson(basemap, false))
   writeFileSync(join(BUNDLE_DIR, 'tree.json'), stableJson(tree, false))
   writeFileSync(join(BUNDLE_DIR, 'coverage.json'), stableJson(coverage, true))
   writeFileSync(join(BUNDLE_DIR, 'manifest.json'), stableJson(manifest, true))

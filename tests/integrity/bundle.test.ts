@@ -14,7 +14,7 @@ import {
   type TreeIndex,
 } from '@/lib/tree'
 import { AES_STATUSES, languoidsByCode } from '@/lib/bundle/types'
-import { coverage, geometry, languoids, tree } from './bundle'
+import { basemap, coverage, geometry, languoids, tree } from './bundle'
 
 const byCode = languoidsByCode(languoids)
 
@@ -160,6 +160,75 @@ describe('points stay points', () => {
 
   it('does not fill the map with hulls — polygon count matches the coverage figure', () => {
     expect(geometry.length).toBe(coverage.withPolygon)
+  })
+})
+
+describe('the basemap', () => {
+  it('ships land to draw the archipelago on', () => {
+    expect(basemap.length).toBeGreaterThan(100)
+  })
+
+  it('carries no glottocode, so it cannot become data', () => {
+    // The land is the ground the languages sit on. If it ever gained a glottocode it could be
+    // hovered, selected, searched and announced — and a coastline is not a language.
+    const text = JSON.stringify(basemap)
+    expect(text).not.toContain('glottocode')
+    expect(text).not.toContain('ancestors')
+    for (const shape of basemap) {
+      expect(Object.keys(shape).sort()).toEqual(['geometry', 'kind', 'name'])
+    }
+  })
+
+  it('uses only the three land kinds', () => {
+    for (const shape of basemap) {
+      expect(['indonesia', 'neighbour', 'island']).toContain(shape.kind)
+    }
+  })
+
+  it('includes Indonesia, and names it', () => {
+    const indonesia = basemap.filter((shape) => shape.kind === 'indonesia')
+    expect(indonesia).toHaveLength(1)
+    expect(indonesia[0]?.name).toBe('Indonesia')
+  })
+
+  it('makes no national claim about the minor islands, since the source names none', () => {
+    for (const shape of basemap) {
+      if (shape.kind !== 'island') continue
+      expect(shape.name).toBeNull()
+    }
+  })
+
+  it('keeps every piece of land inside the frame', () => {
+    for (const shape of basemap) {
+      expect(intersectsBounds(shape.geometry, INDONESIA_BBOX), shape.name ?? shape.kind).toBe(true)
+    }
+  })
+
+  it('closes every ring', () => {
+    for (const shape of basemap) {
+      for (const polygon of shape.geometry.polygons) {
+        for (const ring of polygon) {
+          expect(ring.length).toBeGreaterThanOrEqual(4)
+          expect(ring[0]).toEqual(ring[ring.length - 1])
+        }
+      }
+    }
+  })
+
+  it('draws Indonesia last, so its own coast wins where two countries meet', () => {
+    const lastNeighbour = basemap.reduce(
+      (last, shape, index) => (shape.kind !== 'indonesia' ? index : last),
+      -1,
+    )
+    const firstIndonesia = basemap.findIndex((shape) => shape.kind === 'indonesia')
+    expect(firstIndonesia).toBeGreaterThan(lastNeighbour)
+  })
+
+  it('stays within a background-sized share of the vertex budget', () => {
+    const vertices = basemap.reduce((total, shape) => total + vertexCount(shape.geometry), 0)
+    expect(vertices).toBe(coverage.basemapVertices)
+    // Background must not cost more than the data it sits under.
+    expect(vertices).toBeLessThan(coverage.polygonVertices)
   })
 })
 

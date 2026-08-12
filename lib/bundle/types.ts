@@ -65,6 +65,24 @@ export type GeometryEntry = {
   readonly geometry: PolygonGeometry
 }
 
+/**
+ * A piece of land under the plate. It carries no glottocode and never will: this is the ground
+ * the languages sit on, not data about a language. Nothing resolves against it, nothing hovers
+ * it, and it takes no part in selection.
+ *
+ * `island` exists because Natural Earth's minor-island layer carries no country attribution, so
+ * those pieces are drawn as neutral land rather than assigned to a country the source does not
+ * name. The fill makes no national claim.
+ */
+export type LandKind = 'indonesia' | 'neighbour' | 'island'
+
+export type BasemapShape = {
+  readonly kind: LandKind
+  /** Country name where the source gives one. Absent for the minor-island layer. */
+  readonly name: string | null
+  readonly geometry: PolygonGeometry
+}
+
 export type FamilyCoverage = {
   readonly glottocode: string
   readonly name: string
@@ -96,6 +114,8 @@ export type Coverage = {
   readonly families: readonly FamilyCoverage[]
   readonly isolates: number
   readonly polygonVertices: number
+  /** Vertices in the basemap. Reported separately: it is background, not coverage. */
+  readonly basemapVertices: number
   readonly periods: readonly SourcePeriodCoverage[]
   /**
    * Languoids Glottolog lists for Indonesia that this bundle excludes, by reason —
@@ -115,7 +135,7 @@ export type BundleManifestSource = {
   readonly homepage: string
   readonly decision: 'bundled' | 'refused'
   readonly citation?: string
-  readonly role?: 'catalogue' | 'geometry'
+  readonly role?: 'catalogue' | 'geometry' | 'basemap'
   readonly reason?: string
   readonly period?: { readonly label: string; readonly fromYear: number; readonly toYear: number }
 }
@@ -132,6 +152,7 @@ export type BundleManifest = {
 export type Bundle = {
   readonly languoids: readonly Languoid[]
   readonly geometry: readonly GeometryEntry[]
+  readonly basemap: readonly BasemapShape[]
   readonly tree: TreeData
   readonly coverage: Coverage
   readonly manifest: BundleManifest

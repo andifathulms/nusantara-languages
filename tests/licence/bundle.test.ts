@@ -3,6 +3,7 @@ import {
   BANNED_BUNDLE_FIELDS,
   BANNED_SOURCES,
   BUNDLE_LICENCE,
+  COMPATIBLE_LICENCES,
   MANIFEST,
 } from '@/lib/sources/manifest'
 import { BUNDLE_FILES, manifest, readBundleText } from '../integrity/bundle'
@@ -95,10 +96,19 @@ describe('the bundle manifest', () => {
   })
 
   it('bundles only licences compatible with the bundle’s own terms', () => {
+    // Read from the gate's own list rather than a copy: a second list here would drift from the
+    // one that actually decides, and then this test would be asserting fiction.
     for (const source of manifest.sources) {
       if (source.decision !== 'bundled') continue
-      expect(['CC0-1.0', 'CC-BY-4.0', 'CC-BY-SA-4.0'], source.id).toContain(source.licence)
+      expect(COMPATIBLE_LICENCES, source.id).toContain(source.licence)
     }
+  })
+
+  it('records the basemap as its own role, so it is never mistaken for speaker areas', () => {
+    const basemap = manifest.sources.filter((source) => source.role === 'basemap')
+    expect(basemap).toHaveLength(1)
+    expect(basemap[0]?.licence).toBe('public-domain')
+    expect(basemap[0]?.citation ?? '').toContain('Natural Earth')
   })
 
   it('does not ship geometry from a source it refused', () => {

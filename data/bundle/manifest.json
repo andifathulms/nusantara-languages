@@ -1,7 +1,7 @@
 {
   "bundleLicence": "CC-BY-SA-4.0",
   "bundleLicenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-  "attribution": "Hammarström, Harald & Forkel, Robert & Haspelmath, Martin & Bank, Sebastian. 2026. Glottolog 5.3. Leipzig: Max Planck Institute for Evolutionary Anthropology. | Asher, R. E. & Christopher J. Moseley (eds.) 2007. Atlas of the World's Languages. 2nd edn. Routledge. | Schapper, Antoinette. 2020. Introduction to The Papuan languages of Timor, Alor and Pantar. Volume 3. Berlin, Boston: De Gruyter Mouton. doi:10.1515/9781501511158-001.",
+  "attribution": "Hammarström, Harald & Forkel, Robert & Haspelmath, Martin & Bank, Sebastian. 2026. Glottolog 5.3. Leipzig: Max Planck Institute for Evolutionary Anthropology. | Asher, R. E. & Christopher J. Moseley (eds.) 2007. Atlas of the World's Languages. 2nd edn. Routledge. | Schapper, Antoinette. 2020. Introduction to The Papuan languages of Timor, Alor and Pantar. Volume 3. Berlin, Boston: De Gruyter Mouton. doi:10.1515/9781501511158-001. | Made with Natural Earth. Free vector and raster map data @ naturalearthdata.com. Public domain.",
   "sources": [
     {
       "id": "glottolog",
@@ -49,6 +49,22 @@
         "label": "sebaran kontemporer Alor–Pantar menurut Schapper 2020",
         "fromYear": 2010,
         "toYear": 2020
+      }
+    },
+    {
+      "id": "naturalearth",
+      "title": "Natural Earth vector, 1:10m cultural and physical",
+      "version": "v5.1.2",
+      "licence": "public-domain",
+      "licenceUrl": "https://www.naturalearthdata.com/about/terms-of-use/",
+      "homepage": "https://www.naturalearthdata.com",
+      "decision": "bundled",
+      "citation": "Made with Natural Earth. Free vector and raster map data @ naturalearthdata.com. Public domain.",
+      "role": "basemap",
+      "period": {
+        "label": "garis pantai dan batas negara, edisi 2022",
+        "fromYear": 2022,
+        "toYear": 2022
       }
     },
     {

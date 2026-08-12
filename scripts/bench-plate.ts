@@ -26,10 +26,15 @@ import {
   type Geometry,
   type Position,
 } from '../lib/geo'
-import type { GeometryEntry, Languoid } from '../lib/bundle/types'
+import type { BasemapShape, GeometryEntry, Languoid } from '../lib/bundle/types'
 
-/** Past this, SVG stops being the right renderer. */
+/** Past this, SVG stops being the right renderer. Counts data and background together. */
 const VERTEX_BUDGET = 60_000
+/**
+ * The basemap's own share. It is background: it is drawn once and never hit-tested, so it costs
+ * payload and paint but nothing per hover. Kept under the data it sits beneath.
+ */
+const BASEMAP_VERTEX_BUDGET = 20_000
 /** One-off, on the server for a static export — generous, but not unbounded. */
 const PATH_BUILD_BUDGET_MS = 400
 /** Per hover. The interaction has to stay inside a frame with room to spare. */
@@ -61,6 +66,7 @@ function report(label: string, value: number, budget: number, unit: string): boo
 function main(): void {
   const languoids = readBundle<Languoid[]>('languoids.json')
   const geometry = readBundle<GeometryEntry[]>('geometry.json')
+  const basemap = readBundle<BasemapShape[]>('basemap.json')
   const projection = createProjection(INDONESIA_BBOX, PLATE_WIDTH)
 
   const shapes: { id: string; geometry: Geometry }[] = [
@@ -75,6 +81,10 @@ function main(): void {
 
   const vertices = geometry.reduce(
     (total, entry) => total + vertexCount(entry.geometry),
+    0,
+  )
+  const basemapVertices = basemap.reduce(
+    (total, shape) => total + vertexCount(shape.geometry),
     0,
   )
 
@@ -111,12 +121,14 @@ function main(): void {
   console.log(`plate ${PLATE_WIDTH}px wide, ${Math.round(projection.height)}px tall`)
   console.log(
     `${geometry.length} speaker areas, ${shapes.length - geometry.length} point marks, ` +
-      `${(pathBytes / 1024).toFixed(0)} KB of path data`,
+      `${basemap.length} pieces of land, ${(pathBytes / 1024).toFixed(0)} KB of path data`,
   )
   console.log(`${probes.length} hover probes, ${hits} of them over a languoid\n`)
 
   const results = [
     report('polygon vertices', vertices, VERTEX_BUDGET, 'vertices'),
+    report('basemap vertices', basemapVertices, BASEMAP_VERTEX_BUDGET, 'vertices'),
+    report('drawn vertices', vertices + basemapVertices, VERTEX_BUDGET, 'vertices'),
     report('path build', pathBuildMs, PATH_BUILD_BUDGET_MS, 'ms'),
     report('hover p50', percentile(samples, 0.5), HOVER_P95_BUDGET_MS, 'ms'),
     report('hover p95', percentile(samples, 0.95), HOVER_P95_BUDGET_MS, 'ms'),

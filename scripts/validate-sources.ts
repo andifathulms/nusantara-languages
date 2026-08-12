@@ -36,7 +36,13 @@ function readJson(file: string): unknown {
 }
 
 function checkBundlePresent(): Check {
-  const required = ['manifest.json', 'languoids.json', 'tree.json', 'coverage.json']
+  const required = [
+    'manifest.json',
+    'languoids.json',
+    'tree.json',
+    'coverage.json',
+    'basemap.json',
+  ]
   const missing = required.filter((file) => !existsSync(join(BUNDLE_DIR, file)))
   return {
     label: 'bundle present',
@@ -208,7 +214,7 @@ function main(): void {
   if (checks.every((check) => check.problems.length === 0)) {
     checks.push(
       checkPinnedVersions(),
-      checkNoBannedFields(['manifest.json', 'languoids.json', 'coverage.json']),
+      checkNoBannedFields(['manifest.json', 'languoids.json', 'coverage.json', 'basemap.json']),
       checkReferentialIntegrity(),
       checkCoverage(),
     )
