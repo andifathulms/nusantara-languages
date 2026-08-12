@@ -11,9 +11,11 @@ import {
   toggleOpen,
   type PlateSelection,
 } from '@/lib/plate/select'
+import { LanguageFacts } from '@/components/panel/LanguageFacts'
+import { HatchLegend } from './HatchLegend'
 import type { PlateModel, TreeRow } from '@/lib/plate/build'
-import type { Coverage } from '@/lib/bundle/types'
-import { format, type Dictionary } from '@/lib/i18n'
+import type { BundleManifest, Coverage } from '@/lib/bundle/types'
+import { format, type Dictionary, type Locale } from '@/lib/i18n'
 
 /**
  * The linkage. This is the product.
@@ -32,17 +34,23 @@ type PlateViewProps = {
   readonly model: PlateModel
   readonly coverage: Coverage
   readonly strings: Dictionary
+  readonly locale: Locale
+  readonly manifest: BundleManifest
   /** Ancestry to open on first render, for a guided view or a shared link. */
   readonly initialOpen?: readonly string[]
   readonly initialSelection?: PlateSelection
+  readonly initialHatching?: boolean
 }
 
 export function PlateView({
   model,
   coverage,
   strings,
+  locale,
+  manifest,
   initialOpen,
   initialSelection = NO_SELECTION,
+  initialHatching = false,
 }: PlateViewProps) {
   const [hovered, setHovered] = useState<string | null>(null)
   const [selection, setSelection] = useState<PlateSelection>(initialSelection)
@@ -50,6 +58,7 @@ export function PlateView({
     () => new Set(initialOpen ?? model.rows.slice(0, 1).map((row) => row.glottocode)),
   )
   const [scrollTo, setScrollTo] = useState<string | null>(null)
+  const [hatching, setHatching] = useState(initialHatching)
 
   const scope = scopeOf(hovered, selection)
   const selectedLanguage = selection.kind === 'language' ? selection.glottocode : null
@@ -113,6 +122,7 @@ export function PlateView({
   }, [])
 
   const scopedRow = scope === null ? null : model.rows.find((row) => row.glottocode === scope)
+  const selectedDetail = selectedLanguage === null ? undefined : model.details[selectedLanguage]
 
   return (
     <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_20rem] xl:grid-cols-[minmax(0,1fr)_24rem]">
@@ -128,7 +138,7 @@ export function PlateView({
             total: coverage.languages,
             percent: coverage.polygonPercent,
           })}`}
-          showHatching={false}
+          showHatching={hatching}
         />
 
         <p className="mt-2 flex flex-wrap items-baseline gap-x-3 text-sm text-boundary/75">
@@ -146,6 +156,36 @@ export function PlateView({
           )}
         </p>
 
+        {/* The panel for the selected language, above the index: it is the answer to the
+            click that produced it, so it belongs next to the plate rather than on another
+            page. The language page carries the same facts plus every citation. */}
+        {selectedDetail !== undefined ? (
+          <section
+            className="mt-4 border border-boundary/30 bg-index/70 p-4"
+            aria-label={selectedDetail.name}
+          >
+            <div className="flex items-baseline justify-between gap-4">
+              <h2 className="font-display text-2xl leading-tight">{selectedDetail.name}</h2>
+              <button
+                type="button"
+                onClick={clear}
+                className="index-label border border-boundary/40 px-2 py-1 hover:bg-boundary hover:text-plate"
+              >
+                {strings.panel.close}
+              </button>
+            </div>
+            <div className="mt-3">
+              <LanguageFacts
+                detail={selectedDetail}
+                strings={strings}
+                locale={locale}
+                manifest={manifest}
+                compact
+              />
+            </div>
+          </section>
+        ) : null}
+
         <IndexPanel
           legend={model.legend}
           coverage={coverage}
@@ -155,6 +195,13 @@ export function PlateView({
           onSelect={selectBranch}
           onClear={clear}
           hasSelection={selection.kind !== 'none'}
+        />
+
+        <HatchLegend
+          strings={strings}
+          coverage={coverage}
+          enabled={hatching}
+          onToggle={() => setHatching((current) => !current)}
         />
       </div>
 

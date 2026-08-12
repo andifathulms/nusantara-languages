@@ -4,6 +4,7 @@ import {
   INDONESIA_BBOX,
   buildHitTestIndex,
   createProjection,
+  formatCoordinate,
   geometryBounds,
   hitTest,
   intersectsBounds,
@@ -303,5 +304,24 @@ describe('hit-testing', () => {
         expect(hitTest(index, [lon, lat]), `${lon},${lat}`).toBe(expected)
       }
     }
+  })
+})
+
+describe('formatCoordinate', () => {
+  it('uses hemisphere letters rather than a minus sign', () => {
+    expect(formatCoordinate([124.588, -8.31058])).toBe('124.5880°E, 8.3106°S')
+  })
+
+  it('handles the western and northern hemispheres', () => {
+    expect(formatCoordinate([-4.9, 52.4], 1)).toBe('4.9°W, 52.4°N')
+  })
+
+  it('puts longitude first, as the data stores it', () => {
+    // Bali: 115°E, 8°S — not 8°E, 115°S.
+    expect(formatCoordinate([115.075, -8.35714], 2)).toBe('115.08°E, 8.36°S')
+  })
+
+  it('treats zero as east and north', () => {
+    expect(formatCoordinate([0, 0], 0)).toBe('0°E, 0°N')
   })
 })

@@ -40,7 +40,13 @@ export default function PlatePage({ params }: { params: { locale: string } }) {
         <h1 className="sr-only">
           {strings.siteTitle} — {strings.plate.title}
         </h1>
-        <PlateView model={model} coverage={bundle.coverage} strings={strings} />
+        <PlateView
+          model={model}
+          coverage={bundle.coverage}
+          strings={strings}
+          locale={locale}
+          manifest={bundle.manifest}
+        />
       </main>
       <SiteFooter locale={locale} />
     </>

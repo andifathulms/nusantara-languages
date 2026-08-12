@@ -78,6 +78,28 @@ export type TreeRow = {
   readonly withPolygon: number
 }
 
+/**
+ * What the language panel shows. Carried alongside the shapes so the panel is a lookup
+ * rather than a computation, and so the panel and the plate cannot disagree.
+ *
+ * There is no speaker count, here or anywhere: the field does not exist in the bundle.
+ */
+export type LanguageDetail = {
+  readonly glottocode: string
+  readonly name: string
+  readonly altNames: readonly string[]
+  readonly iso639P3: string | null
+  readonly aes: AesStatus | null
+  readonly aesStep: number
+  readonly lon: number
+  readonly lat: number
+  readonly geometry:
+    | { readonly type: 'polygon'; readonly source: string }
+    | { readonly type: 'point' }
+  /** Root first, with names, for the classification line. */
+  readonly ancestry: readonly { readonly glottocode: string; readonly name: string }[]
+}
+
 export type PlateModel = {
   readonly width: number
   readonly height: number
@@ -88,6 +110,8 @@ export type PlateModel = {
   readonly graticule: readonly GraticuleLine[]
   readonly legend: readonly LegendEntry[]
   readonly rows: readonly TreeRow[]
+  /** Keyed by glottocode, so the panel is a lookup with no map to build. */
+  readonly details: Readonly<Record<string, LanguageDetail>>
   readonly vertices: number
 }
 
@@ -244,6 +268,28 @@ export function buildPlateModel(input: BuildPlateInput): PlateModel {
   )
   for (const root of roots) walk(root, 0)
 
+  const nameOfNode = (glottocode: string): string =>
+    nodesByCode.get(glottocode)?.name ?? glottocode
+
+  const details: Record<string, LanguageDetail> = {}
+  for (const languoid of input.languoids) {
+    details[languoid.glottocode] = {
+      glottocode: languoid.glottocode,
+      name: languoid.name,
+      altNames: languoid.altNames,
+      iso639P3: languoid.iso639P3,
+      aes: languoid.aes,
+      aesStep: aesStep(languoid.aes),
+      lon: languoid.lon,
+      lat: languoid.lat,
+      geometry: languoid.geometry,
+      ancestry: languoid.ancestors.map((glottocode) => ({
+        glottocode,
+        name: nameOfNode(glottocode),
+      })),
+    }
+  }
+
   return {
     width: projection.width,
     height: projection.height,
@@ -253,6 +299,7 @@ export function buildPlateModel(input: BuildPlateInput): PlateModel {
     graticule: buildGraticule(input.frame, projection.project),
     legend,
     rows,
+    details,
     vertices: input.geometry.reduce((total, entry) => total + vertexCount(entry.geometry), 0),
   }
 }

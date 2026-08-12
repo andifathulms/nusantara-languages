@@ -55,6 +55,9 @@ export type Dictionary = {
     /** Legend for the tree column's per-language mark. */
     readonly geometryArea: string
     readonly geometryPoint: string
+    readonly hatchingToggle: string
+    /** Template. Placeholder: {total}. */
+    readonly hatchingNote: string
   }
   readonly tree: {
     readonly title: string
@@ -165,6 +168,9 @@ const id: Dictionary = {
     attribution: 'Sumber: Glottolog 5.3 (CC-BY-4.0) dan Glottography (CC-BY-4.0).',
     geometryArea: 'punya wilayah',
     geometryPoint: 'hanya titik',
+    hatchingToggle: 'tampilkan arsir',
+    hatchingNote:
+      'Kebertahanan digambarkan sebagai kerapatan arsir di atas warna rumpun, bukan sebagai warna tersendiri: warna sudah dipakai untuk rumpun, sehingga kedua lapisan dapat dibaca bersamaan. Status mengikuti AES Glottolog untuk {total} bahasa.',
   },
   tree: {
     title: 'Pohon kekerabatan',
@@ -296,6 +302,9 @@ const en: Dictionary = {
     attribution: 'Sources: Glottolog 5.3 (CC-BY-4.0) and Glottography (CC-BY-4.0).',
     geometryArea: 'has a territory',
     geometryPoint: 'point only',
+    hatchingToggle: 'show hatching',
+    hatchingNote:
+      'Endangerment is drawn as hatch density over the family colour rather than as a colour of its own: hue already carries family, so the two layers stay readable at once. Status follows Glottolog AES for all {total} languages.',
   },
   tree: {
     title: 'Genealogical tree',
