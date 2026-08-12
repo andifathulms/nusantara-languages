@@ -43,7 +43,7 @@ export type FamilyColour = {
  * it is reserved for top-level languoids with no relatives (PRD §6.5).
  */
 export const FAMILY_COLOURS: readonly FamilyColour[] = [
-  { token: 'ochre', base: '#C8A96A', selected: '#BE8A0F' },
+  { token: 'ochre', base: '#C6AC7C', selected: '#BE8A0F' },
   { token: 'slate', base: '#8B9BAE', selected: '#3F6B93' },
   { token: 'terracotta', base: '#C08A72', selected: '#B4522C' },
   { token: 'sage', base: '#9FAE93', selected: '#6A9155' },
@@ -67,7 +67,7 @@ export const FAMILY_COLOURS: readonly FamilyColour[] = [
 export const ISOLATE_COLOUR: FamilyColour = {
   token: 'isolate',
   base: '#B3ADA2',
-  selected: '#6E655A',
+  selected: '#6B5E48',
 }
 
 export const ALL_FAMILY_COLOURS: readonly FamilyColour[] = [
