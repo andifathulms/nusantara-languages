@@ -44,12 +44,8 @@ export type Dictionary = {
     readonly coverage: string
     readonly pointNote: string
     readonly gradientNote: string
-    readonly sea: string
-    readonly hint: string
     readonly clearSelection: string
     readonly selectedFamily: string
-    /** Template. Placeholder: {count}. */
-    readonly languagesInFamily: string
     readonly index: string
     readonly attribution: string
     /** Legend for the tree column's per-language mark. */
@@ -91,7 +87,6 @@ export type Dictionary = {
     readonly isolate: string
     /** Template. Placeholder: {count}. */
     readonly languages: string
-    readonly showAncestry: string
   }
   readonly panel: {
     readonly glottocode: string
@@ -153,7 +148,6 @@ export type Dictionary = {
   }
   readonly a11y: {
     readonly skipToPlate: string
-    readonly skipToTree: string
     /** Template. Placeholders: {name}, {count}. */
     readonly announceBranch: string
     /** Template. Placeholder: {name}. */
@@ -197,11 +191,8 @@ const id: Dictionary = {
       'Titik adalah titik. Koordinat Glottolog sering merupakan titik tengah populasi yang tersebar, jadi bahasa tanpa poligon digambarkan sebagai tanda titik dan tidak pernah dimekarkan menjadi wilayah.',
     gradientNote:
       'Batas antarbahasa pada kenyataannya berupa gradien, bukan garis. Garis batas digambar setipis mungkin untuk mengingatkan hal itu.',
-    sea: 'Laut',
-    hint: 'Sorot rumpun pada pohon di sebelah kanan, atau klik wilayah pada peta.',
     clearSelection: 'Hapus pilihan',
     selectedFamily: 'Rumpun terpilih',
-    languagesInFamily: '{count} bahasa',
     index: 'Indeks',
     attribution: 'Sumber: Glottolog 5.3 (CC-BY-4.0) dan Glottography (CC-BY-4.0).',
     geometryArea: 'punya wilayah',
@@ -242,7 +233,6 @@ const id: Dictionary = {
     collapse: 'Tutup',
     isolate: 'bahasa isolat',
     languages: '{count} bahasa',
-    showAncestry: 'Tampilkan garis keturunan',
   },
   panel: {
     glottocode: 'Glottocode',
@@ -326,7 +316,6 @@ const id: Dictionary = {
   },
   a11y: {
     skipToPlate: 'Lewati ke peta',
-    skipToTree: 'Lewati ke pohon kekerabatan',
     announceBranch: '{name} dipilih, {count} bahasa disorot',
     announceLanguage: '{name} dipilih',
     announceCleared: 'Pilihan dihapus',
@@ -368,11 +357,8 @@ const en: Dictionary = {
       'A point stays a point. Glottolog’s coordinate is frequently the midpoint of a dispersed population, so a language without a polygon is drawn as a mark and is never inflated into a territory.',
     gradientNote:
       'Language boundaries are gradients rather than lines. Boundaries are drawn as hairlines to keep that in view.',
-    sea: 'Sea',
-    hint: 'Hover a family in the tree at right, or click a territory on the map.',
     clearSelection: 'Clear selection',
     selectedFamily: 'Selected family',
-    languagesInFamily: '{count} languages',
     index: 'Index',
     attribution: 'Sources: Glottolog 5.3 (CC-BY-4.0) and Glottography (CC-BY-4.0).',
     geometryArea: 'has a territory',
@@ -413,7 +399,6 @@ const en: Dictionary = {
     collapse: 'Collapse',
     isolate: 'isolate',
     languages: '{count} languages',
-    showAncestry: 'Show ancestry',
   },
   panel: {
     glottocode: 'Glottocode',
@@ -497,7 +482,6 @@ const en: Dictionary = {
   },
   a11y: {
     skipToPlate: 'Skip to the map',
-    skipToTree: 'Skip to the genealogical tree',
     announceBranch: '{name} selected, {count} languages highlighted',
     announceLanguage: '{name} selected',
     announceCleared: 'Selection cleared',
