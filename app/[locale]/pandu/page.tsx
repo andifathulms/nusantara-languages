@@ -53,7 +53,7 @@ export default function GuidedIndexPage({ params }: { params: { locale: string }
               <h2 className="font-display text-2xl leading-tight">{view.title}</h2>
               <p className="mt-2 text-boundary/85">{view.body}</p>
               <p className="tabular mt-2 font-mono text-sm text-boundary/70">
-                {format(strings.guided.emphasised, { count: view.count }, locale)}
+                {format(strings.guided.emphasised, { count: view.count })}
               </p>
               <Link
                 href={localePath(locale, `pandu/${view.id}`)}

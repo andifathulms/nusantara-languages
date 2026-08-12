@@ -60,7 +60,7 @@ export default function HomePage({ params }: { params: { locale: string } }) {
           <p className="border-l-2 border-boundary/40 pl-4">
             {strings.home.whatThisIsNot}
             {period !== null
-              ? ` ${format(strings.plate.period, { fromYear: period.fromYear, toYear: period.toYear }, locale)}.`
+              ? ` ${format(strings.plate.period, { fromYear: period.fromYear, toYear: period.toYear })}.`
               : ''}
           </p>
           <p className="text-sm">

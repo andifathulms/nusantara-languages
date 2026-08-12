@@ -74,24 +74,19 @@ export default function MethodPage({ params }: { params: { locale: string } }) {
           </dl>
 
           <p className="mt-4">
-            {format(
-              strings.plate.coverage,
-              {
-                withPolygon: coverage.withPolygon,
-                total: coverage.languages,
-                percent: coverage.polygonPercent,
-              },
-              locale,
-            )}
+            {format(strings.plate.coverage, {
+              withPolygon: coverage.withPolygon,
+              total: coverage.languages,
+              percent: coverage.polygonPercent,
+            })}
           </p>
 
           {period !== null ? (
             <p className="mt-2">
-              {format(
-                strings.plate.period,
-                { fromYear: period.fromYear, toYear: period.toYear },
-                locale,
-              )}
+              {format(strings.plate.period, {
+                fromYear: period.fromYear,
+                toYear: period.toYear,
+              })}
               . {strings.plate.periodCaveat}
             </p>
           ) : null}

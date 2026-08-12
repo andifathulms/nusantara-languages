@@ -437,18 +437,23 @@ const DICTIONARIES: Readonly<Record<Locale, Dictionary>> = { id, en }
  * crosses the server/client boundary — functions cannot be serialised into a client
  * component, and finding that out at build time is exactly what a static export is for.
  *
- * Counts arrive as numbers and are rendered with locale grouping; the UI sets them in
- * tabular figures.
+ * Numbers are substituted plainly, with no locale grouping. This was the other way around
+ * and it printed the atlas period as "atlas 1.990–2.020" on the plate itself: Indonesian
+ * groups thousands with a period, and a template cannot know whether its number is a count
+ * or a year. So grouping is the caller's decision — `toLocaleString` at the call site, or a
+ * pre-formatted string — and a year stays a year.
+ *
+ * An unknown placeholder is left in place rather than blanked, so a missing value shows up
+ * as `{count}` in the UI instead of vanishing silently.
  */
 export function format(
   template: string,
   values: Readonly<Record<string, string | number>>,
-  locale: Locale = DEFAULT_LOCALE,
 ): string {
   return template.replace(/\{(\w+)\}/g, (whole, key: string) => {
     const value = values[key]
     if (value === undefined) return whole
-    return typeof value === 'number' ? value.toLocaleString(locale) : value
+    return String(value)
   })
 }
 

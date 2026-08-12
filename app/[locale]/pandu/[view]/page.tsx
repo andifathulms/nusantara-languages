@@ -84,7 +84,7 @@ export default function GuidedViewPage({
           <h1 className="mt-1 font-display text-3xl leading-tight">{copy.title}</h1>
           <p className="mt-2 text-boundary/85">{copy.body}</p>
           <p className="tabular mt-2 font-mono text-sm text-boundary/70">
-            {format(strings.guided.emphasised, { count: emphasis.length }, locale)}
+            {format(strings.guided.emphasised, { count: emphasis.length })}
           </p>
           <p className="mt-2 text-sm text-boundary/70">{strings.guided.stillClickable}</p>
         </div>
