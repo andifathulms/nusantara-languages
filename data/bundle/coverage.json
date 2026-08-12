@@ -1,0 +1,475 @@
+{
+  "glottologVersion": "v5.3",
+  "languages": 727,
+  "withPolygon": 421,
+  "pointOnly": 306,
+  "polygonPercent": 57.9,
+  "families": [
+    {
+      "glottocode": "aust1307",
+      "name": "Austronesian",
+      "languageCount": 464,
+      "withPolygon": 250,
+      "isIsolate": false
+    },
+    {
+      "glottocode": "nucl1709",
+      "name": "Nuclear Trans New Guinea",
+      "languageCount": 69,
+      "withPolygon": 38,
+      "isIsolate": false
+    },
+    {
+      "glottocode": "timo1261",
+      "name": "Timor-Alor-Pantar",
+      "languageCount": 21,
+      "withPolygon": 20,
+      "isIsolate": false
+    },
+    {
+      "glottocode": "lake1255",
+      "name": "Lakes Plain",
+      "languageCount": 20,
+      "withPolygon": 10,
+      "isIsolate": false
+    },
+    {
+      "glottocode": "nort2923",
+      "name": "North Halmahera",
+      "languageCount": 15,
+      "withPolygon": 10,
+      "isIsolate": false
+    },
+    {
+      "glottocode": "toro1256",
+      "name": "Tor-Orya",
+      "languageCount": 13,
+      "withPolygon": 7,
+      "isIsolate": false
+    },
+    {
+      "glottocode": "geel1240",
+      "name": "Geelvink Bay",
+      "languageCount": 10,
+      "withPolygon": 4,
+      "isIsolate": false
+    },
+    {
+      "glottocode": "kwer1242",
+      "name": "Greater Kwerba",
+      "languageCount": 8,
+      "withPolygon": 4,
+      "isIsolate": false
+    },
+    {
+      "glottocode": "sout3418",
+      "name": "South Bird's Head",
+      "languageCount": 8,
+      "withPolygon": 5,
+      "isIsolate": false
+    },
+    {
+      "glottocode": "bord1247",
+      "name": "Border",
+      "languageCount": 7,
+      "withPolygon": 6,
+      "isIsolate": false
+    },
+    {
+      "glottocode": "more1255",
+      "name": "Yam",
+      "languageCount": 5,
+      "withPolygon": 1,
+      "isIsolate": false
+    },
+    {
+      "glottocode": "nimb1257",
+      "name": "Nimboranic",
+      "languageCount": 5,
+      "withPolygon": 3,
+      "isIsolate": false
+    },
+    {
+      "glottocode": "west1493",
+      "name": "West Bird's Head",
+      "languageCount": 5,
+      "withPolygon": 5,
+      "isIsolate": false
+    },
+    {
+      "glottocode": "anim1240",
+      "name": "Anim",
+      "languageCount": 4,
+      "withPolygon": 4,
+      "isIsolate": false
+    },
+    {
+      "glottocode": "pauw1244",
+      "name": "Pauwasi",
+      "languageCount": 4,
+      "withPolygon": 4,
+      "isIsolate": false
+    },
+    {
+      "glottocode": "sent1261",
+      "name": "Sentanic",
+      "languageCount": 4,
+      "withPolygon": 4,
+      "isIsolate": false
+    },
+    {
+      "glottocode": "bula1259",
+      "name": "Bulaka River",
+      "languageCount": 3,
+      "withPolygon": 2,
+      "isIsolate": false
+    },
+    {
+      "glottocode": "east1459",
+      "name": "East Bird's Head",
+      "languageCount": 3,
+      "withPolygon": 2,
+      "isIsolate": false
+    },
+    {
+      "glottocode": "indo1319",
+      "name": "Indo-European",
+      "languageCount": 3,
+      "withPolygon": 0,
+      "isIsolate": false
+    },
+    {
+      "glottocode": "kaya1327",
+      "name": "Kayagaric",
+      "languageCount": 3,
+      "withPolygon": 3,
+      "isIsolate": false
+    },
+    {
+      "glottocode": "kolo1268",
+      "name": "Kolopom",
+      "languageCount": 3,
+      "withPolygon": 3,
+      "isIsolate": false
+    },
+    {
+      "glottocode": "lepk1239",
+      "name": "Lepki-Murkim-Kembra",
+      "languageCount": 3,
+      "withPolygon": 0,
+      "isIsolate": false
+    },
+    {
+      "glottocode": "mair1253",
+      "name": "Mairasic",
+      "languageCount": 3,
+      "withPolygon": 2,
+      "isIsolate": false
+    },
+    {
+      "glottocode": "west2604",
+      "name": "West Bomberai",
+      "languageCount": 3,
+      "withPolygon": 3,
+      "isIsolate": false
+    },
+    {
+      "glottocode": "bayo1259",
+      "name": "Bayono-Awbono",
+      "languageCount": 2,
+      "withPolygon": 0,
+      "isIsolate": false
+    },
+    {
+      "glottocode": "hata1242",
+      "name": "Hatam-Mansim",
+      "languageCount": 2,
+      "withPolygon": 2,
+      "isIsolate": false
+    },
+    {
+      "glottocode": "kaur1274",
+      "name": "Kaure-Kosare",
+      "languageCount": 2,
+      "withPolygon": 1,
+      "isIsolate": false
+    },
+    {
+      "glottocode": "kond1302",
+      "name": "Konda-Yahadian",
+      "languageCount": 2,
+      "withPolygon": 2,
+      "isIsolate": false
+    },
+    {
+      "glottocode": "mayb1237",
+      "name": "Maybratic",
+      "languageCount": 2,
+      "withPolygon": 2,
+      "isIsolate": false
+    },
+    {
+      "glottocode": "momb1255",
+      "name": "Mombum-Koneraw",
+      "languageCount": 2,
+      "withPolygon": 2,
+      "isIsolate": false
+    },
+    {
+      "glottocode": "naml1239",
+      "name": "Namla-Tofanma",
+      "languageCount": 2,
+      "withPolygon": 1,
+      "isIsolate": false
+    },
+    {
+      "glottocode": "skoo1245",
+      "name": "Sko",
+      "languageCount": 2,
+      "withPolygon": 2,
+      "isIsolate": false
+    },
+    {
+      "glottocode": "yawa1259",
+      "name": "Yawa-Saweru",
+      "languageCount": 2,
+      "withPolygon": 1,
+      "isIsolate": false
+    },
+    {
+      "glottocode": "abin1243",
+      "name": "Abinomn",
+      "languageCount": 1,
+      "withPolygon": 0,
+      "isIsolate": true
+    },
+    {
+      "glottocode": "abun1252",
+      "name": "Abun",
+      "languageCount": 1,
+      "withPolygon": 1,
+      "isIsolate": true
+    },
+    {
+      "glottocode": "burm1264",
+      "name": "Burmeso",
+      "languageCount": 1,
+      "withPolygon": 1,
+      "isIsolate": true
+    },
+    {
+      "glottocode": "dama1272",
+      "name": "Damal",
+      "languageCount": 1,
+      "withPolygon": 1,
+      "isIsolate": true
+    },
+    {
+      "glottocode": "demm1245",
+      "name": "Dem",
+      "languageCount": 1,
+      "withPolygon": 1,
+      "isIsolate": true
+    },
+    {
+      "glottocode": "else1239",
+      "name": "Elseng",
+      "languageCount": 1,
+      "withPolygon": 1,
+      "isIsolate": true
+    },
+    {
+      "glottocode": "kapo1250",
+      "name": "Kapori",
+      "languageCount": 1,
+      "withPolygon": 1,
+      "isIsolate": true
+    },
+    {
+      "glottocode": "kehu1238",
+      "name": "Kehu",
+      "languageCount": 1,
+      "withPolygon": 0,
+      "isIsolate": true
+    },
+    {
+      "glottocode": "kimk1238",
+      "name": "Kimki",
+      "languageCount": 1,
+      "withPolygon": 0,
+      "isIsolate": true
+    },
+    {
+      "glottocode": "mass1263",
+      "name": "Massep",
+      "languageCount": 1,
+      "withPolygon": 1,
+      "isIsolate": true
+    },
+    {
+      "glottocode": "mawe1251",
+      "name": "Mawes",
+      "languageCount": 1,
+      "withPolygon": 1,
+      "isIsolate": true
+    },
+    {
+      "glottocode": "molo1262",
+      "name": "Molof",
+      "languageCount": 1,
+      "withPolygon": 1,
+      "isIsolate": true
+    },
+    {
+      "glottocode": "momu1241",
+      "name": "Momuna",
+      "languageCount": 1,
+      "withPolygon": 0,
+      "isIsolate": true
+    },
+    {
+      "glottocode": "morb1239",
+      "name": "Mor (Bomberai Peninsula)",
+      "languageCount": 1,
+      "withPolygon": 1,
+      "isIsolate": true
+    },
+    {
+      "glottocode": "moro1289",
+      "name": "Marori",
+      "languageCount": 1,
+      "withPolygon": 1,
+      "isIsolate": true
+    },
+    {
+      "glottocode": "mpur1239",
+      "name": "Mpur",
+      "languageCount": 1,
+      "withPolygon": 1,
+      "isIsolate": true
+    },
+    {
+      "glottocode": "pyuu1245",
+      "name": "Pyu",
+      "languageCount": 1,
+      "withPolygon": 1,
+      "isIsolate": true
+    },
+    {
+      "glottocode": "saus1247",
+      "name": "Sause",
+      "languageCount": 1,
+      "withPolygon": 1,
+      "isIsolate": true
+    },
+    {
+      "glottocode": "sena1264",
+      "name": "Senagi",
+      "languageCount": 1,
+      "withPolygon": 1,
+      "isIsolate": true
+    },
+    {
+      "glottocode": "tamb1257",
+      "name": "Tambora",
+      "languageCount": 1,
+      "withPolygon": 0,
+      "isIsolate": true
+    },
+    {
+      "glottocode": "tana1288",
+      "name": "Tanahmerah",
+      "languageCount": 1,
+      "withPolygon": 1,
+      "isIsolate": true
+    },
+    {
+      "glottocode": "usku1243",
+      "name": "Usku",
+      "languageCount": 1,
+      "withPolygon": 1,
+      "isIsolate": true
+    },
+    {
+      "glottocode": "yetf1238",
+      "name": "Yetfa",
+      "languageCount": 1,
+      "withPolygon": 1,
+      "isIsolate": true
+    }
+  ],
+  "isolates": 23,
+  "polygonVertices": 19570,
+  "periods": [
+    {
+      "sourceId": "schapper2020papuan",
+      "label": "sebaran kontemporer Alor–Pantar menurut Schapper 2020",
+      "fromYear": 2010,
+      "toYear": 2020,
+      "languages": 18
+    },
+    {
+      "sourceId": "asher2007world",
+      "label": "sebaran tradisional menurut atlas 2007",
+      "fromYear": 1990,
+      "toYear": 2007,
+      "languages": 403
+    }
+  ],
+  "excluded": [
+    {
+      "reason": "kategori Glottolog \"Bookkeeping\"",
+      "count": 14
+    },
+    {
+      "reason": "dialek Glottolog (di luar cakupan v1)",
+      "count": 12
+    },
+    {
+      "reason": "kategori Glottolog \"Sign_Language\"",
+      "count": 5
+    },
+    {
+      "reason": "kategori Glottolog \"Pidgin\"",
+      "count": 4
+    },
+    {
+      "reason": "kategori Glottolog \"Unattested\"",
+      "count": 3
+    },
+    {
+      "reason": "kategori Glottolog \"Unclassifiable\"",
+      "count": 3
+    }
+  ],
+  "aes": [
+    {
+      "status": "not endangered",
+      "count": 134
+    },
+    {
+      "status": "threatened",
+      "count": 270
+    },
+    {
+      "status": "shifting",
+      "count": 224
+    },
+    {
+      "status": "moribund",
+      "count": 60
+    },
+    {
+      "status": "nearly extinct",
+      "count": 14
+    },
+    {
+      "status": "extinct",
+      "count": 25
+    },
+    {
+      "status": "unknown",
+      "count": 0
+    }
+  ]
+}

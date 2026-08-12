@@ -1,0 +1,72 @@
+{
+  "bundleLicence": "CC-BY-SA-4.0",
+  "bundleLicenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "attribution": "Hammarström, Harald & Forkel, Robert & Haspelmath, Martin & Bank, Sebastian. 2026. Glottolog 5.3. Leipzig: Max Planck Institute for Evolutionary Anthropology. | Asher, R. E. & Christopher J. Moseley (eds.) 2007. Atlas of the World's Languages. 2nd edn. Routledge. | Schapper, Antoinette. 2020. Introduction to The Papuan languages of Timor, Alor and Pantar. Volume 3. Berlin, Boston: De Gruyter Mouton. doi:10.1515/9781501511158-001.",
+  "sources": [
+    {
+      "id": "glottolog",
+      "title": "Glottolog 5.3 as CLDF",
+      "version": "v5.3",
+      "licence": "CC-BY-4.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "homepage": "https://glottolog.org",
+      "decision": "bundled",
+      "citation": "Hammarström, Harald & Forkel, Robert & Haspelmath, Martin & Bank, Sebastian. 2026. Glottolog 5.3. Leipzig: Max Planck Institute for Evolutionary Anthropology.",
+      "role": "catalogue",
+      "period": {
+        "label": "katalog daring, dimutakhirkan berkelanjutan",
+        "fromYear": 2005,
+        "toYear": 2026
+      }
+    },
+    {
+      "id": "asher2007world",
+      "title": "Glottography dataset derived from Asher and Moseley 2007 \"Atlas of the World's Languages\"",
+      "version": "v2.0",
+      "licence": "CC-BY-4.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "homepage": "https://github.com/Glottography/asher2007world",
+      "decision": "bundled",
+      "citation": "Asher, R. E. & Christopher J. Moseley (eds.) 2007. Atlas of the World's Languages. 2nd edn. Routledge.",
+      "role": "geometry",
+      "period": {
+        "label": "sebaran tradisional menurut atlas 2007",
+        "fromYear": 1990,
+        "toYear": 2007
+      }
+    },
+    {
+      "id": "schapper2020papuan",
+      "title": "Glottography dataset derived from Schapper 2020 \"Introduction to The Papuan languages of Timor, Alor and Pantar. Volume 3\"",
+      "version": "v2.0",
+      "licence": "CC-BY-4.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "homepage": "https://github.com/Glottography/schapper2020papuan",
+      "decision": "bundled",
+      "citation": "Schapper, Antoinette. 2020. Introduction to The Papuan languages of Timor, Alor and Pantar. Volume 3. Berlin, Boston: De Gruyter Mouton. doi:10.1515/9781501511158-001.",
+      "role": "geometry",
+      "period": {
+        "label": "sebaran kontemporer Alor–Pantar menurut Schapper 2020",
+        "fromYear": 2010,
+        "toYear": 2020
+      }
+    },
+    {
+      "id": "wurm1981pacific",
+      "title": "Glottography dataset derived from Wurm and Hattori 1981/83 \"Language atlas of the pacific area\"",
+      "version": "v2.0",
+      "licence": "CC-BY-NC-4.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by-nc/4.0/",
+      "homepage": "https://github.com/Glottography/wurm1981pacific",
+      "decision": "refused",
+      "reason": "Dirilis dengan lisensi CC-BY-NC-4.0. Pembatasan non-komersial tidak dapat dibawa ke dalam kumpulan data turunan CC-BY-SA-4.0, sehingga poligon atlas Wurm & Hattori tidak disertakan. Poligon pada peta ini berasal dari sumber CC-BY-4.0."
+    }
+  ],
+  "nameProviders": [
+    "glottolog",
+    "multitree",
+    "elcat",
+    "wals",
+    "lexvo (id)"
+  ]
+}
