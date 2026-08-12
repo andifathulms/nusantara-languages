@@ -83,6 +83,25 @@ describe('treeDataFromNewick', () => {
     expect(buildTreeIndex(built.data).type).toBe('ok')
   })
 
+  it('makes an isolate its own root, since Glottolog emits no tree for one', () => {
+    // A language that is its own top-level unit appears in no family tree. Having no
+    // relatives is a fact about the language, not a gap in the data.
+    const built = treeDataFromNewick(
+      FIXTURE_TREES,
+      new Set(['kamb1299', 'else1239']),
+      (code) => (code === 'else1239' ? 'language' : levelOf(code)),
+      (code) => (code === 'else1239' ? 'Elseng' : nameOf(code)),
+    )
+    if (built.type !== 'ok') throw new Error(built.problems.join('; '))
+    expect(built.data.roots).toContain('else1239')
+
+    const indexed = buildTreeIndex(built.data)
+    if (indexed.type !== 'ok') throw new Error(indexed.problems.join('; '))
+    expect(ancestors(indexed.index, 'else1239')).toEqual([])
+    expect(rootFamily(indexed.index, 'else1239')).toBe('else1239')
+    expect(subtreeLanguages(indexed.index, 'else1239')).toEqual(['else1239'])
+  })
+
   it('reports a malformed Newick tree rather than emitting a partial one', () => {
     const built = treeDataFromNewick(
       [{ name: 'broken', newick: '(a,b' }],

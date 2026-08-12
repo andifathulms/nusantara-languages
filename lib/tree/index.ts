@@ -315,6 +315,17 @@ export function treeDataFromNewick(
     }
   }
 
+  // Glottolog emits a tree per family, so an isolate — a language that is its own
+  // top-level unit — appears in none of them. It becomes its own root here rather than
+  // being reported missing: having no relatives is a fact about the language, not a gap
+  // in the data.
+  for (const glottocode of keep) {
+    if (nodes.has(glottocode)) continue
+    if (levelOf(glottocode) !== 'language') continue
+    nodes.set(glottocode, { level: 'language', parent: null, children: [] })
+    roots.push(glottocode)
+  }
+
   if (problems.length > 0) return { type: 'error', problems }
 
   const data: TreeData = {
