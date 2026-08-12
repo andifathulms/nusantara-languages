@@ -30,6 +30,19 @@ export function PlateThumbnail({
       <rect x={0} y={0} width={model.width} height={model.height} fill="var(--plate-plate)" />
 
       <g aria-hidden="true">
+        {model.land.map((land, index) => (
+          <path
+            key={`${land.kind}-${index}`}
+            d={land.d}
+            fill={land.kind === 'neighbour' ? 'var(--plate-landNeighbour)' : 'var(--plate-land)'}
+            stroke="var(--plate-landEdge)"
+            strokeWidth={0.25}
+            strokeOpacity={0.45}
+          />
+        ))}
+      </g>
+
+      <g aria-hidden="true">
         {model.graticule.map((line) => (
           <line
             key={`${line.kind}-${line.degrees}`}

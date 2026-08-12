@@ -12,6 +12,7 @@ import { assignFamilyColours, type ColourAssignment } from '../colour'
 import {
   geometryByCode,
   languoidsByCode,
+  type BasemapShape,
   type BundleManifest,
   type Coverage,
   type GeometryEntry,
@@ -29,6 +30,7 @@ export type LoadedBundle = {
   readonly byCode: ReadonlyMap<string, Languoid>
   readonly geometry: readonly GeometryEntry[]
   readonly geometryByCode: ReadonlyMap<string, GeometryEntry>
+  readonly basemap: readonly BasemapShape[]
   readonly tree: TreeData
   readonly treeIndex: TreeIndex
   readonly coverage: Coverage
@@ -48,6 +50,7 @@ export function loadBundle(): LoadedBundle {
 
   const languoids = read<Languoid[]>('languoids.json')
   const geometry = read<GeometryEntry[]>('geometry.json')
+  const basemap = read<BasemapShape[]>('basemap.json')
   const tree = read<TreeData>('tree.json')
   const coverage = read<Coverage>('coverage.json')
   const manifest = read<BundleManifest>('manifest.json')
@@ -64,6 +67,7 @@ export function loadBundle(): LoadedBundle {
     byCode: languoidsByCode(languoids),
     geometry,
     geometryByCode: geometryByCode(geometry),
+    basemap,
     tree,
     treeIndex: indexed.index,
     coverage,

@@ -280,6 +280,38 @@ describe('the plate furniture', () => {
     expect(step).toBeLessThan(1.2)
   })
 
+  it('keeps the no-data land unmistakable from the isolate colour, which is data', () => {
+    // Both are greys, and confusing them would mean confusing "we have no polygon here" with
+    // "this is a language with no known relatives".
+    expect(distance(PLATE_COLOURS.land, ISOLATE_COLOUR.base)).toBeGreaterThan(8)
+    expect(oklabLightness(PLATE_COLOURS.land)).toBeGreaterThan(
+      oklabLightness(ISOLATE_COLOUR.base) + 0.08,
+    )
+  })
+
+  it('keeps every family tint readable where it sits on the land', () => {
+    for (const colour of ALL_FAMILY_COLOURS) {
+      expect(distance(colour.base, PLATE_COLOURS.land), colour.token).toBeGreaterThan(4)
+    }
+  })
+
+  it('makes land read as land against the paper, without competing with it', () => {
+    const step = distance(PLATE_COLOURS.land, PLATE_COLOURS.plate)
+    expect(step).toBeGreaterThan(5)
+    expect(step).toBeLessThan(14)
+  })
+
+  it('keeps foreign land recessive but distinguishable from Indonesian land', () => {
+    expect(distance(PLATE_COLOURS.landNeighbour, PLATE_COLOURS.land)).toBeGreaterThan(3)
+    expect(oklabLightness(PLATE_COLOURS.landNeighbour)).toBeGreaterThan(
+      oklabLightness(PLATE_COLOURS.land),
+    )
+  })
+
+  it('gives the coastline an edge that reads under the palest tint', () => {
+    expect(contrast(PLATE_COLOURS.landEdge, PLATE_COLOURS.land)).toBeGreaterThan(2.5)
+  })
+
   it('keeps the sea pale enough to recede', () => {
     expect(contrast(PLATE_COLOURS.sea, PLATE_COLOURS.plate)).toBeLessThan(1.2)
   })

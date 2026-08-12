@@ -57,6 +57,10 @@ export default function MethodPage({ params }: { params: { locale: string } }) {
                 value: coverage.polygonVertices,
               },
               {
+                term: locale === 'id' ? 'Titik peta dasar' : 'Basemap vertices',
+                value: coverage.basemapVertices,
+              },
+              {
                 term: locale === 'id' ? 'Persen berwilayah' : 'Percent with a territory',
                 value: `${coverage.polygonPercent}%`,
               },

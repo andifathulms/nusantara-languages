@@ -19,7 +19,7 @@ export function MapKey({ strings }: { strings: Dictionary }) {
         {strings.guide.title}
       </h2>
 
-      <dl className="mt-3 grid gap-x-8 gap-y-4 sm:grid-cols-3">
+      <dl className="mt-3 grid gap-x-8 gap-y-4 sm:grid-cols-2 xl:grid-cols-4">
         <Entry specimen={<FamilySpecimen />} term={strings.guide.colour}>
           {strings.guide.colourNote}
         </Entry>
@@ -28,6 +28,9 @@ export function MapKey({ strings }: { strings: Dictionary }) {
         </Entry>
         <Entry specimen={<HatchSpecimen />} term={strings.guide.hatch}>
           {strings.guide.hatchNote}
+        </Entry>
+        <Entry specimen={<LandSpecimen />} term={strings.guide.land}>
+          {strings.guide.landNote}
         </Entry>
       </dl>
     </section>
@@ -110,6 +113,38 @@ function PointSpecimen() {
         <circle r={3} fill="var(--plate-plate)" stroke="var(--family-verdigris)" strokeWidth={1.1} />
         <circle r={0.9} fill="var(--family-verdigris)" />
       </g>
+    </svg>
+  )
+}
+
+/** Bare land beside land with a family tint over it — the difference the reader has to see. */
+function LandSpecimen() {
+  return (
+    <svg width={46} height={22} viewBox="0 0 46 22" aria-hidden="true">
+      <path
+        d="M0.5 3.5h20v11h-20z"
+        fill="var(--plate-land)"
+        stroke="var(--plate-landEdge)"
+        strokeOpacity={0.6}
+        strokeWidth={0.7}
+      />
+      <path
+        d="M25.5 3.5h20v11h-20z"
+        fill="var(--plate-land)"
+        stroke="var(--plate-landEdge)"
+        strokeOpacity={0.6}
+        strokeWidth={0.7}
+      />
+      <rect
+        x={28}
+        y={5}
+        width={15}
+        height={8}
+        fill="var(--family-moss)"
+        stroke="var(--plate-boundary)"
+        strokeOpacity={0.5}
+        strokeWidth={0.6}
+      />
     </svg>
   )
 }

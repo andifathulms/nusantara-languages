@@ -26,6 +26,7 @@ export default function HomePage({ params }: { params: { locale: string } }) {
   const model = buildPlateModel({
     languoids: bundle.languoids,
     geometry: bundle.geometry,
+    basemap: bundle.basemap,
     tree: bundle.tree,
     treeIndex: bundle.treeIndex,
     coverage,

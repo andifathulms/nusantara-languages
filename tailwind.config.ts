@@ -44,6 +44,9 @@ const config: Config = {
         accent: PLATE_COLOURS.accent,
         'accent-soft': PLATE_COLOURS.accentSoft,
         point: PLATE_COLOURS.point,
+        land: PLATE_COLOURS.land,
+        'land-neighbour': PLATE_COLOURS.landNeighbour,
+        'land-edge': PLATE_COLOURS.landEdge,
         ...familyColours,
       },
       fontFamily: {

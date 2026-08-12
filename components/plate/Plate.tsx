@@ -12,9 +12,13 @@ import type { PlateModel, PlateShape } from '@/lib/plate/build'
  * against a 60,000 budget), and with SVG hover and selection are free — the browser
  * hit-tests for us.
  *
- * There is deliberately no coastline. The only geography in the bundle is speaker areas, so
- * drawing a landmass would mean sourcing one — and a silhouette derived from the areas
- * themselves would draw a country that stops where the documentation stops.
+ * The land beneath comes from Natural Earth (public domain), sourced properly rather than traced
+ * from the language areas themselves — a silhouette derived from the data would have drawn a
+ * country that stops where the documentation stops. Land with no speaker area over it stays grey,
+ * which is the honest reading: the coast is known, the language is not recorded there.
+ *
+ * The land layer is `pointer-events-none` and `aria-hidden`, and it lives in its own list in the
+ * model with no glottocode attached, so it cannot be hovered, selected, searched or announced.
  */
 
 type PlateProps = {
@@ -165,7 +169,23 @@ export function Plate({
         })}
       </defs>
 
-      {/* The graticule sits under everything: a printed plate carries its grid quietly. */}
+      {/* The ground: coastline first, so every language area is drawn onto land rather than onto
+          paper, and the gaps in coverage read as unrecorded rather than as sea. */}
+      <g aria-hidden="true" className="pointer-events-none">
+        {model.land.map((land, index) => (
+          <path
+            key={`${land.kind}-${index}`}
+            d={land.d}
+            fill={land.kind === 'neighbour' ? 'var(--plate-landNeighbour)' : 'var(--plate-land)'}
+            stroke="var(--plate-landEdge)"
+            strokeWidth={land.kind === 'neighbour' ? 0.25 : 0.4}
+            strokeOpacity={land.kind === 'neighbour' ? 0.35 : 0.6}
+          />
+        ))}
+      </g>
+
+      {/* The graticule sits over the land but under the data: a printed plate carries its grid
+          quietly. */}
       <g aria-hidden="true">
         {model.graticule.map((line) => (
           <line
@@ -186,7 +206,7 @@ export function Plate({
             <text
               key={`label-${line.degrees}`}
               x={line.x1 + 3}
-              y={model.height - 6}
+              y={model.height - 20}
               className="font-label"
               fontSize={9}
               fill="var(--plate-boundary)"
@@ -266,16 +286,18 @@ export function Plate({
 
       {/* Attribution is structural: it is inside the plate, and the PNG export renders this
           same SVG, so it cannot be removed by a layout change. */}
+      {/* Attribution sits on its own baseline below the degree labels — the two used to collide
+          in the bottom-right corner. */}
       <text
         x={model.width - 6}
-        y={model.height - 6}
+        y={model.height - 5}
         textAnchor="end"
         className="font-label"
         fontSize={9}
         fill="var(--plate-boundary)"
         fillOpacity={0.6}
       >
-        Glottolog 5.3 (CC-BY-4.0) · Glottography (CC-BY-4.0) · CC-BY-SA-4.0
+        Glottolog 5.3 (CC-BY-4.0) · Glottography (CC-BY-4.0) · Natural Earth · CC-BY-SA-4.0
       </text>
     </svg>
   )

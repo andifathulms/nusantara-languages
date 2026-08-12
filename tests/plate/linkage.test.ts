@@ -12,7 +12,7 @@ import {
   type PlateSelection,
 } from '@/lib/plate/select'
 import { buildTreeIndex } from '@/lib/tree'
-import { coverage, geometry, languoids, tree } from '../integrity/bundle'
+import { basemap, coverage, geometry, languoids, tree } from '../integrity/bundle'
 
 /**
  * The linkage, exercised as a sequence of interactions over the bundle that ships.
@@ -28,6 +28,7 @@ if (indexed.type !== 'ok') throw new Error('the shipped tree does not index')
 const model: PlateModel = buildPlateModel({
   languoids,
   geometry,
+  basemap,
   tree,
   treeIndex: indexed.index,
   coverage,

@@ -137,4 +137,16 @@ export const PLATE_COLOURS = {
   accentSoft: '#C36954',
   /** Languages with no polygon, drawn as points — visibly a different thing. */
   point: '#4F463C',
+
+  /**
+   * Land with no language polygon over it. Cool and light: it has to be unmistakable against
+   * `isolate`, which is itself a near-neutral warm grey and *is* data. Lightness does most of
+   * that work — this sits 0.13 above it in OKLCH — and the cool cast keeps them from sharing a
+   * tone. 12.7 perceptual units apart, asserted in tests/colour/vision.
+   */
+  land: '#D0D3D6',
+  /** Land outside Indonesia. Present for context only, and deliberately recessive. */
+  landNeighbour: '#E1E3E5',
+  /** The coastline hairline, so a pale tint on a pale coast still has an edge. */
+  landEdge: '#7C8186',
 } as const

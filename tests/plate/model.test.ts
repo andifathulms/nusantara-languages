@@ -11,7 +11,7 @@ import {
   toggleOpen,
 } from '@/lib/plate/select'
 import { buildTreeIndex } from '@/lib/tree'
-import { coverage, geometry, languoids, tree } from '../integrity/bundle'
+import { basemap, coverage, geometry, languoids, tree } from '../integrity/bundle'
 
 const indexed = buildTreeIndex(tree)
 if (indexed.type !== 'ok') throw new Error('the shipped tree does not index')
@@ -19,6 +19,7 @@ if (indexed.type !== 'ok') throw new Error('the shipped tree does not index')
 const model = buildPlateModel({
   languoids,
   geometry,
+  basemap,
   tree,
   treeIndex: indexed.index,
   coverage,
@@ -101,6 +102,7 @@ describe('the plate model', () => {
     const again = buildPlateModel({
       languoids,
       geometry,
+      basemap,
       tree,
       treeIndex: indexed.index,
       coverage,
@@ -118,6 +120,38 @@ describe('the plate model', () => {
 
   it('reports the same vertex count the coverage report does', () => {
     expect(model.vertices).toBe(coverage.polygonVertices)
+  })
+})
+
+describe('the land layer', () => {
+  it('draws the archipelago under the data', () => {
+    expect(model.land.length).toBeGreaterThan(100)
+    for (const land of model.land) {
+      expect(land.d.startsWith('M'), land.kind).toBe(true)
+      expect(land.d.endsWith('Z'), land.kind).toBe(true)
+    }
+  })
+
+  it('stays out of the interactive shape list, so it cannot be hovered', () => {
+    // Unhoverability is structural here, not a prop someone has to remember to pass: a land
+    // shape has no glottocode, so nothing can scope, select, search or announce it.
+    expect(model.shapes).toHaveLength(languoids.length)
+    for (const land of model.land) {
+      expect(Object.keys(land).sort()).toEqual(['d', 'kind'])
+    }
+  })
+
+  it('is not counted as coverage', () => {
+    expect(model.vertices).toBe(coverage.polygonVertices)
+    expect(model.shapes.filter((shape) => shape.type === 'area')).toHaveLength(
+      coverage.withPolygon,
+    )
+  })
+
+  it('is deterministic in order, so the plate renders identically between builds', () => {
+    const kinds = model.land.map((land) => land.kind)
+    const firstIndonesia = kinds.indexOf('indonesia')
+    expect(firstIndonesia).toBeGreaterThan(kinds.lastIndexOf('neighbour'))
   })
 })
 

@@ -15,7 +15,15 @@ import {
   type Position,
 } from '../geo'
 import { colourOf, type ColourAssignment, cssVariable } from '../colour'
-import { aesStep, type AesStatus, type Coverage, type GeometryEntry, type Languoid } from '../bundle/types'
+import {
+  aesStep,
+  type AesStatus,
+  type BasemapShape,
+  type Coverage,
+  type GeometryEntry,
+  type LandKind,
+  type Languoid,
+} from '../bundle/types'
 import type { SerialTreeNode, TreeData, TreeIndex } from '../tree'
 import { ancestors as ancestorsOf, subtreeLanguages } from '../tree'
 
@@ -43,6 +51,16 @@ export type PlateShape =
   | (ShapeCommon & { readonly type: 'area'; readonly d: string; readonly labelX: number; readonly labelY: number })
   /** A language with no polygon. Drawn as a mark, visibly a different kind of thing. */
   | (ShapeCommon & { readonly type: 'point'; readonly x: number; readonly y: number })
+
+/**
+ * A piece of land under the plate. Kept in its own list rather than among `shapes`, which is what
+ * makes it structurally unhoverable: it has no glottocode and no ancestors, so it cannot be
+ * scoped, selected, searched or announced. Nothing has to remember to exclude it.
+ */
+export type LandShape = {
+  readonly kind: LandKind
+  readonly d: string
+}
 
 export type GraticuleLine = {
   readonly kind: 'parallel' | 'meridian'
@@ -107,6 +125,8 @@ export type PlateModel = {
   readonly frame: BoundingBox
   /** Painter's order: largest areas first, point marks last, so small shapes stay clickable. */
   readonly shapes: readonly PlateShape[]
+  /** Drawn first, under everything, and never interactive. */
+  readonly land: readonly LandShape[]
   readonly graticule: readonly GraticuleLine[]
   readonly legend: readonly LegendEntry[]
   readonly rows: readonly TreeRow[]
@@ -171,6 +191,7 @@ export type BuildPlateInput = {
   readonly treeIndex: TreeIndex
   readonly coverage: Coverage
   readonly colours: ColourAssignment
+  readonly basemap?: readonly BasemapShape[]
   readonly frame: BoundingBox
   readonly width: number
   /**
@@ -301,6 +322,10 @@ export function buildPlateModel(input: BuildPlateInput): PlateModel {
     viewBox: projection.viewBox,
     frame: input.frame,
     shapes: [...areas.map(({ area: _area, ...shape }) => shape), ...points],
+    land: (input.basemap ?? []).flatMap((shape) => {
+      const d = toPathData(shape.geometry, projection, input.pathDecimals ?? 1)
+      return d === '' ? [] : [{ kind: shape.kind, d }]
+    }),
     graticule: buildGraticule(input.frame, projection.project),
     legend,
     rows,
