@@ -1,0 +1,87 @@
+name: build and deploy
+
+# The licence gate and the render budget run before anything is published, so a bundle that
+# cannot be redistributed, or a plate that would stutter on hover, never reaches Pages.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # Gates first: an unresolved licence or a broken bundle stops the run before anything
+      # is built.
+      - name: licence gate and bundle validation
+        run: pnpm sources:validate
+
+      - name: typecheck
+        run: pnpm typecheck
+
+      - name: lint
+        run: pnpm lint
+
+      - name: tests
+        run: pnpm test:run
+
+      - name: render budget
+        run: pnpm bench:plate
+
+      # The committed bundle has to be exactly what the pinned sources produce. This rebuilds
+      # it from the sources and fails if it differs — determinism asserted against the network
+      # rather than only against itself.
+      - name: bundle is reproducible from the pinned sources
+        run: |
+          cp -r data/bundle /tmp/bundle-committed
+          pnpm sources:fetch
+          pnpm sources:build
+          if ! diff -r /tmp/bundle-committed data/bundle; then
+            echo "::error::data/bundle differs from a rebuild of the pinned sources. Run pnpm sources:build and commit the result."
+            exit 1
+          fi
+
+      - name: build
+        run: pnpm build
+
+      - name: upload
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: out
+
+  deploy:
+    needs: verify
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
