@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import { SiteFooter, SiteHeader } from '@/components/site/SiteChrome'
 import { loadBundle } from '@/lib/bundle/load'
 import { atlasPeriod } from '@/lib/bundle/types'
-import { dictionary, isLocale, localePath, type Locale } from '@/lib/i18n'
+import { dictionary, format, isLocale, localePath, type Locale } from '@/lib/i18n'
 
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
   const locale: Locale = isLocale(params.locale) ? params.locale : 'id'
@@ -59,7 +59,9 @@ export default function HomePage({ params }: { params: { locale: string } }) {
           <p>{strings.home.whatThisIs}</p>
           <p className="border-l-2 border-boundary/40 pl-4">
             {strings.home.whatThisIsNot}
-            {period !== null ? ` ${strings.plate.period(period.fromYear, period.toYear)}.` : ''}
+            {period !== null
+              ? ` ${format(strings.plate.period, { fromYear: period.fromYear, toYear: period.toYear }, locale)}.`
+              : ''}
           </p>
           <p className="text-sm">
             <Link href={localePath(locale, 'metode')} className="underline">

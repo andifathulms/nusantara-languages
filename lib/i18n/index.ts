@@ -35,18 +35,21 @@ export type Dictionary = {
   }
   readonly plate: {
     readonly title: string
-    readonly period: (fromYear: number, toYear: number) => string
+    /** Template. Placeholders: {fromYear}, {toYear}. */
+    readonly period: string
     readonly periodCaveat: string
     readonly legend: string
     readonly families: string
-    readonly coverage: (withPolygon: number, total: number, percent: number) => string
+    /** Template. Placeholders: {withPolygon}, {total}, {percent}. */
+    readonly coverage: string
     readonly pointNote: string
     readonly gradientNote: string
     readonly sea: string
     readonly hint: string
     readonly clearSelection: string
     readonly selectedFamily: string
-    readonly languagesInFamily: (count: number) => string
+    /** Template. Placeholder: {count}. */
+    readonly languagesInFamily: string
     readonly index: string
     readonly attribution: string
   }
@@ -56,7 +59,8 @@ export type Dictionary = {
     readonly expand: string
     readonly collapse: string
     readonly isolate: string
-    readonly languages: (count: number) => string
+    /** Template. Placeholder: {count}. */
+    readonly languages: string
     readonly showAncestry: string
   }
   readonly panel: {
@@ -67,7 +71,8 @@ export type Dictionary = {
     readonly endangerment: string
     readonly coordinates: string
     readonly geometry: string
-    readonly hasPolygon: (source: string) => string
+    /** Template. Placeholder: {source}. */
+    readonly hasPolygon: string
     readonly pointOnly: string
     readonly altNames: string
     readonly noAltNames: string
@@ -103,7 +108,8 @@ export type Dictionary = {
     readonly label: string
     readonly placeholder: string
     readonly noResults: string
-    readonly resultCount: (count: number) => string
+    /** Template. Placeholder: {count}. */
+    readonly resultCount: string
   }
   readonly export: {
     readonly png: string
@@ -136,14 +142,13 @@ const id: Dictionary = {
   },
   plate: {
     title: 'Peta rumpun bahasa',
-    period: (fromYear, toYear) =>
-      `Sebaran wilayah menurut sumber atlas ${fromYear}–${toYear}`,
+    period: 'Sebaran wilayah menurut sumber atlas {fromYear}–{toYear}',
     periodCaveat:
       'Peta ini menunjukkan sebaran menurut sumber atlas tersebut, bukan sensus penutur hari ini.',
     legend: 'Keterangan',
     families: 'Rumpun',
-    coverage: (withPolygon, total, percent) =>
-      `${withPolygon} dari ${total} bahasa memiliki wilayah (${percent}%); sisanya hanya titik.`,
+    coverage:
+      '{withPolygon} dari {total} bahasa memiliki wilayah ({percent}%); sisanya hanya titik.',
     pointNote:
       'Titik adalah titik. Koordinat Glottolog sering merupakan titik tengah populasi yang tersebar, jadi bahasa tanpa poligon digambarkan sebagai tanda titik dan tidak pernah dimekarkan menjadi wilayah.',
     gradientNote:
@@ -152,7 +157,7 @@ const id: Dictionary = {
     hint: 'Sorot rumpun pada pohon di sebelah kanan, atau klik wilayah pada peta.',
     clearSelection: 'Hapus pilihan',
     selectedFamily: 'Rumpun terpilih',
-    languagesInFamily: (count) => `${count} bahasa`,
+    languagesInFamily: '{count} bahasa',
     index: 'Indeks',
     attribution: 'Sumber: Glottolog 5.3 (CC-BY-4.0) dan Glottography (CC-BY-4.0).',
   },
@@ -162,7 +167,7 @@ const id: Dictionary = {
     expand: 'Buka',
     collapse: 'Tutup',
     isolate: 'bahasa isolat',
-    languages: (count) => `${count} bahasa`,
+    languages: '{count} bahasa',
     showAncestry: 'Tampilkan garis keturunan',
   },
   panel: {
@@ -173,7 +178,7 @@ const id: Dictionary = {
     endangerment: 'Status kebertahanan',
     coordinates: 'Koordinat',
     geometry: 'Wilayah',
-    hasPolygon: (source) => `Ada poligon wilayah, dari ${source}`,
+    hasPolygon: 'Ada poligon wilayah, dari {source}',
     pointOnly: 'Tidak ada poligon — digambarkan sebagai titik',
     altNames: 'Nama lain',
     noAltNames: 'Tidak ada nama lain pada sumber yang dipakai',
@@ -233,7 +238,7 @@ const id: Dictionary = {
     label: 'Cari bahasa',
     placeholder: 'Nama, nama lain, glottocode, atau kode ISO',
     noResults: 'Tidak ada yang cocok.',
-    resultCount: (count) => `${count} hasil`,
+    resultCount: '{count} hasil',
   },
   export: {
     png: 'Unduh PNG',
@@ -266,13 +271,13 @@ const en: Dictionary = {
   },
   plate: {
     title: 'Language families',
-    period: (fromYear, toYear) => `Distribution as described by atlas sources, ${fromYear}–${toYear}`,
+    period: 'Distribution as described by atlas sources, {fromYear}–{toYear}',
     periodCaveat:
       'This map shows the distribution described by those atlas sources, not a census of who speaks what today.',
     legend: 'Legend',
     families: 'Families',
-    coverage: (withPolygon, total, percent) =>
-      `${withPolygon} of ${total} languages have a territory (${percent}%); the rest are points only.`,
+    coverage:
+      '{withPolygon} of {total} languages have a territory ({percent}%); the rest are points only.',
     pointNote:
       'A point stays a point. Glottolog’s coordinate is frequently the midpoint of a dispersed population, so a language without a polygon is drawn as a mark and is never inflated into a territory.',
     gradientNote:
@@ -281,7 +286,7 @@ const en: Dictionary = {
     hint: 'Hover a family in the tree at right, or click a territory on the map.',
     clearSelection: 'Clear selection',
     selectedFamily: 'Selected family',
-    languagesInFamily: (count) => `${count} languages`,
+    languagesInFamily: '{count} languages',
     index: 'Index',
     attribution: 'Sources: Glottolog 5.3 (CC-BY-4.0) and Glottography (CC-BY-4.0).',
   },
@@ -291,7 +296,7 @@ const en: Dictionary = {
     expand: 'Expand',
     collapse: 'Collapse',
     isolate: 'isolate',
-    languages: (count) => `${count} languages`,
+    languages: '{count} languages',
     showAncestry: 'Show ancestry',
   },
   panel: {
@@ -302,7 +307,7 @@ const en: Dictionary = {
     endangerment: 'Endangerment status',
     coordinates: 'Coordinates',
     geometry: 'Territory',
-    hasPolygon: (source) => `Polygon present, from ${source}`,
+    hasPolygon: 'Polygon present, from {source}',
     pointOnly: 'No polygon — drawn as a point',
     altNames: 'Alternate names',
     noAltNames: 'No alternate names in the sources used',
@@ -362,7 +367,7 @@ const en: Dictionary = {
     label: 'Search languages',
     placeholder: 'Name, alternate name, glottocode, or ISO code',
     noResults: 'Nothing matches.',
-    resultCount: (count) => `${count} results`,
+    resultCount: '{count} results',
   },
   export: {
     png: 'Download PNG',
@@ -372,6 +377,26 @@ const en: Dictionary = {
 }
 
 const DICTIONARIES: Readonly<Record<Locale, Dictionary>> = { id, en }
+
+/**
+ * Fills `{placeholder}` templates. Templates rather than functions because a dictionary
+ * crosses the server/client boundary — functions cannot be serialised into a client
+ * component, and finding that out at build time is exactly what a static export is for.
+ *
+ * Counts arrive as numbers and are rendered with locale grouping; the UI sets them in
+ * tabular figures.
+ */
+export function format(
+  template: string,
+  values: Readonly<Record<string, string | number>>,
+  locale: Locale = DEFAULT_LOCALE,
+): string {
+  return template.replace(/\{(\w+)\}/g, (whole, key: string) => {
+    const value = values[key]
+    if (value === undefined) return whole
+    return typeof value === 'number' ? value.toLocaleString(locale) : value
+  })
+}
 
 export function dictionary(locale: Locale): Dictionary {
   return DICTIONARIES[locale]
