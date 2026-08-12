@@ -61,6 +61,17 @@ bundle that ships:
 | Path build (whole plate) | ~10 ms | 400 ms |
 | Hover hit-test, p95 | 0.01 ms | 2 ms |
 
+The palette is measured too, not chosen by eye. It is placed in OKLCH and scored over every
+pair of family colours four times — normal vision, deuteranopia, protanopia, tritanopia — and
+`tests/colour/vision.test.ts` fails if an edit reintroduces a confusable pair:
+
+| confusable pairs (distance < 4) | before | after |
+|---|---|---|
+| normal vision | 15 | **0** |
+| deuteranopia | 48 | 2 |
+| protanopia | 37 | 1 |
+| tritanopia | 35 | **0** |
+
 The vertex count is the one that decides the architecture: inside it, the plate is SVG and
 the browser hit-tests hover for free. Past it, the plate becomes canvas with an offscreen
 colour-index buffer.

@@ -92,7 +92,7 @@ tests/
 
 8. **Language level only.** Glottolog dialects are excluded from v1 — the tree becomes unmanageable and the polygons do not exist.
 
-9. **Family colours are assigned stably** from a curated muted set in `lib/colour`. **Never generate from a rainbow ramp, never assign by index order** — the same family must get the same colour across builds, or the map's memory value is destroyed.
+9. **Family colours are assigned stably** from a curated muted set in `lib/colour`. **Never generate from a rainbow ramp, never assign by index order** — the same family must get the same colour across builds, or the map's memory value is destroyed. The set is placed in OKLCH and scored against normal vision plus three colour-vision deficiencies; `tests/colour/vision.test.ts` fails on a confusable pair. Read the header of `lib/colour/palette.ts` before touching a value: lightness is a deliberate second channel (CVD collapses hue), the hue spacing is uneven on purpose, and the selected inks are chroma-capped because chasing maximum chroma produces neon.
 
 10. **Saturation is reserved for selection.** Base state is muted; the selected family is the only saturated object on the plate. Do not raise base saturation for "visual impact" — the contrast *is* the interaction.
 
@@ -129,7 +129,10 @@ tests/
 - Comments cite the Glottolog release version or the atlas edition any figure comes from.
 - Indonesian first in UI copy; family names in standard scholarly form.
 - Tabular numerals on counts and coverage figures.
-- Tailwind utilities inline; semantic tokens in `tailwind.config.ts` — `plate`, `boundary`, `sea`, plus the curated `family-*` set. Never raw hex in components.
+- Tailwind utilities inline; semantic tokens in `tailwind.config.ts` — `plate`, `boundary`, `sea`, `index`, `index-deep`, `ink-soft`, `accent`, plus the curated `family-*` set. Never raw hex in components: family colours reach the DOM as `var(--family-*)` from `PaletteVars`.
+- **Type by role, not by size.** The scale is `micro`, `label`, `body-s`, `body`, `lead`, `title-s`…`title-xl`. Never pick a heading size for how big it looks.
+- **Use the component layer** in `globals.css` rather than reassembling it: `sheet` / `sheet-quiet` for the paper washes, `btn` / `btn-primary`, `field`, `link`, `caveat`, `figure`, `index-label`, `rule` / `rule-double`.
+- **The accent red is rationed** — primary action, current page, selection, focus ring. Nothing else. It is also the only colour that must never read as data, which a test asserts.
 
 ## Testing rules
 
@@ -163,9 +166,28 @@ The bundle: 726 languages, 421 with speaker areas (58%), 305 points only, 23 iso
 
 `bench:plate` cleared at M0 with room to spare — 19,570 vertices against 60,000, hover p95 0.01 ms against 2 ms — so the plate is SVG and the canvas colour-index path was never needed.
 
+### The design pass (2026-08-13)
+
+The palette was rebuilt from measurement, a type scale and component layer replaced the ad-hoc
+utilities, and a comprehension layer was added for readers who have never met the phrase
+"language family": a plain lead, a key made of real specimens rather than descriptions, three
+worked examples that perform the interaction, and the selection stated in words. The tree
+becomes a tab below `lg`. The front page shows a still of the plate built from the same model.
+
+Colour-vision deficiency is now checked, so PRD §13's request is discharged: confusable pairs
+fell from 15 to 0 in normal vision and from 48 to 2 under deuteranopia.
+
 ### Next, in rough order
 
-1. **Look at it on a real screen.** The plate has been verified structurally and in the exported HTML, never visually — no headless browser was available while it was built. Colour distinctness at 19 hues, hairline weights, and the tree column's density are all unchecked by eye.
-2. **Trim the page payload.** The plate page is 1.79 MB raw / 307 KB gzipped. `LanguageDetail.ancestry` repeats ancestor *names* per language (~150 KB raw) when the tree rows already carry them, and shapes/rows carry two CSS variable strings each where a colour token would do (~60 KB). Both are mechanical.
-3. **Check the palette under colour-vision deficiency.** PRD §13 asks for it and it has not been done.
+1. **Look at it on a real screen.** Still the top item, and now more so: the interface has been
+   verified structurally and numerically, never visually. No headless browser was available.
+   Worth checking specifically — pale tints (blush, wedgwood, olive at L 0.82) against the
+   paper, the density of the tree column at 12px, and whether the accent red feels rationed or
+   scarce.
+2. **Trim the page payload.** The plate page is 1.82 MB raw / 310 KB gzipped; the front page is
+   108 KB gzipped after dropping the still to integer path precision. `LanguageDetail.ancestry`
+   still repeats ancestor *names* per language (~150 KB raw) when the tree rows carry them, and
+   shapes/rows carry two CSS variable strings each where a token would do (~60 KB).
+3. **A dark variant, maybe not.** The plate is paper. A dark mode would be a second design, not
+   a colour swap, and the atlas conceit does not obviously survive it.
 4. **Dialects, if ever.** Still out of scope, and the reasons in §5 have not changed.
