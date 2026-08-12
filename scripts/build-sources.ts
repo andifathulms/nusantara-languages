@@ -29,6 +29,7 @@ import {
 import {
   DEFAULT_SIMPLIFY,
   INDONESIA_BBOX,
+  containsPosition,
   intersectsBounds,
   simplifyGeometry,
   vertexCount,
@@ -321,6 +322,13 @@ function main(): void {
     }
     if (row.longitude === '' || row.latitude === '') {
       countExclusion('tanpa koordinat di Glottolog')
+      continue
+    }
+    if (!containsPosition(INDONESIA_BBOX, [Number(row.longitude), Number(row.latitude)])) {
+      // Glottolog lists a few languages for Indonesia whose coordinate sits well outside
+      // the archipelago — Ternateño's is in the Philippines. The plate cannot draw them,
+      // so they are excluded and counted rather than dropped off the edge unremarked.
+      countExclusion('titik Glottolog di luar kerangka peta')
       continue
     }
     kept.push(row)

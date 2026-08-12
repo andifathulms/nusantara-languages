@@ -1,9 +1,9 @@
 {
   "glottologVersion": "v5.3",
-  "languages": 727,
+  "languages": 726,
   "withPolygon": 421,
-  "pointOnly": 306,
-  "polygonPercent": 57.9,
+  "pointOnly": 305,
+  "polygonPercent": 58,
   "families": [
     {
       "glottocode": "aust1307",
@@ -132,13 +132,6 @@
       "isIsolate": false
     },
     {
-      "glottocode": "indo1319",
-      "name": "Indo-European",
-      "languageCount": 3,
-      "withPolygon": 0,
-      "isIsolate": false
-    },
-    {
       "glottocode": "kaya1327",
       "name": "Kayagaric",
       "languageCount": 3,
@@ -185,6 +178,13 @@
       "name": "Hatam-Mansim",
       "languageCount": 2,
       "withPolygon": 2,
+      "isIsolate": false
+    },
+    {
+      "glottocode": "indo1319",
+      "name": "Indo-European",
+      "languageCount": 2,
+      "withPolygon": 0,
       "isIsolate": false
     },
     {
@@ -440,6 +440,10 @@
     {
       "reason": "kategori Glottolog \"Unclassifiable\"",
       "count": 3
+    },
+    {
+      "reason": "titik Glottolog di luar kerangka peta",
+      "count": 1
     }
   ],
   "aes": [
@@ -465,7 +469,7 @@
     },
     {
       "status": "extinct",
-      "count": 25
+      "count": 24
     },
     {
       "status": "unknown",

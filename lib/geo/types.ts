@@ -38,8 +38,16 @@ export type PointGeometry = {
 
 export type Geometry = PolygonGeometry | PointGeometry
 
-/** Indonesia, padded slightly so coastal areas are not clipped at the frame. */
-export const INDONESIA_BBOX: BoundingBox = [94.0, -11.5, 141.5, 7.0]
+/**
+ * The plate's frame. Indonesia, padded so coastal areas are not clipped, and extended
+ * east of the 141° border because languages there straddle it — Faiwol's Glottolog
+ * midpoint sits at 141.66 and it is genuinely spoken on both sides.
+ *
+ * A frame is a cartographic decision, so it cannot be allowed to lose data quietly: the
+ * pipeline counts every languoid whose point falls outside this box and publishes the
+ * count in `coverage.json` with its reason.
+ */
+export const INDONESIA_BBOX: BoundingBox = [94.0, -11.5, 142.5, 7.0]
 
 export function isPolygon(geometry: Geometry): geometry is PolygonGeometry {
   return geometry.type === 'polygon'
