@@ -46,6 +46,7 @@ export default function PlatePage({ params }: { params: { locale: string } }) {
           strings={strings}
           locale={locale}
           manifest={bundle.manifest}
+          syncHash
         />
       </main>
       <SiteFooter locale={locale} />

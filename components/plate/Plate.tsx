@@ -25,6 +25,8 @@ type PlateProps = {
   readonly onSelect: (glottocode: string) => void
   readonly label: string
   readonly showHatching: boolean
+  /** A guided view's standing emphasis. Null when the reader is exploring freely. */
+  readonly emphasis: ReadonlySet<string> | null
 }
 
 const HATCH_IDS = ['hatch-1', 'hatch-2', 'hatch-3', 'hatch-4', 'hatch-5', 'hatch-6'] as const
@@ -121,6 +123,7 @@ export function Plate({
   onSelect,
   label,
   showHatching,
+  emphasis,
 }: PlateProps) {
   return (
     <svg
@@ -205,7 +208,7 @@ export function Plate({
       </g>
 
       {model.shapes.map((shape) => {
-        const state = paintStateFor(shape.glottocode, shape.ancestors, scope)
+        const state = paintStateFor(shape.glottocode, shape.ancestors, scope, emphasis)
         const isSelected = selectedLanguage === shape.glottocode
         return shape.type === 'area' ? (
           <MemoArea

@@ -109,6 +109,10 @@ export type Dictionary = {
     readonly isolates: { readonly title: string; readonly body: string }
     readonly endangered: { readonly title: string; readonly body: string }
     readonly open: string
+    readonly backToViews: string
+    /** Template. Placeholder: {count}. */
+    readonly emphasised: string
+    readonly stillClickable: string
   }
   readonly search: {
     readonly label: string
@@ -244,6 +248,10 @@ const id: Dictionary = {
       body: 'Disaring ke kategori yang paling dekat dengan kepunahan menurut status AES Glottolog.',
     },
     open: 'Buka tampilan ini',
+    backToViews: 'Semua panduan',
+    emphasised: '{count} bahasa disorot pada tampilan ini',
+    stillClickable:
+      'Tampilan ini hanya menentukan apa yang menyala lebih dahulu. Semua bahasa tetap digambar dan tetap dapat diklik — menyembunyikan sisanya berarti mengklaim sesuatu tentang apa yang ada di sana.',
   },
   search: {
     label: 'Cari bahasa',
@@ -378,6 +386,10 @@ const en: Dictionary = {
       body: 'Filtered to the categories nearest extinction according to Glottolog’s AES.',
     },
     open: 'Open this view',
+    backToViews: 'All guided views',
+    emphasised: '{count} languages are emphasised in this view',
+    stillClickable:
+      'A view only decides what starts lit. Every language is still drawn and still clickable — hiding the rest would be making a claim about what is there.',
   },
   search: {
     label: 'Search languages',

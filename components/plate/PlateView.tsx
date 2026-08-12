@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Plate } from './Plate'
 import { IndexPanel } from './IndexPanel'
 import { TreeColumn } from '@/components/tree/TreeColumn'
@@ -13,6 +13,9 @@ import {
 } from '@/lib/plate/select'
 import { LanguageFacts } from '@/components/panel/LanguageFacts'
 import { HatchLegend } from './HatchLegend'
+import { SearchBox } from './SearchBox'
+import { parseViewHash, toViewHash } from '@/lib/plate/hash'
+import type { SearchEntry } from '@/lib/search'
 import type { PlateModel, TreeRow } from '@/lib/plate/build'
 import type { BundleManifest, Coverage } from '@/lib/bundle/types'
 import { format, type Dictionary, type Locale } from '@/lib/i18n'
@@ -40,6 +43,14 @@ type PlateViewProps = {
   readonly initialOpen?: readonly string[]
   readonly initialSelection?: PlateSelection
   readonly initialHatching?: boolean
+  /**
+   * A guided view's standing emphasis: the isolates, the most endangered, the Papuan side of
+   * the seam. Hover or a selection overrides it, so a guided view is a starting point rather
+   * than a mode the reader is stuck in.
+   */
+  readonly emphasis?: readonly string[]
+  /** Whether the URL hash carries the view. Off inside a guided view, which owns its URL. */
+  readonly syncHash?: boolean
 }
 
 export function PlateView({
@@ -51,6 +62,8 @@ export function PlateView({
   initialOpen,
   initialSelection = NO_SELECTION,
   initialHatching = false,
+  emphasis,
+  syncHash = false,
 }: PlateViewProps) {
   const [hovered, setHovered] = useState<string | null>(null)
   const [selection, setSelection] = useState<PlateSelection>(initialSelection)
@@ -59,6 +72,24 @@ export function PlateView({
   )
   const [scrollTo, setScrollTo] = useState<string | null>(null)
   const [hatching, setHatching] = useState(initialHatching)
+
+  const emphasisSet = useMemo(
+    () => (emphasis === undefined ? null : new Set(emphasis)),
+    [emphasis],
+  )
+
+  const searchEntries = useMemo<readonly SearchEntry[]>(
+    () =>
+      Object.values(model.details).map((detail) => ({
+        glottocode: detail.glottocode,
+        name: detail.name,
+        altNames: detail.altNames,
+        iso639P3: detail.iso639P3,
+        familyName: detail.ancestry[0]?.name ?? strings.tree.isolate,
+        hasPolygon: detail.geometry.type === 'polygon',
+      })),
+    [model.details, strings.tree.isolate],
+  )
 
   const scope = scopeOf(hovered, selection)
   const selectedLanguage = selection.kind === 'language' ? selection.glottocode : null
@@ -71,6 +102,31 @@ export function PlateView({
     },
     [model],
   )
+
+  // The hash is read once on mount, so a shared link opens on the view it names, and written
+  // as the reader changes it. replaceState rather than a push: the plate is one page, and the
+  // back button should leave it rather than walk a history of hovers.
+  useEffect(() => {
+    if (!syncHash) return
+    const state = parseViewHash(window.location.hash)
+    const named = state.selection
+    if (named.kind !== 'none') {
+      setSelection(named)
+      setOpen((current) => openAncestry(current, [...ancestryOf(named.glottocode), named.glottocode]))
+      setScrollTo(named.glottocode)
+    }
+    if (state.hatching) setHatching(true)
+    // Deliberately mount-only: after this, the reader's interaction owns the state.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [syncHash])
+
+  useEffect(() => {
+    if (!syncHash) return
+    const hash = toViewHash({ selection, hatching })
+    const url = `${window.location.pathname}${window.location.search}${hash}`
+    window.history.replaceState(null, '', url)
+  }, [syncHash, selection, hatching])
+
 
   /** Clicking a territory: select it, open its ancestry, scroll the tree to it. */
   const selectFromPlate = useCallback(
@@ -127,6 +183,10 @@ export function PlateView({
   return (
     <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_20rem] xl:grid-cols-[minmax(0,1fr)_24rem]">
       <div className="min-w-0">
+        <div className="mb-3 max-w-sm">
+          <SearchBox entries={searchEntries} strings={strings} onChoose={selectFromPlate} />
+        </div>
+
         <Plate
           model={model}
           scope={scope}
@@ -139,6 +199,7 @@ export function PlateView({
             percent: coverage.polygonPercent,
           })}`}
           showHatching={hatching}
+          emphasis={emphasisSet}
         />
 
         <p className="mt-2 flex flex-wrap items-baseline gap-x-3 text-sm text-boundary/75">

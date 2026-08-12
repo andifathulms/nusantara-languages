@@ -40,9 +40,19 @@ export function paintStateFor(
   glottocode: string,
   ancestors: readonly string[],
   scope: string | null,
+  /**
+   * A guided view's standing emphasis — the isolates, the most endangered, the Papuan side of
+   * the seam. It behaves exactly like a selection the reader did not have to make, and hover
+   * or a real selection overrides it, so a guided view is a starting point and not a mode the
+   * reader is stuck in.
+   */
+  emphasis: ReadonlySet<string> | null = null,
 ): PaintState {
-  if (scope === null) return 'base'
-  return isInScope(glottocode, ancestors, scope) ? 'selected' : 'muted'
+  if (scope !== null) {
+    return isInScope(glottocode, ancestors, scope) ? 'selected' : 'muted'
+  }
+  if (emphasis !== null) return emphasis.has(glottocode) ? 'selected' : 'muted'
+  return 'base'
 }
 
 /** A tree row is open when it is on the open set. Ancestry decides visibility. */
