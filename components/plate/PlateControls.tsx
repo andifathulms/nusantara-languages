@@ -108,6 +108,9 @@ function ControlButton({
       type="button"
       onClick={onClick}
       disabled={disabled}
+      // aria-label names it; title repeated the same string, which some screen readers then
+      // announce twice. The tooltip stays because these are icon-only buttons and a sighted
+      // pointer user has nothing else to go on — but the two must not both be read out.
       aria-label={label}
       title={label}
       className={`flex h-8 w-8 items-center justify-center text-boundary transition-colors hover:bg-boundary hover:text-plate disabled:cursor-default disabled:text-ink-soft/40 disabled:hover:bg-transparent disabled:hover:text-ink-soft/40 ${

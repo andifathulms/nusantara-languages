@@ -88,15 +88,13 @@ export function SearchBox({ entries, strings, onChoose }: SearchBoxProps) {
                       <span className="figure shrink-0 text-micro text-ink-soft">
                         {result.entry.glottocode}
                       </span>
-                      <span
-                        className="figure shrink-0 text-micro text-ink-soft"
-                        title={
-                          result.entry.hasPolygon
+                      <span className="figure shrink-0 text-micro text-ink-soft">
+                        <span aria-hidden="true">{result.entry.hasPolygon ? '▣' : '○'}</span>
+                        <span className="sr-only">
+                          {result.entry.hasPolygon
                             ? strings.plate.geometryArea
-                            : strings.plate.geometryPoint
-                        }
-                      >
-                        {result.entry.hasPolygon ? '▣' : '○'}
+                            : strings.plate.geometryPoint}
+                        </span>
                       </span>
                     </button>
                     <p className="px-2 pb-1 text-micro text-ink-soft">{result.entry.familyName}</p>

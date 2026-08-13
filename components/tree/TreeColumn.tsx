@@ -57,10 +57,14 @@ export function TreeColumn({
 
   const visible = rows.filter((row) => isRowVisible(row.ancestors, open))
 
+  // The tree's name was announced three times over — on the aside, on the heading and on the
+  // tree itself. One heading names it; the other two point at that heading.
   return (
-    <aside className="sheet flex h-full min-h-0 flex-col" aria-label={strings.tree.title}>
+    <aside className="sheet flex h-full min-h-0 flex-col" aria-labelledby="tree-title">
       <div className="border-b border-boundary/20 px-3 py-2.5">
-        <h2 className="font-display text-title-s leading-none">{strings.tree.title}</h2>
+        <h2 id="tree-title" className="font-display text-title-s leading-none">
+          {strings.tree.title}
+        </h2>
         <p className="index-label mt-1">{strings.tree.subtitle}</p>
       </div>
 
@@ -69,7 +73,7 @@ export function TreeColumn({
         className="min-h-0 flex-1 overflow-y-auto px-1 py-1"
         onPointerLeave={() => onHover(null)}
       >
-        <ul role="tree" aria-label={strings.tree.title}>
+        <ul role="tree" aria-labelledby="tree-title">
           {visible.map((row) => {
             const isScoped = scope !== null && (row.glottocode === scope || row.ancestors.includes(scope))
             const isExactScope = row.glottocode === scope
@@ -121,26 +125,33 @@ export function TreeColumn({
                     className={`min-w-0 flex-1 truncate text-left text-body-s hover:text-accent ${
                       row.level === 'language' ? '' : 'font-medium'
                     } ${isSelected ? 'text-accent underline' : ''}`}
-                    title={row.name}
                   >
                     {row.name}
                   </button>
 
-                  <span
-                    className="figure shrink-0 text-micro text-ink-soft"
-                    title={
-                      row.level === 'language'
-                        ? row.withPolygon === 1
-                          ? strings.plate.geometryArea
-                          : strings.plate.geometryPoint
-                        : format(strings.tree.languages, { count: row.languageCount })
-                    }
-                  >
-                    {row.level === 'language'
-                      ? row.withPolygon === 1
-                        ? '▣'
-                        : '○'
-                      : row.languageCount}
+                  {/* Whether a language has a territory or is only a point is one of the
+                      central distinctions this project makes, and it was carried by a glyph in
+                      a title attribute — unreadable to a screen reader on a non-interactive
+                      span, and unreachable on touch. The glyph is decorative now and the
+                      meaning is in text. */}
+                  <span className="figure shrink-0 text-micro text-ink-soft">
+                    {row.level === 'language' ? (
+                      <>
+                        <span aria-hidden="true">{row.withPolygon === 1 ? '▣' : '○'}</span>
+                        <span className="sr-only">
+                          {row.withPolygon === 1
+                            ? strings.plate.geometryArea
+                            : strings.plate.geometryPoint}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <span aria-hidden="true">{row.languageCount}</span>
+                        <span className="sr-only">
+                          {format(strings.tree.languages, { count: row.languageCount })}
+                        </span>
+                      </>
+                    )}
                   </span>
                 </div>
               </li>
