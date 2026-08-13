@@ -98,6 +98,8 @@ tests/
 
 10. **Saturation is reserved for selection.** Base state is muted; the selected family is the only saturated object on the plate. Do not raise base saturation for "visual impact" — the contrast *is* the interaction.
 
+10a. **The plate can be read at two levels, and subgroup colour means something different from family colour.** At family level a colour names a family. At subgroup level it only distinguishes *neighbours* — tints repeat across the archipelago on purpose, because the first real branching of Austronesian gives 25 subgroups and no palette can name that many. The UI must keep saying so. Two rules hold it together: a subgroup only ever draws from its family's band of neighbouring hues (so Austronesian stays warm, the Papuan families stay cool, and the seam survives), and adjacent subgroups take different tints. `tests/colour/subgroup.test.ts` asserts both, including that no Austronesian subgroup can drift onto a cool tint.
+
 11. **Endangerment is hatching, never hue.** Colour carries family; the two layers must compose, not compete.
 
 12. **Rendering stays within the vertex and latency budget.** `bench:plate` gates it. SVG while the budget allows; canvas with an offscreen colour-index hit-test past it. A plate that stutters on hover destroys the linkage.
@@ -190,6 +192,16 @@ Natural Earth 1:10m, `public-domain`, entering as a third source role (`basemap`
 vertices after ring-clipping to the frame and simplifying at 0.01°; the whole plate now draws
 34,317 of the 60,000 budget, and hover is unaffected because the land is never hit-tested.
 
+### Subgroup colouring (2026-08-13)
+
+Austronesian was two-thirds of the map in one tint. The plate now reads at two levels; see
+invariant 10a for what subgroup colour does and does not claim. Tints within a region went from
+1 to 4 in Sumatra, 1 to 3 in Kalimantan, 1 to 5 in Sulawesi.
+
+Pan, zoom and full screen landed alongside it (`lib/plate/viewport`, pure, 19 tests). The plate's
+viewBox never changes — a transform moves a group inside it — which is what keeps the attribution
+pinned, hover hit-testing free, and the PNG export correct at any zoom.
+
 ### Next, in rough order
 
 1. **Look at it on a real screen.** Still the top item, and now more so: the interface has been
@@ -204,10 +216,10 @@ vertices after ring-clipping to the frame and simplifying at 0.01°; the whole p
    twice — once as SSR markup, once in the flight payload. Rendering the land from a single
    `<use>`-able definition, or moving it out of the RSC payload, would be the biggest single win.
 
-3. **Austronesian is 64% of the map.** With one colour per family, most of the west is a single
-   beige. The seam still reads, but the west carries no information. Worth considering: colouring
-   by *subgroup* within Austronesian once a family is selected, so the largest family stops being
-   a monolith.
+3. ~~**Austronesian is 64% of the map.**~~ Done: the colour-by control reads the plate at family
+   or subgroup level. `informativeCut` in `lib/tree` finds the level to cut at — depth is the
+   wrong instrument, because every Austronesian language here is Malayo-Polynesian and a fixed
+   depth of 1 reproduces the same wall.
 3. **A dark variant, maybe not.** The plate is paper. A dark mode would be a second design, not
    a colour swap, and the atlas conceit does not obviously survive it.
 4. **Dialects, if ever.** Still out of scope, and the reasons in §5 have not changed.
