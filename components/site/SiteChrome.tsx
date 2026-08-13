@@ -39,15 +39,17 @@ export function SiteHeader({ locale, current }: { locale: Locale; current?: stri
       </a>
 
       <div className="mx-auto flex max-w-plate flex-wrap items-center gap-x-8 gap-y-2 px-4 py-3 sm:px-6">
-        <Link href={localePath(locale, '')} className="group flex items-center gap-3 leading-none">
+        {/* The wordmark alone. The tagline used to sit under it and restate, in sixty
+            characters, what the page's own h1 and lead say immediately below — three
+            near-synonymous statements competing before any content, so none of them landed.
+            The masthead owns the identity; the h1 owns the page. */}
+        <Link
+          href={localePath(locale, '')}
+          className="flex items-center gap-3 leading-none transition-colors hover:text-accent"
+        >
           <BrandMark className="h-8 w-8 shrink-0" />
-          <span className="block">
-            <span className="block font-display text-title-s leading-none tracking-tight">
-              {strings.siteTitle}
-            </span>
-            <span className="index-label mt-1 block group-hover:text-accent">
-              {strings.siteTagline}
-            </span>
+          <span className="font-display text-title-s leading-none tracking-tight">
+            {strings.siteTitle}
           </span>
         </Link>
 
@@ -68,21 +70,31 @@ export function SiteHeader({ locale, current }: { locale: Locale; current?: stri
           ))}
         </nav>
 
-        <div className="ml-auto flex items-baseline gap-1">
-          {LOCALES.map((candidate, index) => (
-            <span key={candidate} className="flex items-baseline gap-1">
-              {index > 0 ? <span className="text-ink-soft/50">·</span> : null}
-              <Link
-                href={localePath(candidate, current === 'home' ? '' : (current ?? ''))}
-                hrefLang={candidate}
-                aria-current={candidate === locale ? 'true' : undefined}
-                className={`font-label text-label uppercase transition-colors hover:text-accent ${
-                  candidate === locale ? 'text-boundary' : 'text-ink-soft'
-                }`}
-              >
-                {candidate}
-              </Link>
-            </span>
+        {/* A segmented control rather than "id · en" in bare 12px type. For a reader who does
+            not read Indonesian the entire page is opaque and this is the way out, so it has to
+            look like a control. The current locale is filled, the way the tab pair over the
+            plate marks its active side, and each link names its language in full for a screen
+            reader rather than announcing two letters. */}
+        <div
+          className="ml-auto flex items-center overflow-hidden rounded-sm border border-boundary/25"
+          role="group"
+          aria-label={strings.localeName}
+        >
+          {LOCALES.map((candidate) => (
+            <Link
+              key={candidate}
+              href={localePath(candidate, current === 'home' ? '' : (current ?? ''))}
+              hrefLang={candidate}
+              aria-current={candidate === locale ? 'true' : undefined}
+              className={`px-2.5 py-1 font-label text-label uppercase transition-colors ${
+                candidate === locale
+                  ? 'bg-boundary text-plate'
+                  : 'text-ink-soft hover:bg-boundary/10 hover:text-accent'
+              }`}
+            >
+              <span aria-hidden="true">{candidate}</span>
+              <span className="sr-only">{dictionary(candidate).localeName}</span>
+            </Link>
           ))}
         </div>
       </div>
