@@ -309,7 +309,24 @@ describe('the plate furniture', () => {
   })
 
   it('gives the coastline an edge that reads under the palest tint', () => {
-    expect(contrast(PLATE_COLOURS.landEdge, PLATE_COLOURS.land)).toBeGreaterThan(2.5)
+    // A graphical object, so 3:1 is the bar — and it has to clear it on every ground the
+    // coastline is drawn on, not only on paper. `land` is the tightest of them and is where
+    // the old value failed, at 2.62:1.
+    for (const ground of [
+      PLATE_COLOURS.land,
+      PLATE_COLOURS.landNeighbour,
+      PLATE_COLOURS.plate,
+      PLATE_COLOURS.index,
+      PLATE_COLOURS.indexDeep,
+    ]) {
+      expect(contrast(PLATE_COLOURS.landEdge, ground)).toBeGreaterThanOrEqual(3)
+    }
+  })
+
+  it('keeps the coastline clearly lighter than the boundary ink — a coast, not a border', () => {
+    expect(contrast(PLATE_COLOURS.landEdge, PLATE_COLOURS.plate)).toBeLessThan(
+      contrast(PLATE_COLOURS.boundary, PLATE_COLOURS.plate) / 2,
+    )
   })
 
   it('keeps the sea pale enough to recede', () => {

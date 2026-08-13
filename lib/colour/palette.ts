@@ -147,6 +147,15 @@ export const PLATE_COLOURS = {
   land: '#D0D3D6',
   /** Land outside Indonesia. Present for context only, and deliberately recessive. */
   landNeighbour: '#E1E3E5',
-  /** The coastline hairline, so a pale tint on a pale coast still has an edge. */
-  landEdge: '#7C8186',
+  /**
+   * The coastline hairline, so a pale tint on a pale coast still has an edge.
+   *
+   * A graphical object rather than text, so 3:1 is the bar it has to clear — and it has to
+   * clear it on every ground it is ever drawn on, not just paper. At #7C8186 it made 3.34:1 on
+   * paper but fell to 2.88:1 on `indexDeep` and 2.62:1 on `land` itself, which is the ground it
+   * spends most of its life on. Darkened until the worst of those cases passes: 4.19 on paper,
+   * 3.62 on indexDeep, 3.29 on land. Still three times lighter than the boundary ink, so it
+   * reads as a coast and not as a border.
+   */
+  landEdge: '#6B7176',
 } as const
