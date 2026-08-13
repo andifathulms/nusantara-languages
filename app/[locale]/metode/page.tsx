@@ -34,7 +34,7 @@ export default function MethodPage({ params }: { params: { locale: string } }) {
         <h1 className="font-display text-title-l">{strings.method.title}</h1>
         <p className="mt-3 text-lead text-ink-soft">{strings.method.lead}</p>
 
-        <section className="mt-10">
+        <section className="mt-section">
           <h2 className="font-display text-title-m">{strings.method.coverage}</h2>
           <dl className="mt-4 grid grid-cols-2 gap-y-4 sm:grid-cols-4">
             {[
@@ -96,7 +96,7 @@ export default function MethodPage({ params }: { params: { locale: string } }) {
           ) : null}
         </section>
 
-        <section className="mt-10">
+        <section className="mt-section">
           <h2 className="font-display text-title-m">{strings.method.notClaimed}</h2>
           <ul className="mt-4 space-y-3">
             {strings.method.claims.map((claim) => (
@@ -107,7 +107,7 @@ export default function MethodPage({ params }: { params: { locale: string } }) {
           </ul>
         </section>
 
-        <section className="mt-10">
+        <section className="mt-section">
           <h2 className="font-display text-title-m">{strings.method.sources}</h2>
           <ul className="mt-4 space-y-5">
             {bundled.map((source) => (
@@ -148,7 +148,7 @@ export default function MethodPage({ params }: { params: { locale: string } }) {
 
         {/* Refusals are published, not hidden: the atlas this project was designed around is
             the one source it cannot ship, and the reason belongs on the page. */}
-        <section className="mt-10">
+        <section className="mt-section">
           <h2 className="font-display text-title-m">{strings.method.refused}</h2>
           <ul className="mt-4 space-y-5">
             {refused.map((source) => (
@@ -170,7 +170,7 @@ export default function MethodPage({ params }: { params: { locale: string } }) {
           </ul>
         </section>
 
-        <section className="mt-10">
+        <section className="mt-section">
           <h2 className="font-display text-title-m">{strings.method.excluded}</h2>
           <ul className="mt-4 space-y-1">
             {coverage.excluded.map((entry) => (
@@ -182,7 +182,7 @@ export default function MethodPage({ params }: { params: { locale: string } }) {
           </ul>
         </section>
 
-        <section className="mt-10">
+        <section className="mt-section">
           <h2 className="font-display text-title-m">{strings.panel.endangerment}</h2>
           <ul className="mt-4 space-y-1">
             {coverage.aes
@@ -196,7 +196,7 @@ export default function MethodPage({ params }: { params: { locale: string } }) {
           </ul>
         </section>
 
-        <section className="mt-10">
+        <section className="mt-section">
           <h2 className="font-display text-title-m">{strings.plate.families}</h2>
           <ul className="mt-4 space-y-1">
             {coverage.families.map((family) => (
@@ -215,7 +215,7 @@ export default function MethodPage({ params }: { params: { locale: string } }) {
           </ul>
         </section>
 
-        <p className="mt-10 text-body-s">
+        <p className="mt-section text-body-s">
           <Link href={localePath(locale, 'peta')} className="link">
             {strings.nav.plate}
           </Link>

@@ -102,7 +102,7 @@ export default function LanguagePage({
           />
         </div>
 
-        <p className="mt-10 text-body-s text-ink-soft">
+        <p className="mt-section text-body-s text-ink-soft">
           <Link href={localePath(locale, 'metode')} className="link">
             {strings.method.title}
           </Link>

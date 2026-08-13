@@ -105,7 +105,7 @@ export function SiteHeader({ locale, current }: { locale: Locale; current?: stri
 export function SiteFooter({ locale }: { locale: Locale }) {
   const strings = dictionary(locale)
   return (
-    <footer className="mt-16 border-t border-boundary/20">
+    <footer className="mt-section-lg border-t border-boundary/20">
       {/* One seam, two kinds of statement. Left: the licence attribution and the affiliation
           disclaimer — obligations. Right: the maker's mark — personal credit. Kept apart by
           position rather than by a second rule, so the footer stays a single bottom bar. */}

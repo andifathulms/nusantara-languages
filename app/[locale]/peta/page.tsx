@@ -81,7 +81,7 @@ export default function PlatePage({ params }: { params: { locale: string } }) {
           </p>
         </header>
 
-        <div className="mt-6">
+        <div className="mt-block">
           <PlateView
             model={model}
             coverage={bundle.coverage}
@@ -96,12 +96,12 @@ export default function PlatePage({ params }: { params: { locale: string } }) {
         {/* The key sits under the map, not over it. Every entry describes a mark — a tint, a
             ring, a hatch, bare grey land — and a reader who has the map on screen can check
             each one against the plate instead of holding four abstractions in mind. */}
-        <div className="mt-8">
+        <div className="mt-section">
           <MapKey strings={strings} />
         </div>
 
         {/* Placed after the reader has used the map: by now the question has a referent. */}
-        <section className="rule-double mt-12 max-w-prose pt-6">
+        <section className="rule-double mt-section-lg max-w-prose pt-block">
           <h2 className="font-display text-title-s">{strings.guide.whatIsFamily}</h2>
           <p className="mt-2 text-ink-soft">{strings.guide.whatIsFamilyBody}</p>
         </section>

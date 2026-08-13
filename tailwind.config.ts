@@ -56,6 +56,25 @@ const config: Config = {
         mono: ['var(--font-mono)', 'ui-monospace', 'monospace'],
       },
       fontSize,
+      /**
+       * The vertical rhythm, named by role for the same reason the type scale is: a gap should
+       * be chosen for what it separates, not for how big it looks. Before this there were three
+       * different section gaps in use — 64px on the front page, 48px on the plate, 40px on the
+       * method page — for one role, which is drift rather than intent.
+       *
+       * Two section sizes survive because there are genuinely two kinds of page: a landing page
+       * that breathes, and a dense reference page where a 64px gap reads as a missing section.
+       */
+      spacing: {
+        /** Between blocks that belong to each other — a heading and the thing it introduces. */
+        block: '1.5rem',
+        /** Between blocks that belong together but need a beat. */
+        'block-lg': '2rem',
+        /** Between sections of a dense reference page. */
+        section: '2.5rem',
+        /** Between major sections of a landing page. */
+        'section-lg': '4rem',
+      },
       maxWidth: {
         // ~66 characters at the body size: the measure prose actually reads well at.
         prose: '38rem',

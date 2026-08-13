@@ -68,7 +68,7 @@ export default function HomePage({ params }: { params: { locale: string } }) {
 
       <main>
         {/* Hero: the plain sentence first, the map immediately under it. */}
-        <section className="mx-auto max-w-plate px-4 pt-10 sm:px-6 sm:pt-16">
+        <section className="mx-auto max-w-plate px-4 pt-section sm:px-6 sm:pt-section-lg">
           <div className="max-w-prose">
             <h1 className="font-display text-title-l sm:text-title-xl">{strings.siteTitle}</h1>
             <p className="mt-4 text-lead">
@@ -88,7 +88,7 @@ export default function HomePage({ params }: { params: { locale: string } }) {
 
           <Link
             href={localePath(locale, 'peta')}
-            className="mt-10 block plate-frame bg-plate transition-shadow hover:shadow-lifted"
+            className="mt-section block plate-frame bg-plate transition-shadow hover:shadow-lifted"
             aria-label={strings.home.openPlate}
           >
             <PlateThumbnail
@@ -102,7 +102,7 @@ export default function HomePage({ params }: { params: { locale: string } }) {
             />
           </Link>
 
-          <dl className="mt-8 grid grid-cols-2 gap-x-8 gap-y-6 sm:grid-cols-4">
+          <dl className="mt-block-lg grid grid-cols-2 gap-x-8 gap-y-6 sm:grid-cols-4">
             {figures.map((figure) => (
               <div key={figure.term}>
                 <dt className="index-label">{figure.term}</dt>
@@ -115,7 +115,7 @@ export default function HomePage({ params }: { params: { locale: string } }) {
         </section>
 
         {/* What a language family is, before any family is named. */}
-        <section className="mx-auto mt-16 max-w-plate px-4 sm:px-6">
+        <section className="mx-auto mt-section-lg max-w-plate px-4 sm:px-6">
           <div className="sheet grid gap-6 p-6 sm:p-8 lg:grid-cols-2">
             <div>
               <h2 className="font-display text-title-m">{strings.guide.whatIsFamily}</h2>
@@ -129,11 +129,11 @@ export default function HomePage({ params }: { params: { locale: string } }) {
         </section>
 
         {/* Guided views as cards: three concrete things to look at. */}
-        <section className="mx-auto mt-16 max-w-plate px-4 sm:px-6">
+        <section className="mx-auto mt-section-lg max-w-plate px-4 sm:px-6">
           <h2 className="font-display text-title-m">{strings.guided.title}</h2>
           <p className="mt-2 max-w-prose text-ink-soft">{strings.guided.lead}</p>
 
-          <ul className="mt-6 grid gap-4 md:grid-cols-3">
+          <ul className="mt-block grid gap-4 md:grid-cols-3">
             {views.map((view) => (
               <li key={view.id}>
                 <Link
@@ -154,7 +154,7 @@ export default function HomePage({ params }: { params: { locale: string } }) {
         </section>
 
         {/* The honesty notes. Last, and unmissable rather than buried in a footer. */}
-        <section className="mx-auto mt-16 max-w-plate px-4 sm:px-6">
+        <section className="mx-auto mt-section-lg max-w-plate px-4 sm:px-6">
           <div className="rule-double max-w-prose pt-6">
             <h2 className="font-display text-title-s">{strings.method.notClaimed}</h2>
             <p className="mt-3 text-ink-soft">{strings.home.whatThisIsNot}</p>
