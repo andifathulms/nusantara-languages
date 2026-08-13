@@ -70,7 +70,11 @@ export default function HomePage({ params }: { params: { locale: string } }) {
         {/* Hero: the plain sentence first, the map immediately under it. */}
         <section className="mx-auto max-w-plate px-4 pt-section sm:px-6 sm:pt-section-lg">
           <div className="max-w-prose">
-            <h1 className="font-display text-title-l sm:text-title-xl">{strings.siteTitle}</h1>
+            {/* The h1 says what this is, not what it is called. The masthead prints the name two
+                lines above; spending the largest type on the page repeating it left a stranger —
+                who now lands here rather than on the plate — reading the same four words twice
+                before learning anything. The name is still the document title and the masthead. */}
+            <h1 className="font-display text-title-l sm:text-title-xl">{strings.siteTagline}</h1>
             <p className="mt-4 text-lead">
               {format(strings.guide.leadPlain, { total: coverage.languages })}
             </p>
