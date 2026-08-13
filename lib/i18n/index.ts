@@ -148,10 +148,16 @@ export type Dictionary = {
   }
   readonly panel: {
     readonly glottocode: string
+    /** What a glottocode is, next to the first one the reader ever sees. */
+    readonly glottocodeHint: string
     readonly isoCode: string
     readonly family: string
     readonly classification: string
     readonly endangerment: string
+    /** That AES is an assessment, not a measurement. */
+    readonly endangermentHint: string
+    /** What "isolate" means, where the word is first used as a bare label. */
+    readonly isolateHint: string
     readonly coordinates: string
     readonly geometry: string
     /** Template. Placeholder: {source}. */
@@ -391,7 +397,7 @@ const id: Dictionary = {
   },
   tree: {
     title: 'Pohon kekerabatan',
-    subtitle: 'Klasifikasi Glottolog, tingkat bahasa',
+    subtitle: 'Klasifikasi Glottolog, tingkat bahasa — dialek tidak dipetakan',
     expand: 'Buka',
     collapse: 'Tutup',
     isolate: 'bahasa isolat',
@@ -399,10 +405,16 @@ const id: Dictionary = {
   },
   panel: {
     glottocode: 'Glottocode',
+    glottocodeHint:
+      'Penanda tetap Glottolog untuk bahasa ini. Nama bisa berubah dan satu nama bisa menunjuk beberapa bahasa; kode ini tidak. Seluruh peta ini bertumpu pada kode, bukan pada nama.',
     isoCode: 'Kode ISO 639-3',
     family: 'Rumpun',
     classification: 'Klasifikasi',
     endangerment: 'Status kebertahanan',
+    endangermentHint:
+      'Penilaian AES Glottolog: pertimbangan ahli tentang sejauh mana penutur beralih ke bahasa lain — bukan hasil pengukuran, bukan sensus, dan bukan angka penutur.',
+    isolateHint:
+      'Bahasa isolat: tidak ada bahasa lain yang terbukti berkerabat dengannya, sehingga ia berdiri sendiri sebagai satu rumpun.',
     coordinates: 'Koordinat',
     geometry: 'Wilayah',
     hasPolygon: 'Ada poligon wilayah, dari {source}',
@@ -633,7 +645,7 @@ const en: Dictionary = {
   },
   tree: {
     title: 'Genealogical tree',
-    subtitle: 'Glottolog classification, language level',
+    subtitle: 'Glottolog classification, language level — dialects are not mapped',
     expand: 'Expand',
     collapse: 'Collapse',
     isolate: 'isolate',
@@ -641,10 +653,16 @@ const en: Dictionary = {
   },
   panel: {
     glottocode: 'Glottocode',
+    glottocodeHint:
+      'Glottolog’s permanent identifier for this language. Names change, and one name can mean several languages; the code does neither. This whole map is keyed on codes, never on names.',
     isoCode: 'ISO 639-3',
     family: 'Family',
     classification: 'Classification',
     endangerment: 'Endangerment status',
+    endangermentHint:
+      'Glottolog’s AES assessment: an expert judgement of how far speakers have shifted to another language — not a measurement, not a census, and not a speaker count.',
+    isolateHint:
+      'An isolate: no other language has been shown to be related to it, so it stands alone as a family of one.',
     coordinates: 'Coordinates',
     geometry: 'Territory',
     hasPolygon: 'Polygon present, from {source}',

@@ -42,7 +42,10 @@ export function LanguageFacts({
   return (
     <div className="space-y-4">
       <dl className="grid gap-x-6 gap-y-3 sm:grid-cols-2">
-        <Fact label={strings.panel.glottocode}>
+        <Fact
+          label={strings.panel.glottocode}
+          hint={compact ? undefined : strings.panel.glottocodeHint}
+        >
           <span className="font-mono">{detail.glottocode}</span>
         </Fact>
 
@@ -54,7 +57,10 @@ export function LanguageFacts({
           )}
         </Fact>
 
-        <Fact label={strings.panel.endangerment}>
+        <Fact
+          label={strings.panel.endangerment}
+          hint={compact ? undefined : strings.panel.endangermentHint}
+        >
           <span className="inline-flex items-baseline gap-2">
             <HatchSwatch step={detail.aesStep} />
             {aesLabel}
@@ -78,7 +84,13 @@ export function LanguageFacts({
           )}
         </Fact>
 
-        <Fact label={strings.panel.classification} wide>
+        <Fact
+          label={strings.panel.classification}
+          hint={
+            compact || detail.ancestry.length > 0 ? undefined : strings.panel.isolateHint
+          }
+          wide
+        >
           <span className="flex flex-wrap items-baseline gap-x-1">
             {detail.ancestry.length === 0 ? (
               <span>{strings.tree.isolate}</span>
@@ -142,16 +154,26 @@ export function LanguageFacts({
 function Fact({
   label,
   children,
+  hint,
   wide = false,
 }: {
   label: string
   children: React.ReactNode
+  /**
+   * A gloss for a term the panel otherwise assumes. Rendered, not hovered: a tooltip is
+   * invisible on touch and unsearchable, and these are exactly the words a newcomer needs.
+   * Only on the full page — the compact panel beside the plate is already dense.
+   */
+  hint?: string
   wide?: boolean
 }) {
   return (
     <div className={wide ? 'sm:col-span-2' : undefined}>
       <dt className="index-label">{label}</dt>
       <dd className="mt-0.5">{children}</dd>
+      {hint === undefined ? null : (
+        <dd className="mt-1 text-micro text-ink-soft">{hint}</dd>
+      )}
     </div>
   )
 }
