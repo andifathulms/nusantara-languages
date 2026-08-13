@@ -103,20 +103,27 @@ export function IndexPanel({
         <div className="space-y-4">
           {/* The coverage figure, given the weight it deserves: it is the map's own statement
               about how much of itself is missing. */}
-          <div>
-            <p className="index-label">{strings.plate.legend}</p>
-            <p className="figure mt-1 text-title-m leading-none">
+          {/* The label said "Keterangan" — legend — over a coverage ratio, which named the
+              wrong thing entirely. A figure this size is the first thing read and the last
+              thing checked; it has to say what it counts.
+
+              A description list, so the number is programmatically tied to its own label
+              rather than sitting near it. The bare ratio is hidden from assistive technology
+              and the full sentence below carries it instead: "421/726" read aloud is a date. */}
+          <dl>
+            <dt className="index-label">{strings.method.coverage}</dt>
+            <dd className="figure mt-1 text-title-m leading-none" aria-hidden="true">
               {coverage.withPolygon}
               <span className="text-ink-soft">/{coverage.languages}</span>
-            </p>
-            <p className="mt-1 text-body-s text-ink-soft">
+            </dd>
+            <dd className="mt-1 text-body-s text-ink-soft">
               {format(strings.plate.coverage, {
                 withPolygon: coverage.withPolygon,
                 total: coverage.languages,
                 percent: coverage.polygonPercent,
               })}
-            </p>
-          </div>
+            </dd>
+          </dl>
 
           {period !== null ? (
             <p className="rule pt-3 font-label text-label uppercase">
