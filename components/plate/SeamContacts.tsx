@@ -52,12 +52,15 @@ export function SeamContacts({
     }
   }
 
+  // Prose keeps the reading measure; the list does not. A 67-row list squeezed into a 38rem
+  // column under a full-height plate was mostly vertical air, and rows this short — "name ·
+  // name · distance" — read fine in a column far narrower than a sentence needs.
   return (
-    <section aria-labelledby="seam-contacts" className="max-w-prose">
-      <h2 id="seam-contacts" className="font-display text-title-m">
+    <section aria-labelledby="seam-contacts">
+      <h2 id="seam-contacts" className="max-w-prose font-display text-title-m">
         {copy.title}
       </h2>
-      <p className="mt-3 text-ink-soft">
+      <p className="mt-3 max-w-prose text-ink-soft">
         {format(copy.lead, {
           count: report.contacts.length,
           languages: report.languageCount,
@@ -65,7 +68,9 @@ export function SeamContacts({
         })}
       </p>
 
-      <ul className="mt-6 space-y-5">
+      {/* Family groups flow across columns once there is width for them. Grouping and order
+          are untouched: the columns run in the same sequence the report returns. */}
+      <ul className="mt-6 grid gap-x-8 gap-y-5 sm:grid-cols-2 xl:grid-cols-3">
         {groups.map((group) => (
           <li key={group.familyGlottocode}>
             <h3 className="index-label">{group.familyName}</h3>
@@ -104,7 +109,7 @@ export function SeamContacts({
 
       {/* The rule and the limit, in one block rather than two stacked rules — they are a
           single statement about what this count is and is not. */}
-      <div className="caveat mt-6 space-y-2">
+      <div className="caveat mt-6 max-w-prose space-y-2">
         <p>{format(copy.threshold, { km: report.maxKm })}</p>
         <p>{format(copy.floor, { pointOnly })}</p>
       </div>
