@@ -223,6 +223,33 @@ family colour, because a signature ink that reads as data is a failure nobody wo
 The masthead still leads with the wordmark — the mark is set small beside it, inline SVG so
 invariant 14 holds.
 
+### Reading the binding backwards (2026-08-13)
+
+Three additions, all of which answer a question the app implied and could not answer. The
+common shape: the linkage already bound descent to geography in one direction — pick a
+branch, see its territory — and each of these reads it the other way.
+
+- **Nearest relatives** (`lib/tree/relatives`, on the language page). The group is genealogy
+  and is *unranked* — Glottolog carries no branch lengths — while the closest recorded point
+  is geography and is stated separately, so nearness on the map is never read as nearness in
+  the family. Scoped to the bundle, so the copy says "on this map", never "in the world".
+- **Branch extent** (`extentKm` on `TreeRow`). Austronesian spans 5,010 km here,
+  Timor-Alor-Pantar 350. Without it the map implies every colour names a thing of the same
+  size, which is its most misleading impression.
+- **Seam contacts** (`lib/geo/adjacency`, `lib/plate/seam`). 67 touching pairs, 74 languages,
+  18 families. The guided view drew a line; the data says Halmahera is interleaved.
+
+**Every one of these prints a number, so every one publishes its rule and its limit next to
+it** — the 2 km threshold against the 0.01° simplification, the midpoint caveat on both
+distances, and the floor on contacts (only polygon-bearing languages can appear). A figure a
+reader cannot trace to a rule is the thing this project does not ship, and a tooltip is a
+good way to let them miss the rule — so these render as visible caveats.
+
+Adjacency is the one piece here that makes a stronger claim than anything else in the
+codebase. Two bugs were caught by fixtures rather than by the data: vertex-to-segment
+sampling misses edges that *cross*, and containment shares no boundary at all. It is
+segment-to-segment with a point-in-polygon pre-check, ring-culled to 238 ms.
+
 ### Next, in rough order
 
 1. **Look at it on a real screen.** Still the top item, and now more so: the interface has been
