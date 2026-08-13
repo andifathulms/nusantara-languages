@@ -202,6 +202,27 @@ Pan, zoom and full screen landed alongside it (`lib/plate/viewport`, pure, 19 te
 viewBox never changes — a transform moves a group inside it — which is what keeps the attribution
 pinned, hover hit-testing free, and the PNG export correct at any zoom.
 
+### Brand assets (2026-08-13)
+
+An asset pack arrived as a working folder (`exports/`, gitignored — four tile variants and
+nine icon sizes, most of which the site never asks for). The files the browser actually
+requests are copied into `app/` and `public/brand/` and committed there; `exports/` is the
+source of truth for the identity but is not what ships.
+
+Two Next behaviours cost a build each and are worth not rediscovering: the `app/manifest.ts`
+route convention hardcodes its `<link>` at the origin root and ignores `basePath`, so the
+manifest is a static `public/manifest.webmanifest` with `metadata.manifest` pointing at it;
+and declaring *any* entry in `metadata.icons` replaces the auto-detected file-convention set
+wholesale, which silently dropped `icon.svg` until both were stated explicitly. Both were
+caught by reading the exported HTML, never by the build or the type checker.
+`tests/site/brand.test.ts` holds the manifest, the basePath and the icon files in agreement.
+
+**Brand inks live in `lib/colour/brand.ts`, never in the family palette.** The mark's three
+leaves (maroon, teal, violet) are a fixed signature; a test asserts they never collide with a
+family colour, because a signature ink that reads as data is a failure nobody would notice.
+The masthead still leads with the wordmark — the mark is set small beside it, inline SVG so
+invariant 14 holds.
+
 ### Next, in rough order
 
 1. **Look at it on a real screen.** Still the top item, and now more so: the interface has been
