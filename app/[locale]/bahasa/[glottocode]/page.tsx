@@ -3,7 +3,9 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { SiteFooter, SiteHeader } from '@/components/site/SiteChrome'
 import { LanguageFacts } from '@/components/panel/LanguageFacts'
+import { NearestRelatives } from '@/components/panel/NearestRelatives'
 import { loadBundle } from '@/lib/bundle/load'
+import { relativeReport } from '@/lib/tree/relatives'
 import { aesStep } from '@/lib/bundle/types'
 import { LOCALES, dictionary, isLocale, localePath, type Locale } from '@/lib/i18n'
 
@@ -99,6 +101,18 @@ export default function LanguagePage({
             strings={strings}
             locale={locale}
             manifest={bundle.manifest}
+          />
+        </div>
+
+        {/* Computed at build time, per page, rather than carried in the plate model: the plate
+            page already ships every language's ancestry and does not need a relatives report
+            for 726 languages to answer a question asked about one. */}
+        <div className="mt-block">
+          <NearestRelatives
+            report={relativeReport(bundle.treeIndex, bundle.byCode, detail.glottocode)}
+            strings={strings}
+            locale={locale}
+            total={bundle.coverage.languages}
           />
         </div>
 

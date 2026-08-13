@@ -130,6 +130,25 @@ export type Dictionary = {
     readonly openLanguage: string
     readonly close: string
   }
+  /**
+   * The nearest-relative readout. Every string here carries a limit as well as a fact, because
+   * the answer is only true within the frame: among the languages mapped here, between recorded
+   * points, and unranked because the classification carries no branch lengths.
+   */
+  readonly relatives: {
+    readonly title: string
+    readonly sharedAncestor: string
+    /** Template. Placeholder: {count}. */
+    readonly count: string
+    readonly unranked: string
+    readonly closest: string
+    /** Template. Placeholder: {km}. */
+    readonly distance: string
+    readonly distanceCaveat: string
+    /** Template. Placeholder: {total}. */
+    readonly scopeCaveat: string
+    readonly isolate: string
+  }
   readonly aes: Readonly<Record<string, string>>
   readonly method: {
     readonly title: string
@@ -295,6 +314,21 @@ const id: Dictionary = {
     sources: 'Sumber',
     openLanguage: 'Buka halaman bahasa',
     close: 'Tutup',
+  },
+  relatives: {
+    title: 'Kerabat terdekat',
+    sharedAncestor: 'Leluhur bersama terdekat',
+    count: '{count} bahasa lain di peta ini',
+    unranked:
+      'Semuanya sama dekatnya. Klasifikasi Glottolog berupa susunan bersarang tanpa panjang cabang, jadi daftar ini tidak dapat diurutkan menurut kedekatan kekerabatan.',
+    closest: 'Titik tercatat paling dekat',
+    distance: '{km} km',
+    distanceCaveat:
+      'Jarak diukur antara titik yang tercatat, bukan antara wilayah tutur. Koordinat Glottolog sering merupakan titik tengah populasi yang tersebar, jadi angka ini adalah perkiraan besaran, bukan hasil ukur.',
+    scopeCaveat:
+      'Dihitung hanya di antara {total} bahasa yang dipetakan di sini. Bahasa yang rumpunnya sebagian besar berada di luar Indonesia dapat memiliki kerabat yang lebih dekat di luar peta ini.',
+    isolate:
+      'Isolat: tidak ada kerabat yang diketahui di antara bahasa yang dipetakan di sini.',
   },
   aes: {
     'not endangered': 'tidak terancam',
@@ -481,6 +515,20 @@ const en: Dictionary = {
     sources: 'Sources',
     openLanguage: 'Open the language page',
     close: 'Close',
+  },
+  relatives: {
+    title: 'Nearest relatives',
+    sharedAncestor: 'Deepest shared ancestor',
+    count: '{count} other languages on this map',
+    unranked:
+      'All equally close. Glottolog’s classification is a nesting without branch lengths, so this list cannot be ordered by how closely related its members are.',
+    closest: 'Closest recorded point',
+    distance: '{km} km',
+    distanceCaveat:
+      'Measured between recorded points, not between speaker areas. Glottolog’s coordinate is frequently the midpoint of a dispersed population, so this is an order of magnitude rather than a survey.',
+    scopeCaveat:
+      'Computed only among the {total} languages mapped here. A language whose family mostly lives outside Indonesia may have a nearer relative off this map.',
+    isolate: 'An isolate: no known relatives among the languages mapped here.',
   },
   aes: {
     'not endangered': 'not endangered',
