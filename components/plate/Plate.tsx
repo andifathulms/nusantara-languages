@@ -43,6 +43,8 @@ type PlateProps = {
   readonly onSelect: (glottocode: string) => void
   readonly label: string
   readonly showHatching: boolean
+  /** Which level of the classification carries colour. */
+  readonly colourMode: 'family' | 'subgroup'
   /** A guided view's standing emphasis. Null when the reader is exploring freely. */
   readonly emphasis: ReadonlySet<string> | null
   /** The view holds this so the PNG export can serialise the plate that is on screen. */
@@ -57,6 +59,7 @@ function Area({
   state,
   isSelected,
   showHatching,
+  colours,
   onHover,
   onSelect,
 }: {
@@ -64,10 +67,11 @@ function Area({
   state: 'base' | 'selected' | 'muted'
   isSelected: boolean
   showHatching: boolean
+  colours: { base: string; selected: string }
   onHover: (glottocode: string | null) => void
   onSelect: (glottocode: string) => void
 }) {
-  const fill = state === 'selected' ? `var(${shape.colour.selected})` : `var(${shape.colour.base})`
+  const fill = state === 'selected' ? `var(${colours.selected})` : `var(${colours.base})`
   const hatch = showHatching && shape.aesStep > 0 ? HATCH_IDS[shape.aesStep - 1] : undefined
 
   return (
@@ -102,6 +106,7 @@ function PointMark({
   shape,
   state,
   isSelected,
+  colours,
   zoom,
   onHover,
   onSelect,
@@ -109,12 +114,13 @@ function PointMark({
   shape: PlateShape & { type: 'point' }
   state: 'base' | 'selected' | 'muted'
   isSelected: boolean
+  colours: { base: string; selected: string }
   /** Current map scale, so the mark can hold its drawn size while the map grows under it. */
   zoom: number
   onHover: (glottocode: string | null) => void
   onSelect: (glottocode: string) => void
 }) {
-  const colour = state === 'selected' ? `var(${shape.colour.selected})` : `var(${shape.colour.base})`
+  const colour = state === 'selected' ? `var(${colours.selected})` : `var(${colours.base})`
   const size = isSelected ? 4.2 : 3
   return (
     <g
@@ -150,6 +156,7 @@ export function Plate({
   onSelect,
   label,
   showHatching,
+  colourMode,
   emphasis,
   plateRef,
   strings,
@@ -419,6 +426,7 @@ export function Plate({
       {model.shapes.map((shape) => {
         const state = paintStateFor(shape.glottocode, shape.ancestors, scope, emphasis)
         const isSelected = selectedLanguage === shape.glottocode
+        const colours = colourMode === 'subgroup' ? shape.subgroupColour : shape.colour
         return shape.type === 'area' ? (
           <MemoArea
             key={shape.glottocode}
@@ -426,6 +434,7 @@ export function Plate({
             state={state}
             isSelected={isSelected}
             showHatching={showHatching}
+            colours={colours}
             onHover={onHover}
             onSelect={guardedSelect}
           />
@@ -435,6 +444,7 @@ export function Plate({
             shape={shape}
             state={state}
             isSelected={isSelected}
+            colours={colours}
             zoom={viewport.scale}
             onHover={onHover}
             onSelect={guardedSelect}

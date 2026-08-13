@@ -14,7 +14,14 @@ import {
   type BoundingBox,
   type Position,
 } from '../geo'
-import { colourOf, type ColourAssignment, cssVariable } from '../colour'
+import {
+  assignSubgroupColours,
+  colourOf,
+  cssVariable,
+  subgroupColourOf,
+  type ColourAssignment,
+  type SubgroupInput,
+} from '../colour'
 import {
   aesStep,
   type AesStatus,
@@ -25,7 +32,7 @@ import {
   type Languoid,
 } from '../bundle/types'
 import type { SerialTreeNode, TreeData, TreeIndex } from '../tree'
-import { ancestors as ancestorsOf, subtreeLanguages } from '../tree'
+import { ancestors as ancestorsOf, groupOf, informativeCut, subtreeLanguages } from '../tree'
 
 export type ShapeColour = {
   /** CSS custom property holding the muted base fill. */
@@ -45,6 +52,13 @@ type ShapeCommon = {
   /** 0 when unknown, rising toward extinction. Drives hatch density, never hue. */
   readonly aesStep: number
   readonly colour: ShapeColour
+  /**
+   * The subgroup this language belongs to, at the family's first real branching, and the colour
+   * it takes when the plate is read at that level. Austronesian is 464 of 726 languages, so at
+   * family level the west is a single tint; this is what gives it structure.
+   */
+  readonly subgroup: string
+  readonly subgroupColour: ShapeColour
 }
 
 export type PlateShape =
@@ -79,6 +93,8 @@ export type LegendEntry = {
   readonly withPolygon: number
   readonly isIsolate: boolean
   readonly colour: ShapeColour
+  /** For a subgroup entry: the family it sits in, so the legend can say where it belongs. */
+  readonly familyName?: string
 }
 
 export type TreeRow = {
@@ -129,6 +145,8 @@ export type PlateModel = {
   readonly land: readonly LandShape[]
   readonly graticule: readonly GraticuleLine[]
   readonly legend: readonly LegendEntry[]
+  /** The same map read one level down. Empty when no family splits. */
+  readonly subgroupLegend: readonly LegendEntry[]
   readonly rows: readonly TreeRow[]
   /** Keyed by glottocode, so the panel is a lookup with no map to build. */
   readonly details: Readonly<Record<string, LanguageDetail>>
@@ -205,6 +223,32 @@ export function buildPlateModel(input: BuildPlateInput): PlateModel {
   const projection = createProjection(input.frame, input.width)
   const geometryByCode = new Map(input.geometry.map((entry) => [entry.glottocode, entry]))
 
+  // Cut each family at its first real branching, then colour the resulting subgroups. Both are
+  // pure and both happen here, once, at build time.
+  const cut = new Set(input.tree.roots.flatMap((root) => informativeCut(input.treeIndex, root)))
+  const subgroupOf = new Map<string, string>()
+  for (const languoid of input.languoids) {
+    subgroupOf.set(languoid.glottocode, groupOf(input.treeIndex, languoid.glottocode, cut))
+  }
+
+  const subgroupMembers = new Map<string, Languoid[]>()
+  for (const languoid of input.languoids) {
+    const group = subgroupOf.get(languoid.glottocode) as string
+    const members = subgroupMembers.get(group) ?? []
+    members.push(languoid)
+    subgroupMembers.set(group, members)
+  }
+
+  const subgroupInputs: SubgroupInput[] = [...subgroupMembers.entries()]
+    .map(([glottocode, members]) => ({
+      glottocode,
+      family: members[0]?.familyGlottocode ?? glottocode,
+      languageCount: members.length,
+      lon: members.reduce((total, member) => total + member.lon, 0) / members.length,
+    }))
+    .sort((left, right) => left.glottocode.localeCompare(right.glottocode))
+  const subgroupColours = assignSubgroupColours(subgroupInputs)
+
   const areas: (PlateShape & { readonly type: 'area'; readonly area: number })[] = []
   const points: (PlateShape & { readonly type: 'point' })[] = []
 
@@ -217,6 +261,14 @@ export function buildPlateModel(input: BuildPlateInput): PlateModel {
       aes: languoid.aes,
       aesStep: aesStep(languoid.aes),
       colour: colourVars(input.colours, languoid.familyGlottocode ?? languoid.glottocode),
+      subgroup: subgroupOf.get(languoid.glottocode) as string,
+      subgroupColour: (() => {
+        const colour = subgroupColourOf(
+          subgroupColours,
+          subgroupOf.get(languoid.glottocode) ?? null,
+        )
+        return { base: cssVariable(colour, 'base'), selected: cssVariable(colour, 'selected') }
+      })(),
     }
 
     const entry = geometryByCode.get(languoid.glottocode)
@@ -255,6 +307,29 @@ export function buildPlateModel(input: BuildPlateInput): PlateModel {
     isIsolate: family.isIsolate,
     colour: colourVars(input.colours, family.glottocode),
   }))
+
+  const nodeNameOf = (glottocode: string): string =>
+    input.tree.nodes.find((node) => node.glottocode === glottocode)?.name ?? glottocode
+
+  const subgroupLegend: LegendEntry[] = subgroupInputs
+    .map((subgroup) => {
+      const members = subgroupMembers.get(subgroup.glottocode) ?? []
+      const colour = subgroupColourOf(subgroupColours, subgroup.glottocode)
+      return {
+        glottocode: subgroup.glottocode,
+        name: nodeNameOf(subgroup.glottocode),
+        languageCount: members.length,
+        withPolygon: members.filter((member) => member.geometry.type === 'polygon').length,
+        isIsolate: members.length === 1 && subgroup.family === subgroup.glottocode,
+        colour: { base: cssVariable(colour, 'base'), selected: cssVariable(colour, 'selected') },
+        familyName: nodeNameOf(subgroup.family),
+      }
+    })
+    .sort(
+      (left, right) =>
+        right.languageCount - left.languageCount ||
+        left.glottocode.localeCompare(right.glottocode),
+    )
 
   const nodesByCode = new Map<string, SerialTreeNode>(
     input.tree.nodes.map((node) => [node.glottocode, node]),
@@ -328,6 +403,7 @@ export function buildPlateModel(input: BuildPlateInput): PlateModel {
     }),
     graticule: buildGraticule(input.frame, projection.project),
     legend,
+    subgroupLegend,
     rows,
     details,
     vertices: input.geometry.reduce((total, entry) => total + vertexCount(entry.geometry), 0),

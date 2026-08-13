@@ -9,12 +9,20 @@
 
 import { NO_SELECTION, type PlateSelection } from './select'
 
+/** Which level of the classification carries colour. */
+export type ColourMode = 'family' | 'subgroup'
+
 export type ViewState = {
   readonly selection: PlateSelection
   readonly hatching: boolean
+  readonly colourMode: ColourMode
 }
 
-export const DEFAULT_VIEW: ViewState = { selection: NO_SELECTION, hatching: false }
+export const DEFAULT_VIEW: ViewState = {
+  selection: NO_SELECTION,
+  hatching: false,
+  colourMode: 'family',
+}
 
 const GLOTTOCODE = /^[a-z0-9]{4}\d{4}$/
 
@@ -30,7 +38,11 @@ export function parseViewHash(hash: string): ViewState {
         ? { kind: 'branch', glottocode: branch }
         : NO_SELECTION
 
-  return { selection, hatching: parameters.get('arsir') === '1' }
+  return {
+    selection,
+    hatching: parameters.get('arsir') === '1',
+    colourMode: parameters.get('warna') === 'subrumpun' ? 'subgroup' : 'family',
+  }
 }
 
 export function toViewHash(state: ViewState): string {
@@ -41,6 +53,7 @@ export function toViewHash(state: ViewState): string {
     parameters.set('rumpun', state.selection.glottocode)
   }
   if (state.hatching) parameters.set('arsir', '1')
+  if (state.colourMode === 'subgroup') parameters.set('warna', 'subrumpun')
 
   const encoded = parameters.toString()
   return encoded === '' ? '' : `#${encoded}`

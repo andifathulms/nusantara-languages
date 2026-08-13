@@ -138,3 +138,4 @@ export function fillOf(colour: FamilyColour, state: PaintState): string {
 export function cssVariable(colour: FamilyColour, state: 'base' | 'selected'): string {
   return `--family-${colour.token}${state === 'selected' ? '-selected' : ''}`
 }
+export * from './subgroup'

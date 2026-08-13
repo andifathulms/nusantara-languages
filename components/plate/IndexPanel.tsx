@@ -25,7 +25,9 @@ type IndexPanelProps = {
   readonly onSelect: (glottocode: string) => void
   readonly onClear: () => void
   readonly hasSelection: boolean
-  /** Families listed openly. The rest fold into a disclosure. */
+  /** Shown above the list when the legend is showing something that needs explaining. */
+  readonly note?: string | null
+  /** Entries listed openly. The rest fold into a disclosure. */
   readonly majorFamilyCount?: number
 }
 
@@ -38,6 +40,7 @@ export function IndexPanel({
   onSelect,
   onClear,
   hasSelection,
+  note = null,
   majorFamilyCount = 12,
 }: IndexPanelProps) {
   const major = legend.slice(0, majorFamilyCount)
@@ -62,6 +65,8 @@ export function IndexPanel({
               </button>
             ) : null}
           </div>
+
+          {note !== null ? <p className="caveat mt-3">{note}</p> : null}
 
           <ul className="mt-3 grid grid-cols-1 gap-x-8 gap-y-1 sm:grid-cols-2">
             {major.map((entry) => (
@@ -163,7 +168,12 @@ function LegendRow({
             backgroundColor: `var(${isScoped ? entry.colour.selected : entry.colour.base})`,
           }}
         />
-        <span className="min-w-0 flex-1 truncate">{entry.name}</span>
+        <span className="min-w-0 flex-1 truncate">
+          {entry.name}
+          {entry.familyName !== undefined && entry.familyName !== entry.name ? (
+            <span className="ml-1.5 text-micro text-ink-soft">{entry.familyName}</span>
+          ) : null}
+        </span>
         <span className="figure shrink-0 text-micro text-ink-soft">
           {entry.withPolygon}/{entry.languageCount}
         </span>

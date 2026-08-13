@@ -15,7 +15,7 @@ import {
   toggleOpen,
   type PlateSelection,
 } from '@/lib/plate/select'
-import { parseViewHash, toViewHash } from '@/lib/plate/hash'
+import { parseViewHash, toViewHash, type ColourMode } from '@/lib/plate/hash'
 import type { SearchEntry } from '@/lib/search'
 import type { PlateModel, TreeRow } from '@/lib/plate/build'
 import type { BundleManifest, Coverage } from '@/lib/bundle/types'
@@ -81,6 +81,7 @@ export function PlateView({
   )
   const [scrollTo, setScrollTo] = useState<string | null>(null)
   const [hatching, setHatching] = useState(initialHatching)
+  const [colourMode, setColourMode] = useState<ColourMode>('family')
   const [tab, setTab] = useState<'map' | 'tree'>('map')
   const plateRef = useRef<SVGSVGElement | null>(null)
 
@@ -129,19 +130,20 @@ export function PlateView({
       setScrollTo(named.glottocode)
     }
     if (state.hatching) setHatching(true)
+    if (state.colourMode === 'subgroup') setColourMode('subgroup')
     // Deliberately mount-only: after this, the reader's interaction owns the state.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [syncHash])
 
   useEffect(() => {
     if (!syncHash) return
-    const hash = toViewHash({ selection, hatching })
+    const hash = toViewHash({ selection, hatching, colourMode })
     window.history.replaceState(
       null,
       '',
       `${window.location.pathname}${window.location.search}${hash}`,
     )
-  }, [syncHash, selection, hatching])
+  }, [syncHash, selection, hatching, colourMode])
 
   /** Clicking a territory: select it, open its ancestry, scroll the tree to it. */
   const selectFromPlate = useCallback(
@@ -217,6 +219,9 @@ export function PlateView({
         examples={examples}
         hatching={hatching}
         onToggleHatching={() => setHatching((current) => !current)}
+        colourMode={colourMode}
+        onColourMode={setColourMode}
+        hasSubgroups={model.subgroupLegend.length > model.legend.length}
         selectionLabel={scopedRow?.name ?? selectedDetail?.name ?? null}
         selectionCount={scopedRow?.languageCount ?? null}
         onClear={clear}
@@ -255,6 +260,7 @@ export function PlateView({
               percent: coverage.polygonPercent,
             })}`}
             showHatching={hatching}
+            colourMode={colourMode}
             emphasis={emphasisSet}
             strings={strings}
           />
@@ -292,7 +298,8 @@ export function PlateView({
           ) : null}
 
           <IndexPanel
-            legend={model.legend}
+            legend={colourMode === 'subgroup' ? model.subgroupLegend : model.legend}
+            note={colourMode === 'subgroup' ? strings.plate.subgroupNote : null}
             coverage={coverage}
             strings={strings}
             scope={scope}

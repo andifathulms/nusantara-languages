@@ -86,17 +86,31 @@ describe('search', () => {
 
 describe('the view hash', () => {
   it('round-trips a selected language', () => {
-    const state = { selection: { kind: 'language', glottocode: 'abui1241' }, hatching: false } as const
+    const state = {
+      selection: { kind: 'language', glottocode: 'abui1241' },
+      hatching: false,
+      colourMode: 'family',
+    } as const
     expect(parseViewHash(toViewHash(state))).toEqual(state)
   })
 
   it('round-trips a selected branch with hatching on', () => {
-    const state = { selection: { kind: 'branch', glottocode: 'aust1307' }, hatching: true } as const
+    const state = {
+      selection: { kind: 'branch', glottocode: 'aust1307' },
+      hatching: true,
+      colourMode: 'subgroup',
+    } as const
     expect(parseViewHash(toViewHash(state))).toEqual(state)
   })
 
   it('writes nothing for the default view', () => {
     expect(toViewHash(DEFAULT_VIEW)).toBe('')
+  })
+
+  it('carries the colour mode, so a shared link opens on the level it names', () => {
+    expect(parseViewHash('#warna=subrumpun').colourMode).toBe('subgroup')
+    expect(parseViewHash('#warna=nonsense').colourMode).toBe('family')
+    expect(parseViewHash('').colourMode).toBe('family')
   })
 
   it('ignores a malformed or unknown key rather than failing', () => {

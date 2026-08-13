@@ -213,6 +213,51 @@ export function flattenTree(
   return rows
 }
 
+/**
+ * The first branching under a root that actually divides it — the level at which colouring the
+ * family by subgroup says something.
+ *
+ * Depth is the wrong instrument here. Every Austronesian language in Indonesia is
+ * Malayo-Polynesian, so a fixed depth of 1 returns one group covering 464 of 726 languages and
+ * tells the reader nothing; depth 2 happens to be right for Austronesian and wrong for a family
+ * that branches immediately. So this descends through any node that has a single child — a link
+ * in a chain carries no information — and stops at the first node that genuinely splits,
+ * returning that node's children.
+ *
+ * A root with no children is its own cut: an isolate is not divisible.
+ */
+export function informativeCut(index: TreeIndex, root: string): readonly string[] {
+  let node = index.nodes.get(root)
+  if (node === undefined) return []
+
+  // A chain of single children adds depth without adding distinctions; walk through it.
+  while (node.children.length === 1) {
+    const only = index.nodes.get(node.children[0] as string)
+    if (only === undefined || only.children.length === 0) break
+    node = only
+  }
+
+  return node.children.length === 0 ? [node.glottocode] : node.children
+}
+
+/**
+ * Every language's colouring group, given a cut of each root. Languages fall to the ancestor that
+ * appears in the cut, or to themselves when the cut is the root itself.
+ */
+export function groupOf(
+  index: TreeIndex,
+  glottocode: string,
+  cut: ReadonlySet<string>,
+): string {
+  if (cut.has(glottocode)) return glottocode
+  const chain = ancestors(index, glottocode)
+  for (let i = chain.length - 1; i >= 0; i -= 1) {
+    const candidate = chain[i] as string
+    if (cut.has(candidate)) return candidate
+  }
+  return chain[0] ?? glottocode
+}
+
 export type NewickTreeInput = {
   /** Root glottocode, as Glottolog names each tree in `classification.nex`. */
   readonly name: string

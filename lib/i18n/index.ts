@@ -54,6 +54,12 @@ export type Dictionary = {
     readonly hatchingToggle: string
     /** Template. Placeholder: {total}. */
     readonly hatchingNote: string
+    readonly colourBy: string
+    readonly colourByFamily: string
+    readonly colourBySubgroup: string
+    readonly subgroupNote: string
+    /** Template. Placeholder: {family}. */
+    readonly subgroupOf: string
     readonly zoomIn: string
     readonly zoomOut: string
     readonly zoomReset: string
@@ -206,6 +212,12 @@ const id: Dictionary = {
       'Sumber: Glottolog 5.3 (CC-BY-4.0), Glottography (CC-BY-4.0), Natural Earth (domain publik).',
     geometryArea: 'punya wilayah',
     geometryPoint: 'hanya titik',
+    colourBy: 'Warna menurut',
+    colourByFamily: 'Rumpun',
+    colourBySubgroup: 'Subrumpun',
+    subgroupNote:
+      'Dua pertiga bahasa di peta ini termasuk rumpun Austronesia, sehingga pada tampilan rumpun sebagian besar wilayah barat hanya satu warna. Tampilan subrumpun memecahnya pada percabangan nyata pertama. Di sini warna dipakai untuk membedakan tetangga, bukan untuk menamai kelompok — warna yang sama bisa muncul lagi di ujung lain kepulauan. Nama kelompok ada pada keterangan dan muncul saat disorot.',
+    subgroupOf: 'dalam {family}',
     zoomIn: 'Perbesar',
     zoomOut: 'Perkecil',
     zoomReset: 'Kembali ke tampilan penuh',
@@ -382,6 +394,12 @@ const en: Dictionary = {
       'Sources: Glottolog 5.3 (CC-BY-4.0), Glottography (CC-BY-4.0), Natural Earth (public domain).',
     geometryArea: 'has a territory',
     geometryPoint: 'point only',
+    colourBy: 'Colour by',
+    colourByFamily: 'Family',
+    colourBySubgroup: 'Subgroup',
+    subgroupNote:
+      'Two-thirds of the languages here are Austronesian, so at family level most of the west is a single tint. The subgroup view cuts each family at its first real branching. Colour distinguishes neighbours rather than naming groups — the same tint reappears elsewhere in the archipelago — and the legend and hover give the names.',
+    subgroupOf: 'in {family}',
     zoomIn: 'Zoom in',
     zoomOut: 'Zoom out',
     zoomReset: 'Reset to the whole map',

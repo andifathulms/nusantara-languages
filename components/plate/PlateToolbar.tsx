@@ -22,6 +22,10 @@ type PlateToolbarProps = {
   readonly examples: readonly { readonly label: string; readonly glottocode: string }[]
   readonly hatching: boolean
   readonly onToggleHatching: () => void
+  readonly colourMode: 'family' | 'subgroup'
+  readonly onColourMode: (mode: 'family' | 'subgroup') => void
+  /** Hidden when nothing in the bundle actually splits — the control would be a no-op. */
+  readonly hasSubgroups: boolean
   readonly selectionLabel: string | null
   readonly selectionCount: number | null
   readonly onClear: () => void
@@ -35,6 +39,9 @@ export function PlateToolbar({
   examples,
   hatching,
   onToggleHatching,
+  colourMode,
+  onColourMode,
+  hasSubgroups,
   selectionLabel,
   selectionCount,
   onClear,
@@ -59,6 +66,29 @@ export function PlateToolbar({
             </button>
           ))}
         </div>
+
+        {hasSubgroups ? (
+          <div className="flex items-center gap-2">
+            <span className="index-label">{strings.plate.colourBy}</span>
+            <div className="flex" role="group" aria-label={strings.plate.colourBy}>
+              {(['family', 'subgroup'] as const).map((mode) => (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => onColourMode(mode)}
+                  aria-pressed={colourMode === mode}
+                  className={`btn ${
+                    colourMode === mode ? 'border-boundary bg-boundary text-plate' : ''
+                  }`}
+                >
+                  {mode === 'family'
+                    ? strings.plate.colourByFamily
+                    : strings.plate.colourBySubgroup}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
 
         <label className="flex items-center gap-2 text-body-s">
           <input
