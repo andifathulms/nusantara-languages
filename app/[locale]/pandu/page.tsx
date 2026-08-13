@@ -43,11 +43,11 @@ export default function GuidedIndexPage({ params }: { params: { locale: string }
     <>
       <SiteHeader locale={locale} current="pandu" />
 
-      <main className="mx-auto max-w-plate px-4 py-10 sm:px-6">
+      <main className="mx-auto max-w-plate px-4 py-section sm:px-6">
         <h1 className="font-display text-title-l">{strings.guided.title}</h1>
         <p className="mt-3 max-w-prose text-lead text-ink-soft">{strings.guided.lead}</p>
 
-        <ul className="mt-8 grid gap-4 md:grid-cols-3">
+        <ul className="mt-block-lg grid gap-4 md:grid-cols-3">
           {views.map((view) => (
             <li key={view.id}>
               <Link

@@ -80,7 +80,7 @@ export default function LanguagePage({
     <>
       <SiteHeader locale={locale} current="peta" />
 
-      <main className="mx-auto max-w-prose px-4 py-10 sm:px-6">
+      <main className="mx-auto max-w-prose px-4 py-section sm:px-6">
         <p className="index-label">
           {family === undefined ? strings.tree.isolate : family.name}
         </p>
@@ -95,7 +95,7 @@ export default function LanguagePage({
           </Link>
         </p>
 
-        <div className="mt-8">
+        <div className="mt-block-lg">
           <LanguageFacts
             detail={detail}
             strings={strings}

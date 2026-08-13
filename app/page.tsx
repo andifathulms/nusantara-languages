@@ -21,8 +21,8 @@ export const metadata = {
 
 export default function RootPage() {
   return (
-    <main className="mx-auto max-w-[60ch] px-5 py-16">
-      <h1 className="font-display text-3xl">{strings.siteTitle}</h1>
+    <main className="mx-auto max-w-[60ch] px-5 py-section-lg">
+      <h1 className="font-display text-title-l">{strings.siteTitle}</h1>
       <p className="mt-4">
         <Link href={localePath(DEFAULT_LOCALE)} className="underline">
           {strings.home.enter}

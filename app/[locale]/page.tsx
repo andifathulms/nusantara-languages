@@ -80,7 +80,7 @@ export default function HomePage({ params }: { params: { locale: string } }) {
             </p>
             <p className="mt-3 text-ink-soft">{strings.guide.linkage}</p>
 
-            <div className="mt-6 flex flex-wrap gap-3">
+            <div className="mt-block flex flex-wrap gap-3">
               <Link href={localePath(locale, 'peta')} className="btn btn-primary btn-lg">
                 {strings.home.openPlate}
               </Link>

@@ -30,7 +30,7 @@ export default function MethodPage({ params }: { params: { locale: string } }) {
     <>
       <SiteHeader locale={locale} current="metode" />
 
-      <main className="mx-auto max-w-prose px-4 py-10 sm:px-6">
+      <main className="mx-auto max-w-prose px-4 py-section sm:px-6">
         <h1 className="font-display text-title-l">{strings.method.title}</h1>
         <p className="mt-3 text-lead text-ink-soft">{strings.method.lead}</p>
 
