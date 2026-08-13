@@ -336,7 +336,7 @@ const id: Dictionary = {
     title: 'Cara membaca peta ini',
     colour: 'Warna menandai rumpun',
     colourNote:
-      'Satu warna, satu rumpun. Warna tetap redup sampai Anda memilih satu rumpun — yang terpilih menjadi satu-satunya warna pekat di peta.',
+      'Satu warna, satu rumpun. Warna mana yang jatuh pada rumpun mana tidak bermakna apa-apa: dua warna yang mirip bukan berarti dua rumpun yang berkerabat, dan kemiripan warna tidak pernah boleh dibaca sebagai kedekatan silsilah. Warna tetap redup sampai Anda memilih satu rumpun — yang terpilih menjadi satu-satunya warna pekat di peta.',
     point: 'Lingkaran berarti titik, bukan wilayah',
     pointNote:
       'Untuk bahasa yang tidak punya data wilayah, yang digambar hanyalah satu titik perkiraan. Titik tidak pernah dimekarkan menjadi wilayah.',
@@ -572,7 +572,7 @@ const en: Dictionary = {
     title: 'How to read this map',
     colour: 'Colour marks the family',
     colourNote:
-      'One colour, one family. Colours stay muted until you choose a family — the one you choose becomes the only saturated thing on the map.',
+      'One colour, one family. Which colour lands on which family means nothing: two similar colours are not two related families, and closeness in colour must never be read as closeness in descent. Colours stay muted until you choose a family — the one you choose becomes the only saturated thing on the map.',
     point: 'A ring means a point, not a territory',
     pointNote:
       'Where no territory data exists, all that is drawn is one approximate point. A point is never inflated into an area.',
