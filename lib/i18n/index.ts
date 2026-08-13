@@ -118,6 +118,16 @@ export type Dictionary = {
      */
     readonly howWeKnow: string
     readonly howWeKnowTitle: string
+    /** The worked example: one language climbed rung by rung, with the real numbers. */
+    readonly workedTitle: string
+    readonly workedLead: string
+    readonly workedLevel: string
+    readonly workedLanguages: string
+    readonly workedSpan: string
+    readonly workedSelf: string
+    /** Template. Placeholders: {family}, {count}, {km}, {name}. */
+    readonly workedClose: string
+    readonly workedCaveat: string
   }
   readonly tree: {
     readonly title: string
@@ -344,6 +354,17 @@ const id: Dictionary = {
     tabTree: 'Pohon',
     whatIsFamily: 'Apa itu rumpun bahasa?',
     howWeKnowTitle: 'Dari mana silsilah itu diketahui?',
+    workedTitle: 'Satu bahasa, dinaiki setingkat demi setingkat',
+    workedLead:
+      'Ambil satu bahasa dan naiki silsilahnya. Setiap tingkat menambah kerabat, dan setiap tingkat memperluas tanah yang ditempati kerabat-kerabat itu. Pelebaran inilah yang dibawa oleh warna pada peta — satu warna adalah satu tingkat teratas.',
+    workedLevel: 'Tingkat',
+    workedLanguages: 'Bahasa',
+    workedSpan: 'Membentang',
+    workedSelf: 'bahasa itu sendiri',
+    workedClose:
+      'Di tingkat teratas: {family}, {count} bahasa di peta ini, membentang {km} km. Itulah satu warna pada peta di atas — dan {name} satu petak kecil di dalamnya.',
+    workedCaveat:
+      'Membentang = jarak antara dua titik tercatat yang paling berjauhan dalam cabang itu, jadi angka batas bawah. Satu bahasa tidak diberi angka: satu titik tidak punya rentang.',
     howWeKnow:
       'Percabangan pada pohon ini bukan pengelompokan menurut kemiripan yang terdengar. Itu simpulan metode perbandingan: dua bahasa dinyatakan sekerabat bila padanan bunyinya teratur — bukan mirip sesekali, melainkan berpola dan dapat diramalkan — dan bila keduanya berbagi pembaruan yang tidak dimiliki kerabat lain. Perlu dicatat: sebagian cabang jauh lebih mapan daripada cabang lain, dan pohon ini mengikuti satu sumber, Glottolog 5.3, bukan kesepakatan seluruh ahli. Cabang yang dalam pada Austronesia dikaji selama lebih dari seabad; sebagian pengelompokan di Papua masih diperdebatkan.',
     whatIsFamilyBody:
@@ -569,6 +590,17 @@ const en: Dictionary = {
     tabTree: 'Tree',
     whatIsFamily: 'What is a language family?',
     howWeKnowTitle: 'How is that genealogy known?',
+    workedTitle: 'One language, climbed a level at a time',
+    workedLead:
+      'Take a single language and climb its ancestry. Each level adds relatives, and each level widens the ground those relatives occupy. That widening is what the colours on the map carry — one colour is one top level.',
+    workedLevel: 'Level',
+    workedLanguages: 'Languages',
+    workedSpan: 'Spans',
+    workedSelf: 'the language itself',
+    workedClose:
+      'At the top: {family}, {count} languages on this map, spanning {km} km. That is one colour on the map above — and {name} is one small patch inside it.',
+    workedCaveat:
+      'Span is the distance between the two furthest-apart recorded points in that branch, so it is a floor. A single language gets no figure: one point has no extent.',
     howWeKnow:
       'The branchings in this tree are not groupings by how alike languages sound. They are the findings of the comparative method: two languages are held to be related when their sounds correspond regularly — not resembling each other here and there, but patterned and predictable — and when they share innovations no other relative has. Worth knowing: some branches are far better established than others, and this tree follows one source, Glottolog 5.3, rather than a consensus of all scholars. Austronesian’s deep branches have been studied for over a century; some of the groupings in Papua are still argued over.',
     whatIsFamilyBody:

@@ -2,10 +2,12 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { SiteFooter, SiteHeader } from '@/components/site/SiteChrome'
 import { PlateThumbnail } from '@/components/plate/PlateThumbnail'
+import { WorkedExample } from '@/components/plate/WorkedExample'
 import { loadBundle } from '@/lib/bundle/load'
 import { buildPlateModel } from '@/lib/plate/build'
 import { atlasPeriod } from '@/lib/bundle/types'
 import { GUIDED } from '@/lib/plate/guided'
+import { exampleLadder } from '@/lib/plate/example'
 import { INDONESIA_BBOX } from '@/lib/geo'
 import { dictionary, format, isLocale, localePath, type Locale } from '@/lib/i18n'
 
@@ -36,6 +38,16 @@ export default function HomePage({ params }: { params: { locale: string } }) {
     // A still at this size cannot show sub-pixel precision, and it is the front page.
     pathDecimals: 0,
   })
+
+  /**
+   * The language the worked example climbs.
+   *
+   * Bima, because its ancestry is the clearest ladder in the bundle: four rungs, each one
+   * visibly wider than the last — 3 languages across 50 km, then 660, then 5,010 at the top.
+   * A language that hangs straight off Malayo-Polynesian (Sundanese does) has no rungs to
+   * climb and teaches nothing; a deeply nested one repeats the same figure twice.
+   */
+  const ladder = exampleLadder(model.rows, 'bima1247')
 
   const views = [
     {
@@ -117,6 +129,15 @@ export default function HomePage({ params }: { params: { locale: string } }) {
             ))}
           </dl>
         </section>
+
+        {/* One language traced end to end, before the reader is asked to press anything. The
+            page's other "examples" are three cards and three chips — all of them invitations to
+            act, which is no use to someone who does not yet know what a family is. */}
+        {ladder === null ? null : (
+          <section className="mx-auto mt-section-lg max-w-plate px-4 sm:px-6">
+            <WorkedExample rungs={ladder} strings={strings} locale={locale} />
+          </section>
+        )}
 
         {/* What a language family is, before any family is named. */}
         <section className="mx-auto mt-section-lg max-w-plate px-4 sm:px-6">
