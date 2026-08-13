@@ -108,7 +108,10 @@ export function PlateToolbar({
         aria-live="polite"
       >
         {selectionLabel === null ? (
-          <p className="text-body-s text-ink-soft">{strings.guide.linkage}</p>
+          /* The linkage sentence used to sit here, which made the one line explaining the whole
+             product the smallest, faintest text on the page and put it below the search box.
+             It leads the page header now; this slot states the empty state and nothing more. */
+          <p className="text-body-s text-ink-soft">{strings.plate.noSelection}</p>
         ) : (
           <>
             <span className="index-label">{strings.plate.selectedFamily}</span>

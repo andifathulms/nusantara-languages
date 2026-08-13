@@ -56,28 +56,30 @@ export default function PlatePage({ params }: { params: { locale: string } }) {
       <SiteHeader locale={locale} current="peta" />
 
       <main id="plate" className="mx-auto max-w-plate px-4 py-6 sm:px-6 sm:py-8">
-        {/* The lead says what the thing is in one plain sentence, before any terminology. */}
+        {/* Two sentences and one line of provenance, then the map. The header used to run to
+            roughly 700px with the legend stacked on top of it, which put the product itself
+            below the fold on a laptop — a reader met four explained concepts and a disclaimer
+            before they met the thing being explained. */}
         <header className="max-w-prose">
           <h1 className="font-display text-title-l sm:text-title-xl">{strings.plate.title}</h1>
           <p className="mt-3 text-lead text-ink-soft">
             {format(strings.guide.leadPlain, { total: bundle.coverage.languages })}
           </p>
-          <p className="caveat mt-4">
+          {/* What the reader can *do*. This sentence is the product, and it used to be set at
+              the smallest size on the page, in secondary ink, below the search box. */}
+          <p className="mt-3 text-body">{strings.guide.linkage}</p>
+          <p className="caveat mt-3">
             {period === null
               ? strings.plate.periodCaveat
-              : `${format(strings.plate.period, {
+              : format(strings.plate.periodShort, {
                   fromYear: period.fromYear,
                   toYear: period.toYear,
-                })}. ${strings.plate.periodCaveat}`}{' '}
+                })}{' '}
             <Link href={localePath(locale, 'metode')} className="link">
               {strings.nav.method}
             </Link>
           </p>
         </header>
-
-        <div className="mt-6">
-          <MapKey strings={strings} />
-        </div>
 
         <div className="mt-6">
           <PlateView
@@ -89,6 +91,13 @@ export default function PlatePage({ params }: { params: { locale: string } }) {
             examples={examples}
             syncHash
           />
+        </div>
+
+        {/* The key sits under the map, not over it. Every entry describes a mark — a tint, a
+            ring, a hatch, bare grey land — and a reader who has the map on screen can check
+            each one against the plate instead of holding four abstractions in mind. */}
+        <div className="mt-8">
+          <MapKey strings={strings} />
         </div>
 
         {/* Placed after the reader has used the map: by now the question has a referent. */}

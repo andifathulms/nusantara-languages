@@ -39,6 +39,12 @@ export type Dictionary = {
     readonly title: string
     /** Template. Placeholders: {fromYear}, {toYear}. */
     readonly period: string
+    /**
+     * The same two facts as `period` + `periodCaveat`, in one line, for the plate header where
+     * the map has to be reachable without scrolling. Invariant 6 is discharged by this.
+     * Template. Placeholders: {fromYear}, {toYear}.
+     */
+    readonly periodShort: string
     readonly periodCaveat: string
     readonly legend: string
     readonly families: string
@@ -48,6 +54,8 @@ export type Dictionary = {
     readonly gradientNote: string
     readonly clearSelection: string
     readonly selectedFamily: string
+    /** Empty state for the selection line, which is a live region and must say something. */
+    readonly noSelection: string
     readonly index: string
     readonly attribution: string
     /** Legend for the tree column's per-language mark. */
@@ -198,6 +206,8 @@ const id: Dictionary = {
   plate: {
     title: 'Peta rumpun bahasa',
     period: 'Sebaran wilayah menurut sumber atlas {fromYear}–{toYear}',
+    periodShort:
+      'Sebaran menurut sumber atlas {fromYear}–{toYear}, bukan sensus penutur hari ini.',
     periodCaveat:
       'Peta ini menunjukkan sebaran menurut sumber atlas tersebut, bukan sensus penutur hari ini.',
     legend: 'Keterangan',
@@ -210,6 +220,7 @@ const id: Dictionary = {
       'Batas antarbahasa pada kenyataannya berupa gradien, bukan garis. Garis batas digambar setipis mungkin untuk mengingatkan hal itu.',
     clearSelection: 'Hapus pilihan',
     selectedFamily: 'Rumpun terpilih',
+    noSelection: 'Belum ada rumpun terpilih.',
     index: 'Indeks',
     attribution:
       'Sumber: Glottolog 5.3 (CC-BY-4.0), Glottography (CC-BY-4.0), Natural Earth (domain publik).',
@@ -381,6 +392,8 @@ const en: Dictionary = {
   plate: {
     title: 'Language families',
     period: 'Distribution as described by atlas sources, {fromYear}–{toYear}',
+    periodShort:
+      'Distribution per atlas sources, {fromYear}–{toYear} — not a census of speakers today.',
     periodCaveat:
       'This map shows the distribution described by those atlas sources, not a census of who speaks what today.',
     legend: 'Legend',
@@ -393,6 +406,7 @@ const en: Dictionary = {
       'Language boundaries are gradients rather than lines. Boundaries are drawn as hairlines to keep that in view.',
     clearSelection: 'Clear selection',
     selectedFamily: 'Selected family',
+    noSelection: 'No family selected yet.',
     index: 'Index',
     attribution:
       'Sources: Glottolog 5.3 (CC-BY-4.0), Glottography (CC-BY-4.0), Natural Earth (public domain).',
