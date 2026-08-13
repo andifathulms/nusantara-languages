@@ -98,6 +98,14 @@ export default function PlatePage({ params }: { params: { locale: string } }) {
         <section className="rule-double mt-section-lg max-w-prose pt-block">
           <h2 className="font-display text-title-s">{strings.guide.whatIsFamily}</h2>
           <p className="mt-2 text-ink-soft">{strings.guide.whatIsFamilyBody}</p>
+
+          {/* And how anyone knows it. The tree is the authority behind every colour on this
+              plate, and naming Glottolog said who without saying how — so it read as a taxonomy
+              somebody decided rather than a claim from evidence. This is the second question a
+              reader who just asked the first one has, so it sits directly under it, on the same
+              page as the tree rather than on the method page. */}
+          <h2 className="mt-block font-display text-title-s">{strings.guide.howWeKnowTitle}</h2>
+          <p className="mt-2 text-ink-soft">{strings.guide.howWeKnow}</p>
         </section>
       </main>
 

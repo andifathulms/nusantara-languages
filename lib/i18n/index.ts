@@ -109,6 +109,15 @@ export type Dictionary = {
     readonly tabTree: string
     readonly whatIsFamily: string
     readonly whatIsFamilyBody: string
+    /**
+     * How anyone knows. The tree is the authority behind every colour on the plate, and naming
+     * Glottolog says who without saying how — so it read as a taxonomy somebody decided, like a
+     * library classification. Renders in the comprehension block directly under the plate and
+     * the tree, rather than in the tree's own header: seven lines of prose in a 21rem scrolling
+     * column would cost about a fifth of the visible rows, and a quarter of them on a phone.
+     */
+    readonly howWeKnow: string
+    readonly howWeKnowTitle: string
   }
   readonly tree: {
     readonly title: string
@@ -334,6 +343,9 @@ const id: Dictionary = {
     tabMap: 'Peta',
     tabTree: 'Pohon',
     whatIsFamily: 'Apa itu rumpun bahasa?',
+    howWeKnowTitle: 'Dari mana silsilah itu diketahui?',
+    howWeKnow:
+      'Percabangan pada pohon ini bukan pengelompokan menurut kemiripan yang terdengar. Itu simpulan metode perbandingan: dua bahasa dinyatakan sekerabat bila padanan bunyinya teratur — bukan mirip sesekali, melainkan berpola dan dapat diramalkan — dan bila keduanya berbagi pembaruan yang tidak dimiliki kerabat lain. Perlu dicatat: sebagian cabang jauh lebih mapan daripada cabang lain, dan pohon ini mengikuti satu sumber, Glottolog 5.3, bukan kesepakatan seluruh ahli. Cabang yang dalam pada Austronesia dikaji selama lebih dari seabad; sebagian pengelompokan di Papua masih diperdebatkan.',
     whatIsFamilyBody:
       'Rumpun bahasa adalah sekelompok bahasa yang terbukti berkembang dari satu bahasa purba yang sama — seperti keluarga yang punya nenek moyang bersama. Bahasa Jawa, Bali, Tagalog, dan Maori, misalnya, semuanya termasuk rumpun Austronesia. Pohon di halaman ini adalah silsilah itu.',
   },
@@ -556,6 +568,9 @@ const en: Dictionary = {
     tabMap: 'Map',
     tabTree: 'Tree',
     whatIsFamily: 'What is a language family?',
+    howWeKnowTitle: 'How is that genealogy known?',
+    howWeKnow:
+      'The branchings in this tree are not groupings by how alike languages sound. They are the findings of the comparative method: two languages are held to be related when their sounds correspond regularly — not resembling each other here and there, but patterned and predictable — and when they share innovations no other relative has. Worth knowing: some branches are far better established than others, and this tree follows one source, Glottolog 5.3, rather than a consensus of all scholars. Austronesian’s deep branches have been studied for over a century; some of the groupings in Papua are still argued over.',
     whatIsFamilyBody:
       'A language family is a group of languages shown to descend from one common ancestor language — a family in the genealogical sense. Javanese, Balinese, Tagalog and Māori all belong to Austronesian, for instance. The tree on this page is that genealogy.',
   },
