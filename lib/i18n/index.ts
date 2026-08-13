@@ -194,6 +194,14 @@ export type Dictionary = {
       readonly threshold: string
       /** Template. Placeholder: {pointOnly}. */
       readonly floor: string
+      /**
+       * The correction the whole seam view rests on. "Austronesian vs Papuan" reads as two
+       * families to anyone who does not already know better, which is the exact opposite of
+       * what this app exists to teach — and the list below it is the proof, so the sentence
+       * goes there rather than on a method page.
+       * Template. Placeholder: {families}.
+       */
+      readonly notAFamily: string
       readonly touching: string
       /** Template. Placeholder: {km}. */
       readonly within: string
@@ -404,7 +412,7 @@ const id: Dictionary = {
     lead: 'Beberapa jalan masuk singkat ke dalam data.',
     seam: {
       title: 'Jahitan Austronesia–Papua',
-      body: 'Rumpun Austronesia menyapu kepulauan dari barat ke timur; rumpun-rumpun Papua duduk di timur. Jahitan di antara keduanya melintasi Halmahera dan terlihat langsung pada peta.',
+      body: 'Rumpun Austronesia menyapu kepulauan dari barat ke timur; di timur duduk puluhan rumpun berbeda yang disebut “Papua” menurut letaknya, bukan karena berkerabat. Jahitan di antara keduanya melintasi Halmahera dan terlihat langsung pada peta.',
     },
     isolates: {
       title: 'Bahasa isolat',
@@ -424,6 +432,8 @@ const id: Dictionary = {
       lead: 'Ada {count} pasang wilayah yang benar-benar bersentuhan di sini: {languages} bahasa dari {families} rumpun berbeda. Warna membuat batas itu tampak seperti satu garis panjang; daftar ini menunjukkan bahwa di Halmahera dan sekitar Kepala Burung keduanya justru saling bersisipan.',
       threshold: 'Dua wilayah dihitung bersentuhan bila jaraknya kurang dari {km} km pada geometri yang sudah disederhanakan (toleransi 0,01°, kira-kira 1,1 km).',
       floor: 'Angka ini batas bawah, bukan sensus. Hanya bahasa yang punya wilayah terekam yang dapat muncul di sini, sedangkan {pointOnly} bahasa di peta ini hanya berupa titik — sebuah bahasa bisa saja duduk tepat di jahitan dan tidak pernah masuk daftar.',
+      notAFamily:
+        'Papua bukan satu rumpun. Kata itu menunjuk letak, bukan garis keturunan: rumpun-rumpun di timur Nusantara yang bukan Austronesia dan sejauh ini tidak terbukti berkerabat satu sama lain. Daftar di bawah memuat {families} rumpun yang berbeda-beda — jahitan ini bukan satu rumpun melawan satu rumpun, melainkan satu rumpun bertemu banyak rumpun.',
       touching: 'bersentuhan',
       within: '{km} km',
       columnFamily: 'Rumpun Papua',
@@ -623,7 +633,7 @@ const en: Dictionary = {
     lead: 'A few short ways into the data.',
     seam: {
       title: 'The Austronesian–Papuan seam',
-      body: 'Austronesian sweeps west to east across the archipelago; the Papuan families sit in the east. The seam between them runs through Halmahera and is visible on the map.',
+      body: 'Austronesian sweeps west to east across the archipelago; in the east sit dozens of separate families called “Papuan” for where they are, not because they are related. The seam between them runs through Halmahera and is visible on the map.',
     },
     isolates: {
       title: 'Isolates',
@@ -643,6 +653,8 @@ const en: Dictionary = {
       lead: '{count} pairs of recorded areas actually touch along it: {languages} languages from {families} different families. Colour makes the boundary look like one long line; this list shows that on Halmahera and around the Bird’s Head the two are interleaved instead.',
       threshold: 'Two areas count as touching when they come within {km} km of each other in the simplified geometry (0.01° tolerance, roughly 1.1 km).',
       floor: 'This is a floor, not a census. Only languages with a recorded area can appear, and {pointOnly} languages on this map are points only — a language can sit squarely on the seam and never be listed.',
+      notAFamily:
+        'Papuan is not a family. The word marks a location, not a line of descent: the families of the eastern archipelago that are not Austronesian and have not, so far, been shown to be related to one another. The list below holds {families} distinct families — this seam is not one family meeting another, but one family meeting many.',
       touching: 'touching',
       within: '{km} km',
       columnFamily: 'Papuan family',

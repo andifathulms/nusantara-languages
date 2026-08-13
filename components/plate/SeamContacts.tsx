@@ -68,6 +68,15 @@ export function SeamContacts({
         })}
       </p>
 
+      {/* The correction this whole view rests on, placed where its own evidence is.
+          "Austronesian–Papuan" reads as two families to anyone who does not already know
+          better — which is the exact opposite of what the app exists to teach, and it is the
+          app's most prominent story. The list underneath settles it: eighteen separate
+          families, none of them shown to be related to any other. */}
+      <p className="mt-3 max-w-prose text-ink-soft">
+        {format(copy.notAFamily, { families: report.familyCount })}
+      </p>
+
       {/* Family groups flow across columns once there is width for them. Grouping and order
           are untouched: the columns run in the same sequence the report returns. */}
       <ul className="mt-6 grid gap-x-8 gap-y-5 sm:grid-cols-2 xl:grid-cols-3">
