@@ -220,6 +220,12 @@ export type Dictionary = {
     /** Names what the control does. Not the current language — that is its value, not its job. */
     readonly chooseLanguage: string
     readonly siteNav: string
+    /**
+     * What the keys do, for someone who has just tabbed onto the plate. The handlers have always
+     * been there; nothing said so, and a focusable element with undiscoverable controls is the
+     * same as one with none.
+     */
+    readonly plateKeys: string
     /** Template. Placeholders: {name}, {count}. */
     readonly announceBranch: string
     /** Template. Placeholder: {name}. */
@@ -439,6 +445,8 @@ const id: Dictionary = {
     skipToContent: 'Lewati ke konten utama',
     chooseLanguage: 'Pilih bahasa tampilan',
     siteNav: 'Navigasi utama',
+    plateKeys:
+      'Gunakan tombol panah untuk menggeser peta, tombol tambah dan kurang untuk memperbesar dan memperkecil, dan angka nol untuk kembali ke tampilan penuh. Untuk memilih satu bahasa, gunakan pohon kekerabatan atau daftar rumpun di bawah peta.',
     announceBranch: '{name} dipilih, {count} bahasa disorot',
     announceLanguage: '{name} dipilih',
     announceCleared: 'Pilihan dihapus',
@@ -655,6 +663,8 @@ const en: Dictionary = {
     skipToContent: 'Skip to main content',
     chooseLanguage: 'Choose interface language',
     siteNav: 'Main navigation',
+    plateKeys:
+      'Use the arrow keys to pan the map, plus and minus to zoom, and zero to return to the full view. To select a language, use the family tree or the index of families below the map.',
     announceBranch: '{name} selected, {count} languages highlighted',
     announceLanguage: '{name} selected',
     announceCleared: 'Selection cleared',

@@ -1,6 +1,6 @@
 'use client'
 
-import { memo, useCallback, useEffect, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useId, useRef, useState } from 'react'
 import { isInScope, paintStateFor } from '@/lib/plate/select'
 import { PlateControls } from './PlateControls'
 import {
@@ -165,6 +165,7 @@ export function Plate({
   const [viewport, setViewport] = useState<Viewport>(IDENTITY)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [fullscreenAvailable, setFullscreenAvailable] = useState(false)
+  const keysId = useId()
   const frameRef = useRef<HTMLDivElement | null>(null)
   const svgRef = useRef<SVGSVGElement | null>(null)
 
@@ -306,6 +307,7 @@ export function Plate({
         viewBox={model.viewBox}
         role="img"
         aria-label={label}
+        aria-describedby={keysId}
         tabIndex={0}
         className={`plate-frame w-full bg-plate ${
           isFullscreen ? 'h-full max-h-full' : 'h-auto'
@@ -498,6 +500,15 @@ export function Plate({
         Glottolog 5.3 (CC-BY-4.0) · Glottography (CC-BY-4.0) · Natural Earth · CC-BY-SA-4.0
       </text>
       </svg>
+
+      {/* The plate has taken arrow keys, +/- and 0 since the viewport landed, and nothing ever
+          said so. A focusable element whose controls cannot be discovered is, for a keyboard
+          user, indistinguishable from one that does nothing — so this is a description on the
+          SVG rather than a new interaction. It also names the way in to selecting a language,
+          which is the tree and the index, not the map itself. */}
+      <p id={keysId} className="sr-only">
+        {strings.a11y.plateKeys}
+      </p>
 
       <PlateControls
         strings={strings}
