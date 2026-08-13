@@ -58,6 +58,15 @@ type PlateViewProps = {
   readonly slug?: string
   /** Worked examples for the toolbar, as `[label, glottocode]`. */
   readonly examples?: readonly { readonly label: string; readonly glottocode: string }[]
+  /**
+   * Slot rendered directly under the plate, for the map key.
+   *
+   * It has to be *here* rather than after this component: everything else in the left column —
+   * the index panel, the endangerment legend — plus the whole tree column sits below, and a key
+   * placed after all of that lands 70 KB of markup away from the marks it decodes. A reader who
+   * needs it never reaches it, and the two legends above it assume the knowledge it supplies.
+   */
+  readonly mapKey?: React.ReactNode
 }
 
 export function PlateView({
@@ -73,6 +82,7 @@ export function PlateView({
   syncHash = false,
   slug = 'peta',
   examples = [],
+  mapKey = null,
 }: PlateViewProps) {
   const [hovered, setHovered] = useState<string | null>(null)
   const [selection, setSelection] = useState<PlateSelection>(initialSelection)
@@ -268,6 +278,8 @@ export function PlateView({
           />
 
           <ExportBar strings={strings} getPlate={() => plateRef.current} slug={slug} />
+
+          {mapKey}
 
           <p aria-live="polite" className="sr-only">
             {announcement}

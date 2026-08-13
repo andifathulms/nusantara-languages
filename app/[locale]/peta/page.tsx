@@ -90,14 +90,8 @@ export default function PlatePage({ params }: { params: { locale: string } }) {
             manifest={bundle.manifest}
             examples={examples}
             syncHash
+            mapKey={<MapKey strings={strings} />}
           />
-        </div>
-
-        {/* The key sits under the map, not over it. Every entry describes a mark — a tint, a
-            ring, a hatch, bare grey land — and a reader who has the map on screen can check
-            each one against the plate instead of holding four abstractions in mind. */}
-        <div className="mt-section">
-          <MapKey strings={strings} />
         </div>
 
         {/* Placed after the reader has used the map: by now the question has a referent. */}
