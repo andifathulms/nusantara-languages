@@ -72,9 +72,14 @@ export function PlateControls({
         </ControlButton>
       ) : null}
 
-      {/* The current zoom, stated. A map that can move should say where it is. */}
+      {/* The current zoom, stated. A map that can move should say where it is — and stated
+          live, because this readout is the only feedback the zoom buttons produce: pressing one
+          otherwise changes nothing a screen reader would hear. */}
       {scale > 1.001 ? (
-        <div className="flex items-center gap-1.5 border border-boundary/30 bg-plate/95 px-2 py-1 shadow-sheet">
+        <div
+          className="flex items-center gap-1.5 border border-boundary/30 bg-plate/95 px-2 py-1 shadow-sheet"
+          aria-live="polite"
+        >
           <span className="figure text-micro text-ink-soft">{scale.toFixed(1)}×</span>
           <button type="button" onClick={onReset} className="font-label text-micro uppercase text-accent hover:underline">
             {strings.plate.zoomReset}

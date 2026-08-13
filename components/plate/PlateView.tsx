@@ -239,14 +239,18 @@ export function PlateView({
         onClear={clear}
       />
 
-      {/* Tabs below lg only: the tree has to be beside the plate when there is room for it. */}
-      <div className="flex gap-1 lg:hidden" role="tablist" aria-label={strings.plate.title}>
+      {/* A switch below lg only: the tree has to be beside the plate when there is room for it.
+          These used to carry role="tablist"/role="tab" and none of what those roles promise —
+          no tabpanel, no aria-controls, no arrow-key navigation, no roving tabindex. A screen
+          reader announced a tab widget and then the arrow keys did nothing.
+          Two buttons that swap a region are two buttons; aria-pressed says which one is on,
+          which is the whole truth here, so the roles are gone rather than propped up. */}
+      <div className="flex gap-1 lg:hidden">
         {(['map', 'tree'] as const).map((candidate) => (
           <button
             key={candidate}
             type="button"
-            role="tab"
-            aria-selected={tab === candidate}
+            aria-pressed={tab === candidate}
             onClick={() => setTab(candidate)}
             className={`btn flex-1 justify-center ${
               tab === candidate ? 'border-boundary bg-boundary text-plate' : ''
