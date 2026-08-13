@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { isRowVisible } from '@/lib/plate/select'
+import { treeKeyAction } from '@/lib/tree/navigate'
 import { scrollBehaviour } from '@/lib/dom/motion'
 import { format, type Dictionary } from '@/lib/i18n'
 import type { TreeRow } from '@/lib/plate/build'
@@ -62,6 +63,14 @@ export function TreeColumn({
   scrollTo,
 }: TreeColumnProps) {
   const listRef = useRef<HTMLDivElement | null>(null)
+  /**
+   * The roving tabindex. Exactly one row is in the tab order; the arrow keys move which.
+   *
+   * Before this the tree was 92 tab stops on load and 1,716 fully expanded, with the footer
+   * behind all of them — it declared role="tree" and implemented none of the navigation that
+   * role promises, so a screen reader announced a tree and the arrow keys did nothing.
+   */
+  const [active, setActive] = useState<string | null>(null)
 
   useEffect(() => {
     if (scrollTo === null) return
@@ -74,9 +83,55 @@ export function TreeColumn({
     // overrides the CSS property, so the guard never covered this call — and this is the app's
     // signature movement: click a territory, the tree travels to it.
     row.scrollIntoView({ block: 'center', behavior: scrollBehaviour() })
+    // Move the tab stop to the row the plate just chose, so tabbing into the tree lands there.
+    // Deliberately not .focus(): the reader clicked the map, and focus belongs where they are.
+    setActive(scrollTo)
   }, [scrollTo, open])
 
   const visible = rows.filter((row) => isRowVisible(row.ancestors, open))
+  const codes = visible.map((row) => row.glottocode)
+
+  // The tab stop, kept valid: collapsing a branch can take the active row off screen, and a
+  // tabindex on a row that is not rendered means the tree drops out of the tab order entirely.
+  const activeCode =
+    active !== null && codes.includes(active) ? active : (codes[0] ?? null)
+
+  const parentOf = (row: TreeRow): string => row.ancestors[row.ancestors.length - 1] ?? '\u0000root'
+
+  // aria-setsize / aria-posinset, because the DOM here is a flat list rather than nested groups.
+  // Without them a screen reader can say "level 3" but never "3 of 25".
+  const sizes = new Map<string, number>()
+  for (const row of visible) sizes.set(parentOf(row), (sizes.get(parentOf(row)) ?? 0) + 1)
+  const seen = new Map<string, number>()
+  const positions = visible.map((row) => {
+    const key = parentOf(row)
+    const next = (seen.get(key) ?? 0) + 1
+    seen.set(key, next)
+    return next
+  })
+
+  const focusRow = (glottocode: string): void => {
+    setActive(glottocode)
+    listRef.current
+      ?.querySelector<HTMLElement>(`[data-glottocode="${glottocode}"]`)
+      ?.focus()
+  }
+
+  const onRowKeyDown = (event: React.KeyboardEvent, row: TreeRow, index: number): void => {
+    const action = treeKeyAction(event.key, {
+      codes,
+      index,
+      hasChildren: row.hasChildren,
+      isOpen: open.has(row.glottocode),
+      parent: row.ancestors[row.ancestors.length - 1] ?? null,
+    })
+    if (action.type === 'none') return
+
+    event.preventDefault()
+    if (action.type === 'move') focusRow(action.glottocode)
+    else if (action.type === 'toggle') onToggle(row.glottocode)
+    else onSelect(row)
+  }
 
   // The tree's name was announced three times over — on the aside, on the heading and on the
   // tree itself. One heading names it; the other two point at that heading.
@@ -95,20 +150,36 @@ export function TreeColumn({
         onPointerLeave={() => onHover(null)}
       >
         <ul role="tree" aria-labelledby="tree-title">
-          {visible.map((row) => {
+          {visible.map((row, index) => {
             const isScoped = scope !== null && (row.glottocode === scope || row.ancestors.includes(scope))
             const isExactScope = row.glottocode === scope
             const isSelected = row.glottocode === selected
             const isOpen = open.has(row.glottocode)
 
             return (
+              /* The treeitem is the focusable thing, which is what the role requires — a
+                 treeitem may not contain focusable descendants, and this used to hold two
+                 buttons. The glyph and the name are hit regions inside it now: still clickable
+                 for a pointer, never separate tab stops. Their keyboard equivalents are the
+                 arrow keys, which is the whole point of the pattern. */
               <li
                 key={row.glottocode}
                 role="treeitem"
                 aria-expanded={row.hasChildren ? isOpen : undefined}
-                aria-selected={isSelected}
+                aria-selected={isSelected ? true : undefined}
                 aria-level={row.depth + 1}
+                aria-setsize={sizes.get(parentOf(row))}
+                aria-posinset={positions[index]}
                 data-glottocode={row.glottocode}
+                tabIndex={row.glottocode === activeCode ? 0 : -1}
+                onKeyDown={(event) => onRowKeyDown(event, row, index)}
+                onFocus={() => {
+                  setActive(row.glottocode)
+                  onHover(row.glottocode)
+                }}
+                onBlur={() => onHover(null)}
+                onClick={() => onSelect(row)}
+                className="outline-offset-[-2px]"
               >
                 <div
                   className={`flex items-baseline gap-1.5 px-1 py-[0.1rem] transition-colors ${
@@ -118,14 +189,17 @@ export function TreeColumn({
                   onPointerEnter={() => onHover(row.glottocode)}
                 >
                   {row.hasChildren ? (
-                    <button
-                      type="button"
-                      onClick={() => onToggle(row.glottocode)}
-                      aria-label={`${isOpen ? strings.tree.collapse : strings.tree.expand}: ${row.name}`}
-                      className="hit shrink-0 font-mono text-micro text-ink-soft hover:text-accent"
+                    <span
+                      aria-hidden="true"
+                      onClick={(event) => {
+                        // The glyph toggles rather than selects, so it must not reach the row.
+                        event.stopPropagation()
+                        onToggle(row.glottocode)
+                      }}
+                      className="hit shrink-0 cursor-pointer font-mono text-micro text-ink-soft"
                     >
                       {isOpen ? '−' : '+'}
-                    </button>
+                    </span>
                   ) : (
                     <span aria-hidden="true" className="hit shrink-0" />
                   )}
@@ -138,17 +212,13 @@ export function TreeColumn({
                     }}
                   />
 
-                  <button
-                    type="button"
-                    onClick={() => onSelect(row)}
-                    onFocus={() => onHover(row.glottocode)}
-                    onBlur={() => onHover(null)}
-                    className={`min-w-0 flex-1 truncate text-left text-body-s hover:text-accent ${
+                  <span
+                    className={`min-w-0 flex-1 cursor-pointer truncate text-left text-body-s ${
                       row.level === 'language' ? '' : 'font-medium'
                     } ${isSelected ? 'text-accent underline' : ''}`}
                   >
                     {row.name}
-                  </button>
+                  </span>
 
                   {/* Whether a language has a territory or is only a point is one of the
                       central distinctions this project makes, and it was carried by a glyph in
