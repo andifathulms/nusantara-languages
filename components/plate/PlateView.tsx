@@ -258,77 +258,87 @@ export function PlateView({
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_21rem] xl:grid-cols-[minmax(0,1fr)_25rem]">
-        <div className={`min-w-0 space-y-4 ${tab === 'map' ? '' : 'hidden lg:block'}`}>
-          <Plate
-            plateRef={plateRef}
-            model={model}
-            scope={scope}
-            selectedLanguage={selectedLanguage}
-            onHover={setHovered}
-            onSelect={selectFromPlate}
-            label={`${strings.plate.title} — ${format(strings.plate.coverage, {
-              withPolygon: coverage.withPolygon,
-              total: coverage.languages,
-              percent: coverage.polygonPercent,
-            })}`}
-            showHatching={hatching}
-            colourMode={colourMode}
-            emphasis={emphasisSet}
-            strings={strings}
-          />
+        {/* Two groups, not six evenly-spaced blocks. The plate, its export row, the key and the
+            panel that answers a click are one thing — the map, and how to read it. The index and
+            the endangerment legend are reference tables *about* the map. Every one of them was
+            16px from the next, so the column read as an undifferentiated stack of cards and
+            nothing marked where the map ended. The two wash levels already distinguished them;
+            only the spacing did not. */}
+        <div className={`min-w-0 space-y-block-lg ${tab === 'map' ? '' : 'hidden lg:block'}`}>
+          <div className="space-y-4">
+            <Plate
+              plateRef={plateRef}
+              model={model}
+              scope={scope}
+              selectedLanguage={selectedLanguage}
+              onHover={setHovered}
+              onSelect={selectFromPlate}
+              label={`${strings.plate.title} — ${format(strings.plate.coverage, {
+                withPolygon: coverage.withPolygon,
+                total: coverage.languages,
+                percent: coverage.polygonPercent,
+              })}`}
+              showHatching={hatching}
+              colourMode={colourMode}
+              emphasis={emphasisSet}
+              strings={strings}
+            />
 
-          <ExportBar strings={strings} getPlate={() => plateRef.current} slug={slug} />
+            <ExportBar strings={strings} getPlate={() => plateRef.current} slug={slug} />
 
-          {mapKey}
+            {mapKey}
 
-          <p aria-live="polite" className="sr-only">
-            {announcement}
-          </p>
+            <p aria-live="polite" className="sr-only">
+              {announcement}
+            </p>
 
-          {/* The panel answers the click that produced it, so it sits with the plate. */}
-          {selectedDetail !== undefined ? (
-            <section className="sheet p-4 sm:p-5" aria-label={selectedDetail.name}>
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="index-label">
-                    {selectedDetail.ancestry[0]?.name ?? strings.tree.isolate}
-                  </p>
-                  <h2 className="mt-0.5 font-display text-title-m">{selectedDetail.name}</h2>
+            {/* The panel answers the click that produced it, so it sits with the plate. */}
+            {selectedDetail !== undefined ? (
+              <section className="sheet p-4 sm:p-5" aria-label={selectedDetail.name}>
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="index-label">
+                      {selectedDetail.ancestry[0]?.name ?? strings.tree.isolate}
+                    </p>
+                    <h2 className="mt-0.5 font-display text-title-m">{selectedDetail.name}</h2>
+                  </div>
+                  <button type="button" onClick={clear} className="btn shrink-0">
+                    {strings.panel.close}
+                  </button>
                 </div>
-                <button type="button" onClick={clear} className="btn shrink-0">
-                  {strings.panel.close}
-                </button>
-              </div>
-              <div className="mt-4">
-                <LanguageFacts
-                  detail={selectedDetail}
-                  strings={strings}
-                  locale={locale}
-                  manifest={manifest}
-                  compact
-                />
-              </div>
-            </section>
-          ) : null}
+                <div className="mt-4">
+                  <LanguageFacts
+                    detail={selectedDetail}
+                    strings={strings}
+                    locale={locale}
+                    manifest={manifest}
+                    compact
+                  />
+                </div>
+              </section>
+            ) : null}
+          </div>
 
-          <IndexPanel
-            legend={colourMode === 'subgroup' ? model.subgroupLegend : model.legend}
-            note={colourMode === 'subgroup' ? strings.plate.subgroupNote : null}
-            coverage={coverage}
-            strings={strings}
-            scope={scope}
-            onHover={setHovered}
-            onSelect={selectBranch}
-            onClear={clear}
-            hasSelection={selection.kind !== 'none'}
-          />
+          <div className="space-y-4">
+            <IndexPanel
+              legend={colourMode === 'subgroup' ? model.subgroupLegend : model.legend}
+              note={colourMode === 'subgroup' ? strings.plate.subgroupNote : null}
+              coverage={coverage}
+              strings={strings}
+              scope={scope}
+              onHover={setHovered}
+              onSelect={selectBranch}
+              onClear={clear}
+              hasSelection={selection.kind !== 'none'}
+            />
 
-          <HatchLegend
-            strings={strings}
-            coverage={coverage}
-            enabled={hatching}
-            onToggle={() => setHatching((current) => !current)}
-          />
+            <HatchLegend
+              strings={strings}
+              coverage={coverage}
+              enabled={hatching}
+              onToggle={() => setHatching((current) => !current)}
+            />
+          </div>
         </div>
 
         <div
