@@ -216,7 +216,7 @@ export type Dictionary = {
     readonly failed: string
   }
   readonly a11y: {
-    readonly skipToPlate: string
+    readonly skipToContent: string
     /** Template. Placeholders: {name}, {count}. */
     readonly announceBranch: string
     /** Template. Placeholder: {name}. */
@@ -433,7 +433,7 @@ const id: Dictionary = {
     failed: 'Gagal. Coba lagi atau gunakan tangkapan layar.',
   },
   a11y: {
-    skipToPlate: 'Lewati ke peta',
+    skipToContent: 'Lewati ke konten utama',
     announceBranch: '{name} dipilih, {count} bahasa disorot',
     announceLanguage: '{name} dipilih',
     announceCleared: 'Pilihan dihapus',
@@ -647,7 +647,7 @@ const en: Dictionary = {
     failed: 'That did not work. Try again, or take a screenshot.',
   },
   a11y: {
-    skipToPlate: 'Skip to the map',
+    skipToContent: 'Skip to main content',
     announceBranch: '{name} selected, {count} languages highlighted',
     announceLanguage: '{name} selected',
     announceCleared: 'Selection cleared',

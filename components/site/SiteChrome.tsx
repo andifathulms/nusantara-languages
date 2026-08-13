@@ -32,10 +32,10 @@ export function SiteHeader({ locale, current }: { locale: Locale; current?: stri
   return (
     <header className="border-b border-boundary/20 bg-plate/80 backdrop-blur-sm">
       <a
-        href="#plate"
+        href="#content"
         className="sr-only focus:not-sr-only focus:absolute focus:z-30 focus:m-2 focus:bg-plate focus:px-3 focus:py-2 focus:underline"
       >
-        {strings.a11y.skipToPlate}
+        {strings.a11y.skipToContent}
       </a>
 
       <div className="mx-auto flex max-w-plate flex-wrap items-center gap-x-8 gap-y-2 px-4 py-3 sm:px-6">

@@ -88,7 +88,7 @@ export default function GuidedViewPage({
     <>
       <SiteHeader locale={locale} current="pandu" />
 
-      <main id="plate" className="mx-auto max-w-plate px-4 py-block sm:px-6 sm:py-block-lg">
+      <main id="content" className="mx-auto max-w-plate px-4 py-block sm:px-6 sm:py-block-lg">
         <div className="max-w-prose">
           <p className="index-label">
             <Link href={localePath(locale, 'pandu')} className="hover:underline">

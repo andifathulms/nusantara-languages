@@ -43,7 +43,7 @@ export default function GuidedIndexPage({ params }: { params: { locale: string }
     <>
       <SiteHeader locale={locale} current="pandu" />
 
-      <main className="mx-auto max-w-plate px-4 py-section sm:px-6">
+      <main id="content" className="mx-auto max-w-plate px-4 py-section sm:px-6">
         <h1 className="font-display text-title-l">{strings.guided.title}</h1>
         <p className="mt-3 max-w-prose text-lead text-ink-soft">{strings.guided.lead}</p>
 

@@ -55,7 +55,7 @@ export default function PlatePage({ params }: { params: { locale: string } }) {
     <>
       <SiteHeader locale={locale} current="peta" />
 
-      <main id="plate" className="mx-auto max-w-plate px-4 py-block sm:px-6 sm:py-block-lg">
+      <main id="content" className="mx-auto max-w-plate px-4 py-block sm:px-6 sm:py-block-lg">
         {/* Two sentences and one line of provenance, then the map. The header used to run to
             roughly 700px with the legend stacked on top of it, which put the product itself
             below the fold on a laptop — a reader met four explained concepts and a disclaimer

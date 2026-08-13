@@ -66,7 +66,7 @@ export default function HomePage({ params }: { params: { locale: string } }) {
     <>
       <SiteHeader locale={locale} current="home" />
 
-      <main>
+      <main id="content">
         {/* Hero: the plain sentence first, the map immediately under it. */}
         <section className="mx-auto max-w-plate px-4 pt-section sm:px-6 sm:pt-section-lg">
           <div className="max-w-prose">
