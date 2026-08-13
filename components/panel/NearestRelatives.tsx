@@ -77,11 +77,15 @@ export function NearestRelatives({
             )}
           </dl>
 
-          <p className="caveat mt-4">{strings.relatives.unranked}</p>
-          {report.closest === null ? null : (
-            <p className="caveat mt-2">{strings.relatives.distanceCaveat}</p>
-          )}
-          <p className="caveat mt-2">{format(strings.relatives.scopeCaveat, { total })}</p>
+          {/* One note, not three stacked rules. Every sentence here is load-bearing — unranked,
+              measured between midpoints, scoped to this map — but set as three separate pulled
+              caveats under a two-line answer they read as a wall of hedging, and a caveat that
+              gets skipped protects nobody. Same words, one block, still pulled out. */}
+          <div className="caveat mt-4 space-y-2">
+            <p>{strings.relatives.unranked}</p>
+            {report.closest === null ? null : <p>{strings.relatives.distanceCaveat}</p>}
+            <p>{format(strings.relatives.scopeCaveat, { total })}</p>
+          </div>
         </>
       )}
     </section>

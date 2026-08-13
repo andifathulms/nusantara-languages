@@ -102,8 +102,12 @@ export function SeamContacts({
         ))}
       </ul>
 
-      <p className="caveat mt-6">{format(copy.threshold, { km: report.maxKm })}</p>
-      <p className="caveat mt-2">{format(copy.floor, { pointOnly })}</p>
+      {/* The rule and the limit, in one block rather than two stacked rules — they are a
+          single statement about what this count is and is not. */}
+      <div className="caveat mt-6 space-y-2">
+        <p>{format(copy.threshold, { km: report.maxKm })}</p>
+        <p>{format(copy.floor, { pointOnly })}</p>
+      </div>
     </section>
   )
 }
