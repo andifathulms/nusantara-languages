@@ -217,6 +217,9 @@ export type Dictionary = {
   }
   readonly a11y: {
     readonly skipToContent: string
+    /** Names what the control does. Not the current language — that is its value, not its job. */
+    readonly chooseLanguage: string
+    readonly siteNav: string
     /** Template. Placeholders: {name}, {count}. */
     readonly announceBranch: string
     /** Template. Placeholder: {name}. */
@@ -434,6 +437,8 @@ const id: Dictionary = {
   },
   a11y: {
     skipToContent: 'Lewati ke konten utama',
+    chooseLanguage: 'Pilih bahasa tampilan',
+    siteNav: 'Navigasi utama',
     announceBranch: '{name} dipilih, {count} bahasa disorot',
     announceLanguage: '{name} dipilih',
     announceCleared: 'Pilihan dihapus',
@@ -648,6 +653,8 @@ const en: Dictionary = {
   },
   a11y: {
     skipToContent: 'Skip to main content',
+    chooseLanguage: 'Choose interface language',
+    siteNav: 'Main navigation',
     announceBranch: '{name} selected, {count} languages highlighted',
     announceLanguage: '{name} selected',
     announceCleared: 'Selection cleared',

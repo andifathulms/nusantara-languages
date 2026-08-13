@@ -53,7 +53,7 @@ export function SiteHeader({ locale, current }: { locale: Locale; current?: stri
           </span>
         </Link>
 
-        <nav aria-label={strings.nav.home} className="flex items-baseline gap-5">
+        <nav aria-label={strings.a11y.siteNav} className="flex items-baseline gap-5">
           {NAV.map((item) => (
             <Link
               key={item.key}
@@ -78,7 +78,7 @@ export function SiteHeader({ locale, current }: { locale: Locale; current?: stri
         <div
           className="ml-auto flex items-center overflow-hidden rounded-sm border border-boundary/25"
           role="group"
-          aria-label={strings.localeName}
+          aria-label={strings.a11y.chooseLanguage}
         >
           {LOCALES.map((candidate) => (
             <Link
