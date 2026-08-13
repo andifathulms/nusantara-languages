@@ -1,6 +1,6 @@
 'use client'
 
-import { useId, useMemo, useState } from 'react'
+import { useId, useMemo, useRef, useState } from 'react'
 import { searchLanguages, type SearchEntry } from '@/lib/search'
 import { format, type Dictionary } from '@/lib/i18n'
 
@@ -23,21 +23,34 @@ export function SearchBox({ entries, strings, onChoose }: SearchBoxProps) {
   const [query, setQuery] = useState('')
   const [isOpen, setIsOpen] = useState(false)
   const listId = useId()
+  const inputRef = useRef<HTMLInputElement | null>(null)
 
   const results = useMemo(() => searchLanguages(entries, query), [entries, query])
+  const showing = isOpen && query.length >= 2
+
+  const close = (): void => {
+    setIsOpen(false)
+    inputRef.current?.focus()
+  }
 
   return (
-    <div className="relative">
+    // Escape closes the list from anywhere inside it, not only from the input. Tabbing out of
+    // twelve results to dismiss them is not a trap, but it is not a way out either.
+    <div
+      className="relative"
+      onKeyDown={(event) => {
+        if (event.key !== 'Escape' || !showing) return
+        event.stopPropagation()
+        close()
+      }}
+    >
       <label className="index-label block" htmlFor={`${listId}-input`}>
         {strings.search.label}
       </label>
       <input
+        ref={inputRef}
         id={`${listId}-input`}
         type="search"
-        role="combobox"
-        aria-expanded={isOpen && query.length >= 2}
-        aria-controls={listId}
-        aria-autocomplete="list"
         autoComplete="off"
         value={query}
         placeholder={strings.search.placeholder}
@@ -47,7 +60,6 @@ export function SearchBox({ entries, strings, onChoose }: SearchBoxProps) {
         }}
         onFocus={() => setIsOpen(true)}
         onKeyDown={(event) => {
-          if (event.key === 'Escape') setIsOpen(false)
           if (event.key === 'Enter') {
             const first = results[0]
             if (first !== undefined) {
@@ -59,18 +71,27 @@ export function SearchBox({ entries, strings, onChoose }: SearchBoxProps) {
         className="field mt-1"
       />
 
-      {isOpen && query.length >= 2 ? (
+      {/* The count, announced. This used to ride on role="combobox" + aria-expanded, which
+          promised a listbox pattern the component never implemented — no arrow keys, no
+          aria-activedescendant, and options that illegally contained buttons. The roles are
+          gone; a polite live region does the one job they were really doing, which is telling
+          a screen reader that results appeared and how many. */}
+      <p aria-live="polite" className="sr-only">
+        {showing ? format(strings.search.resultCount, { count: results.length }) : ''}
+      </p>
+
+      {showing ? (
         <div className="absolute z-20 mt-1 w-full border border-boundary/30 bg-plate shadow-lifted">
           {results.length === 0 ? (
             <p className="px-2 py-2 text-body-s text-ink-soft">{strings.search.noResults}</p>
           ) : (
             <>
-              <p className="index-label px-2 pt-1">
+              <p aria-hidden="true" className="index-label px-2 pt-1">
                 {format(strings.search.resultCount, { count: results.length })}
               </p>
-              <ul id={listId} role="listbox" className="max-h-72 overflow-y-auto">
+              <ul id={listId} className="max-h-72 overflow-y-auto">
                 {results.map((result) => (
-                  <li key={result.entry.glottocode} role="option" aria-selected={false}>
+                  <li key={result.entry.glottocode}>
                     <button
                       type="button"
                       onClick={() => {

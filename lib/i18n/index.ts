@@ -226,6 +226,8 @@ export type Dictionary = {
      * same as one with none.
      */
     readonly plateKeys: string
+    /** Announced when the result count changes, for a user who cannot see the list appear. */
+    readonly searchResultsRegion: string
     /** Template. Placeholders: {name}, {count}. */
     readonly announceBranch: string
     /** Template. Placeholder: {name}. */
@@ -445,6 +447,7 @@ const id: Dictionary = {
     skipToContent: 'Lewati ke konten utama',
     chooseLanguage: 'Pilih bahasa tampilan',
     siteNav: 'Navigasi utama',
+    searchResultsRegion: 'Hasil pencarian',
     plateKeys:
       'Gunakan tombol panah untuk menggeser peta, tombol tambah dan kurang untuk memperbesar dan memperkecil, dan angka nol untuk kembali ke tampilan penuh. Untuk memilih satu bahasa, gunakan pohon kekerabatan atau daftar rumpun di bawah peta.',
     announceBranch: '{name} dipilih, {count} bahasa disorot',
@@ -663,6 +666,7 @@ const en: Dictionary = {
     skipToContent: 'Skip to main content',
     chooseLanguage: 'Choose interface language',
     siteNav: 'Main navigation',
+    searchResultsRegion: 'Search results',
     plateKeys:
       'Use the arrow keys to pan the map, plus and minus to zoom, and zero to return to the full view. To select a language, use the family tree or the index of families below the map.',
     announceBranch: '{name} selected, {count} languages highlighted',
