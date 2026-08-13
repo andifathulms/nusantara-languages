@@ -3,9 +3,11 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { SiteFooter, SiteHeader } from '@/components/site/SiteChrome'
 import { PlateView } from '@/components/plate/PlateView'
+import { SeamContacts } from '@/components/plate/SeamContacts'
 import { loadBundle } from '@/lib/bundle/load'
 import { buildPlateModel } from '@/lib/plate/build'
 import { GUIDED, GUIDED_VIEWS, isGuidedView, type GuidedViewId } from '@/lib/plate/guided'
+import { seamReport } from '@/lib/plate/seam'
 import { LOCALES, dictionary, format, isLocale, localePath, type Dictionary, type Locale } from '@/lib/i18n'
 
 const PLATE_WIDTH = 1600
@@ -71,6 +73,17 @@ export default function GuidedViewPage({
 
   const emphasis = view.emphasise(bundle.languoids, bundle.coverage)
 
+  // Only the seam view enumerates its contacts, and only at build time. The other two views ask
+  // a different question, and computing this for them would be work nobody reads.
+  const seam =
+    params.view === 'jahitan'
+      ? seamReport({
+          languoids: bundle.languoids,
+          geometry: bundle.geometry,
+          treeIndex: bundle.treeIndex,
+        })
+      : null
+
   return (
     <>
       <SiteHeader locale={locale} current="pandu" />
@@ -102,6 +115,20 @@ export default function GuidedViewPage({
             slug={params.view}
           />
         </div>
+
+        {/* The view draws the seam; this is the same claim made checkable. Placed after the
+            map, because the list only means anything to a reader who has seen the thing it
+            enumerates. */}
+        {seam === null ? null : (
+          <div className="mt-section">
+            <SeamContacts
+              report={seam}
+              strings={strings}
+              locale={locale}
+              pointOnly={bundle.coverage.pointOnly}
+            />
+          </div>
+        )}
       </main>
 
       <SiteFooter locale={locale} />

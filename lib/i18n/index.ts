@@ -182,6 +182,25 @@ export type Dictionary = {
     /** Template. Placeholder: {count}. */
     readonly emphasised: string
     readonly stillClickable: string
+    /**
+     * The seam, enumerated. Every string carries the limit with the fact: a threshold the
+     * reader can see, and the reminder that only languages with a polygon can appear.
+     */
+    readonly seamContacts: {
+      readonly title: string
+      /** Template. Placeholders: {count}, {languages}, {families}. */
+      readonly lead: string
+      /** Template. Placeholder: {km}. */
+      readonly threshold: string
+      /** Template. Placeholder: {pointOnly}. */
+      readonly floor: string
+      readonly touching: string
+      /** Template. Placeholder: {km}. */
+      readonly within: string
+      readonly columnFamily: string
+      readonly columnAustronesian: string
+      readonly columnDistance: string
+    }
   }
   readonly search: {
     readonly label: string
@@ -389,6 +408,17 @@ const id: Dictionary = {
     emphasised: '{count} bahasa disorot pada tampilan ini',
     stillClickable:
       'Tampilan ini hanya menentukan apa yang menyala lebih dahulu. Semua bahasa tetap digambar dan tetap dapat diklik — menyembunyikan sisanya berarti mengklaim sesuatu tentang apa yang ada di sana.',
+    seamContacts: {
+      title: 'Jahitan ini bukan sebuah garis',
+      lead: 'Ada {count} pasang wilayah yang benar-benar bersentuhan di sini: {languages} bahasa dari {families} rumpun berbeda. Warna membuat batas itu tampak seperti satu garis panjang; daftar ini menunjukkan bahwa di Halmahera dan sekitar Kepala Burung keduanya justru saling bersisipan.',
+      threshold: 'Dua wilayah dihitung bersentuhan bila jaraknya kurang dari {km} km pada geometri yang sudah disederhanakan (toleransi 0,01°, kira-kira 1,1 km).',
+      floor: 'Angka ini batas bawah, bukan sensus. Hanya bahasa yang punya wilayah terekam yang dapat muncul di sini, sedangkan {pointOnly} bahasa di peta ini hanya berupa titik — sebuah bahasa bisa saja duduk tepat di jahitan dan tidak pernah masuk daftar.',
+      touching: 'bersentuhan',
+      within: '{km} km',
+      columnFamily: 'Rumpun Papua',
+      columnAustronesian: 'Bersentuhan dengan',
+      columnDistance: 'Jarak',
+    },
   },
   search: {
     label: 'Cari bahasa',
@@ -592,6 +622,17 @@ const en: Dictionary = {
     emphasised: '{count} languages are emphasised in this view',
     stillClickable:
       'A view only decides what starts lit. Every language is still drawn and still clickable — hiding the rest would be making a claim about what is there.',
+    seamContacts: {
+      title: 'The seam is not a line',
+      lead: '{count} pairs of recorded areas actually touch along it: {languages} languages from {families} different families. Colour makes the boundary look like one long line; this list shows that on Halmahera and around the Bird’s Head the two are interleaved instead.',
+      threshold: 'Two areas count as touching when they come within {km} km of each other in the simplified geometry (0.01° tolerance, roughly 1.1 km).',
+      floor: 'This is a floor, not a census. Only languages with a recorded area can appear, and {pointOnly} languages on this map are points only — a language can sit squarely on the seam and never be listed.',
+      touching: 'touching',
+      within: '{km} km',
+      columnFamily: 'Papuan family',
+      columnAustronesian: 'In contact with',
+      columnDistance: 'Distance',
+    },
   },
   search: {
     label: 'Search languages',
