@@ -29,6 +29,27 @@ type TreeColumnProps = {
   readonly scrollTo: string | null
 }
 
+/**
+ * Indentation, capped.
+ *
+ * The bundle's deepest row sits at depth 11, which at the old flat 0.7rem per level was 127px
+ * of indent. In the tree tab at 320px that leaves roughly 95px for the name after the toggle,
+ * the swatch and the count — every deep row truncated to nothing. `truncate` meant it never
+ * caused horizontal scrolling, so it degraded quietly instead of failing loudly.
+ *
+ * Full step for the first six levels, where indentation is doing real work in telling siblings
+ * from children, then a quarter step. Depth is still legible past six — aria-level carries it
+ * exactly for anyone who needs the number — and the name keeps its column.
+ */
+const INDENT_STEP_REM = 0.7
+const INDENT_FULL_DEPTH = 6
+
+export function indentRem(depth: number): number {
+  const full = Math.min(depth, INDENT_FULL_DEPTH)
+  const beyond = Math.max(0, depth - INDENT_FULL_DEPTH)
+  return full * INDENT_STEP_REM + beyond * (INDENT_STEP_REM / 4) + 0.25
+}
+
 export function TreeColumn({
   rows,
   strings,
@@ -93,7 +114,7 @@ export function TreeColumn({
                   className={`flex items-baseline gap-1.5 px-1 py-[0.1rem] transition-colors ${
                     isExactScope || isSelected ? 'bg-accent/10' : 'hover:bg-boundary/5'
                   }`}
-                  style={{ paddingLeft: `${row.depth * 0.7 + 0.25}rem` }}
+                  style={{ paddingLeft: `${indentRem(row.depth)}rem` }}
                   onPointerEnter={() => onHover(row.glottocode)}
                 >
                   {row.hasChildren ? (
@@ -101,12 +122,12 @@ export function TreeColumn({
                       type="button"
                       onClick={() => onToggle(row.glottocode)}
                       aria-label={`${isOpen ? strings.tree.collapse : strings.tree.expand}: ${row.name}`}
-                      className="w-3 shrink-0 font-mono text-micro text-ink-soft hover:text-accent"
+                      className="hit shrink-0 font-mono text-micro text-ink-soft hover:text-accent"
                     >
                       {isOpen ? '−' : '+'}
                     </button>
                   ) : (
-                    <span aria-hidden="true" className="w-3 shrink-0" />
+                    <span aria-hidden="true" className="hit shrink-0" />
                   )}
 
                   <span

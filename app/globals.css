@@ -135,6 +135,22 @@
     @apply px-5 py-2.5 text-body-s tracking-[0.1em];
   }
 
+  /* A minimum 24x24 target for a mark drawn smaller than that.
+   *
+   * WCAG 2.5.8 asks for 24x24 CSS px. An atlas index is set tight and the marks here are
+   * deliberately small, so this grows the control without growing the glyph inside it.
+   *
+   * It takes real space rather than stealing it with a negative margin. The tempting version
+   * pads to 24px and pulls the layout back with -6px, which keeps the row identical — but the
+   * overhang then sits on top of the next control and swallows clicks meant for it, and in the
+   * tree the next control is the language name. Room the target needs is room it gets.
+   */
+  .hit {
+    @apply inline-flex items-center justify-center;
+    min-width: 1.5rem;
+    min-height: 1.5rem;
+  }
+
   .field {
     @apply w-full border border-boundary/30 bg-plate px-2.5 py-1.5 font-label text-body-s
       text-boundary placeholder:text-ink-soft/70;
