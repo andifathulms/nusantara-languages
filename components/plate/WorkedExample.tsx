@@ -75,13 +75,26 @@ export function WorkedExample({
                     number(rung.languageCount)
                   )}
                 </td>
-                <td className="figure py-1.5 text-right tabular-nums">
+                <td className="py-1.5 text-right">
                   {rung.extentKm === null ? (
                     <span aria-hidden="true" className="text-ink-soft">
                       —
                     </span>
                   ) : (
-                    `${number(rung.extentKm)} km`
+                    <>
+                      <span className="figure tabular-nums">{number(rung.extentKm)} km</span>
+                      {/* What the figure is the distance *between*. The plate cannot afford
+                          these names on 495 rows; four rungs on one page can, and seeing it
+                          once is the difference between learning the rule and being told it. */}
+                      {rung.between === null ? null : (
+                        <span className="block text-micro text-ink-soft">
+                          {format(strings.guide.workedBetween, {
+                            from: rung.between.from,
+                            to: rung.between.to,
+                          })}
+                        </span>
+                      )}
+                    </>
                   )}
                 </td>
               </tr>

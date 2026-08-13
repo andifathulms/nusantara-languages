@@ -52,6 +52,12 @@ export type Dictionary = {
     readonly coverage: string
     readonly pointNote: string
     readonly gradientNote: string
+    /**
+     * Why 42% have no territory. The figure read as an unfinished job; it is not. The polygon
+     * sources are two published atlases with their own regional scope, and a language outside
+     * that scope has no recorded area to draw.
+     */
+    readonly coverageWhy: string
     readonly clearSelection: string
     readonly selectedFamily: string
     /** Empty state for the selection line, which is a live region and must say something. */
@@ -125,6 +131,8 @@ export type Dictionary = {
     readonly workedLanguages: string
     readonly workedSpan: string
     readonly workedSelf: string
+    /** Template. Placeholders: {from}, {to}. */
+    readonly workedBetween: string
     /** Template. Placeholders: {family}, {count}, {km}, {name}. */
     readonly workedClose: string
     readonly workedCaveat: string
@@ -309,6 +317,8 @@ const id: Dictionary = {
       'Titik adalah titik. Koordinat Glottolog sering merupakan titik tengah populasi yang tersebar, jadi bahasa tanpa poligon digambarkan sebagai tanda titik dan tidak pernah dimekarkan menjadi wilayah.',
     gradientNote:
       'Batas antarbahasa pada kenyataannya berupa gradien, bukan garis. Garis batas digambar setipis mungkin untuk mengingatkan hal itu.',
+    coverageWhy:
+      'Sisanya bukan pekerjaan yang belum selesai. Wilayah tutur di peta ini berasal dari dua atlas terbitan yang masing-masing punya cakupan wilayah sendiri; bahasa di luar cakupan itu tidak punya wilayah tercatat untuk digambar, jadi digambarkan sebagai titik.',
     clearSelection: 'Hapus pilihan',
     selectedFamily: 'Rumpun terpilih',
     noSelection: 'Belum ada rumpun terpilih.',
@@ -369,6 +379,7 @@ const id: Dictionary = {
     workedLanguages: 'Bahasa',
     workedSpan: 'Membentang',
     workedSelf: 'bahasa itu sendiri',
+    workedBetween: '{from} ke {to}',
     workedClose:
       'Di tingkat teratas: {family}, {count} bahasa di peta ini, membentang {km} km. Itulah satu warna pada peta di atas — dan {name} satu petak kecil di dalamnya.',
     workedCaveat:
@@ -548,6 +559,8 @@ const en: Dictionary = {
       'A point stays a point. Glottolog’s coordinate is frequently the midpoint of a dispersed population, so a language without a polygon is drawn as a mark and is never inflated into a territory.',
     gradientNote:
       'Language boundaries are gradients rather than lines. Boundaries are drawn as hairlines to keep that in view.',
+    coverageWhy:
+      'The rest are not unfinished work. The speaker areas on this map come from two published atlases, each with its own regional scope; a language outside that scope has no recorded territory to draw, so it is drawn as a point.',
     clearSelection: 'Clear selection',
     selectedFamily: 'Selected family',
     noSelection: 'No family selected yet.',
@@ -608,6 +621,7 @@ const en: Dictionary = {
     workedLanguages: 'Languages',
     workedSpan: 'Spans',
     workedSelf: 'the language itself',
+    workedBetween: '{from} to {to}',
     workedClose:
       'At the top: {family}, {count} languages on this map, spanning {km} km. That is one colour on the map above — and {name} is one small patch inside it.',
     workedCaveat:

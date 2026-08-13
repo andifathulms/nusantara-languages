@@ -123,6 +123,8 @@ export function IndexPanel({
                 percent: coverage.polygonPercent,
               })}
             </dd>
+            {/* Why, not just how many. Without this the figure reads as an unfinished job. */}
+            <dd className="mt-1 text-body-s text-ink-soft">{strings.plate.coverageWhy}</dd>
           </dl>
 
           {period !== null ? (

@@ -47,7 +47,10 @@ export default function HomePage({ params }: { params: { locale: string } }) {
    * A language that hangs straight off Malayo-Polynesian (Sundanese does) has no rungs to
    * climb and teaches nothing; a deeply nested one repeats the same figure twice.
    */
-  const ladder = exampleLadder(model.rows, 'bima1247')
+  const ladder = exampleLadder(model.rows, 'bima1247', {
+    treeIndex: bundle.treeIndex,
+    byCode: bundle.byCode,
+  })
 
   const views = [
     {

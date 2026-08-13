@@ -1,3 +1,6 @@
+import { furthestPair } from '../geo'
+import { subtreeLanguages, type TreeIndex } from '../tree'
+import type { Languoid } from '../bundle/types'
 import type { TreeRow } from './build'
 
 /**
@@ -23,6 +26,15 @@ export type ExampleRung = {
   readonly languageCount: number
   /** Null for the language itself: one point has no extent, and 0 would imply measurement. */
   readonly extentKm: number | null
+  /**
+   * The two languages the span is measured between.
+   *
+   * The plate states extents as a bare figure, because carrying endpoint names on all 495
+   * internal rows costs four times the payload of the number. Here it is four rungs on one
+   * page, so the reader gets to see once what "spans 5,010 km" is actually the distance
+   * between — which is the difference between learning the rule and being told it.
+   */
+  readonly between: { readonly from: string; readonly to: string } | null
 }
 
 /**
@@ -33,9 +45,20 @@ export type ExampleRung = {
 export function exampleLadder(
   rows: readonly TreeRow[],
   glottocode: string,
+  endpoints?: { readonly treeIndex: TreeIndex; readonly byCode: ReadonlyMap<string, Languoid> },
 ): readonly ExampleRung[] | null {
   const leaf = rows.find((row) => row.glottocode === glottocode)
   if (leaf === undefined) return null
+
+  const between = (code: string): ExampleRung['between'] => {
+    if (endpoints === undefined) return null
+    const members = subtreeLanguages(endpoints.treeIndex, code).flatMap((member) => {
+      const languoid = endpoints.byCode.get(member)
+      return languoid === undefined ? [] : [languoid]
+    })
+    const pair = furthestPair(members, (languoid) => [languoid.lon, languoid.lat])
+    return pair === null ? null : { from: pair.a.name, to: pair.b.name }
+  }
 
   const rungs: ExampleRung[] = []
   for (const code of [glottocode, ...[...leaf.ancestors].reverse()]) {
@@ -46,6 +69,7 @@ export function exampleLadder(
       name: row.name,
       languageCount: row.languageCount,
       extentKm: row.extentKm,
+      between: row.extentKm === null ? null : between(row.glottocode),
     })
   }
 
