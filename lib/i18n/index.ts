@@ -167,6 +167,14 @@ export type Dictionary = {
     /** Template. Placeholder: {count}. */
     readonly count: string
     readonly unranked: string
+    /** Heading over the list itself, when the group is short enough to be a list. */
+    readonly theyAre: string
+    /**
+     * When the group is too large to list — which is itself the finding: the language hangs
+     * high on the tree and has no closer relatives than the whole branch.
+     * Template. Placeholders: {count}, {group}.
+     */
+    readonly tooMany: string
     readonly closest: string
     /** Template. Placeholder: {km}. */
     readonly distance: string
@@ -402,6 +410,9 @@ const id: Dictionary = {
     count: '{count} bahasa lain di peta ini',
     unranked:
       'Semuanya sama dekatnya. Klasifikasi Glottolog berupa susunan bersarang tanpa panjang cabang, jadi daftar ini tidak dapat diurutkan menurut kedekatan kekerabatan.',
+    theyAre: 'Kerabat itu',
+    tooMany:
+      'Terlalu banyak untuk didaftar — dan justru itu temuannya. Bahasa ini menggantung tinggi pada pohon: kerabat terdekatnya adalah seluruh cabang {group}, {count} bahasa sekaligus, tanpa ada yang lebih dekat daripada yang lain.',
     closest: 'Titik tercatat paling dekat',
     distance: '{km} km',
     distanceCaveat:
@@ -638,6 +649,9 @@ const en: Dictionary = {
     count: '{count} other languages on this map',
     unranked:
       'All equally close. Glottolog’s classification is a nesting without branch lengths, so this list cannot be ordered by how closely related its members are.',
+    theyAre: 'They are',
+    tooMany:
+      'Too many to list — and that is the finding. This language hangs high on the tree: its nearest relatives are the whole {group} branch, {count} languages at once, none of them closer than any other.',
     closest: 'Closest recorded point',
     distance: '{km} km',
     distanceCaveat:

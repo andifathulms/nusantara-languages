@@ -77,6 +77,37 @@ export function NearestRelatives({
             )}
           </dl>
 
+          {/* The relatives themselves. They were counted and never shown, which left this
+              panel's central claim — "these are your closest kin" — as a number the reader had
+              to take on faith. Listed in bundle order and unranked: the classification carries
+              no branch lengths, so any order would imply one that does not exist. */}
+          <div className="mt-4">
+            {report.named.length > 0 ? (
+              <>
+                <p className="index-label">{strings.relatives.theyAre}</p>
+                <ul className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-body-s">
+                  {report.named.map((relative) => (
+                    <li key={relative.glottocode}>
+                      <Link
+                        href={localePath(locale, `bahasa/${relative.glottocode}`)}
+                        className="link"
+                      >
+                        {relative.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ) : (
+              <p className="text-body-s">
+                {format(strings.relatives.tooMany, {
+                  count: report.count,
+                  group: report.sharedAncestor.name,
+                })}
+              </p>
+            )}
+          </div>
+
           {/* One note, not three stacked rules. Every sentence here is load-bearing — unranked,
               measured between midpoints, scoped to this map — but set as three separate pulled
               caveats under a two-line answer they read as a wall of hedging, and a caveat that

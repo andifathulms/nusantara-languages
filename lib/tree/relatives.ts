@@ -89,11 +89,27 @@ export type Positioned = {
   readonly lat: number
 }
 
+/**
+ * How many relatives are worth listing by name.
+ *
+ * A short group is a list the reader can read. A long one is not a longer list — it is a
+ * different finding, and truncating it to twelve arbitrary names would hide that. Sundanese
+ * hangs straight off Malayo-Polynesian with 463 equally-related languages, and "no closer
+ * relatives than the whole branch" is the interesting answer, not a sample of it.
+ */
+export const RELATIVE_LIST_LIMIT = 12
+
 export type RelativeReport = {
   readonly sharedAncestor: { readonly glottocode: string; readonly name: string }
   readonly stepsUp: number
   /** How many other languages on this map share that ancestor. */
   readonly count: number
+  /**
+   * The relatives themselves, in bundle order — deliberately not ranked, because the
+   * classification carries no branch lengths and any order would imply one. Empty when the
+   * group is larger than RELATIVE_LIST_LIMIT: see the constant.
+   */
+  readonly named: readonly { readonly glottocode: string; readonly name: string }[]
   /** Nearest by recorded point. Null only if no relative carries a usable position. */
   readonly closest: {
     readonly glottocode: string
@@ -126,6 +142,15 @@ export function relativeReport(
   }
 
   return {
+    named:
+      found.relatives.length > RELATIVE_LIST_LIMIT
+        ? []
+        : found.relatives.flatMap((code) => {
+            const relative = byCode.get(code)
+            return relative === undefined
+              ? []
+              : [{ glottocode: relative.glottocode, name: relative.name }]
+          }),
     sharedAncestor: {
       glottocode: found.sharedAncestor,
       name: index.nodes.get(found.sharedAncestor)?.name ?? found.sharedAncestor,
