@@ -7,3 +7,7 @@ out/
 
 # Raw worldwide source dumps are never committed — the pipeline emits the bundle.
 data/raw/
+
+# Brand asset working folder — the assets the site actually uses are copied into
+# app/ and public/brand/ and committed there.
+exports/

@@ -1,13 +1,15 @@
 import Link from 'next/link'
+import { BrandMark } from './BrandMark'
 import { MakerSignature } from './MakerSignature'
 import { dictionary, localePath, type Locale, LOCALES } from '@/lib/i18n'
 
 /**
  * Masthead and footer.
  *
- * The masthead carries the project's name as a wordmark rather than a logo — an atlas states its
- * title in type — and the current page is marked with the annotation red, the one place in the
- * chrome that uses it. The licence attribution in the footer is a courtesy; the obligation is
+ * The masthead states the project's name in type, the way an atlas states its title, with the
+ * mark set small beside it rather than above it — the wordmark still leads. The current page is
+ * marked with the annotation red, the one place in the chrome that uses it. The licence
+ * attribution in the footer is a courtesy; the obligation is
  * discharged on the plate itself and inside the exported PNG, where a layout change cannot
  * remove it.
  */
@@ -37,12 +39,15 @@ export function SiteHeader({ locale, current }: { locale: Locale; current?: stri
       </a>
 
       <div className="mx-auto flex max-w-plate flex-wrap items-center gap-x-8 gap-y-2 px-4 py-3 sm:px-6">
-        <Link href={localePath(locale, '')} className="group leading-none">
-          <span className="block font-display text-title-s leading-none tracking-tight">
-            {strings.siteTitle}
-          </span>
-          <span className="index-label mt-1 block group-hover:text-accent">
-            {strings.siteTagline}
+        <Link href={localePath(locale, '')} className="group flex items-center gap-3 leading-none">
+          <BrandMark className="h-8 w-8 shrink-0" />
+          <span className="block">
+            <span className="block font-display text-title-s leading-none tracking-tight">
+              {strings.siteTitle}
+            </span>
+            <span className="index-label mt-1 block group-hover:text-accent">
+              {strings.siteTagline}
+            </span>
           </span>
         </Link>
 

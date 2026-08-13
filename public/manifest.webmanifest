@@ -1,0 +1,30 @@
+{
+  "name": "Nusantara Languages — Peta rumpun bahasa Indonesia, bertaut dengan pohon kekerabatannya",
+  "short_name": "Nusantara Languages",
+  "description": "Peta wilayah bahasa di Indonesia, diwarnai menurut rumpun, dengan pohon klasifikasi genealogis di sampingnya dan keduanya saling bertaut. Data Glottolog dan Glottography.",
+  "start_url": "/nusantara-languages/id/peta/",
+  "scope": "/nusantara-languages/",
+  "display": "standalone",
+  "orientation": "any",
+  "lang": "id",
+  "background_color": "#EFE8D6",
+  "theme_color": "#EFE8D6",
+  "icons": [
+    {
+      "src": "/nusantara-languages/brand/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/nusantara-languages/brand/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/nusantara-languages/brand/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
