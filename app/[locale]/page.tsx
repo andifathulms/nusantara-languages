@@ -10,11 +10,16 @@ import { GUIDED } from '@/lib/plate/guided'
 import { exampleLadder } from '@/lib/plate/example'
 import { INDONESIA_BBOX } from '@/lib/geo'
 import { dictionary, format, isLocale, localePath, type Locale } from '@/lib/i18n'
+import { localeMetadata } from '@/lib/seo/locale-meta'
 
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
   const locale: Locale = isLocale(params.locale) ? params.locale : 'id'
   const strings = dictionary(locale)
-  return { title: strings.siteTagline, description: strings.siteDescription }
+  return {
+    title: strings.siteTagline,
+    description: strings.siteDescription,
+    ...localeMetadata(locale),
+  }
 }
 
 export default function HomePage({ params }: { params: { locale: string } }) {

@@ -8,6 +8,7 @@ import { buildPlateModel } from '@/lib/plate/build'
 import { atlasPeriod } from '@/lib/bundle/types'
 import { INDONESIA_BBOX } from '@/lib/geo'
 import { dictionary, format, isLocale, localePath, type Locale } from '@/lib/i18n'
+import { localeMetadata } from '@/lib/seo/locale-meta'
 
 /** Plate units. Wide enough that Halmahera's seam is legible; the SVG scales to fit. */
 const PLATE_WIDTH = 1600
@@ -23,7 +24,11 @@ const EXAMPLE_FAMILIES = ['aust1307', 'nort2923', 'timo1261'] as const
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
   const locale: Locale = isLocale(params.locale) ? params.locale : 'id'
   const strings = dictionary(locale)
-  return { title: strings.plate.title, description: strings.siteDescription }
+  return {
+    title: strings.plate.title,
+    description: strings.siteDescription,
+    ...localeMetadata(locale, 'peta'),
+  }
 }
 
 export default function PlatePage({ params }: { params: { locale: string } }) {

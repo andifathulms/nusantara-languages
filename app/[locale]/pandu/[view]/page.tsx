@@ -9,6 +9,7 @@ import { buildPlateModel } from '@/lib/plate/build'
 import { GUIDED, GUIDED_VIEWS, isGuidedView, type GuidedViewId } from '@/lib/plate/guided'
 import { seamReport } from '@/lib/plate/seam'
 import { LOCALES, dictionary, format, isLocale, localePath, type Dictionary, type Locale } from '@/lib/i18n'
+import { localeMetadata } from '@/lib/seo/locale-meta'
 
 const PLATE_WIDTH = 1600
 
@@ -41,7 +42,7 @@ export function generateMetadata({
   const locale: Locale = isLocale(params.locale) ? params.locale : 'id'
   if (!isGuidedView(params.view)) return {}
   const copy = copyFor(dictionary(locale), params.view)
-  return { title: copy.title, description: copy.body }
+  return { title: copy.title, description: copy.body, ...localeMetadata(locale, `pandu/${params.view}`) }
 }
 
 export default function GuidedViewPage({

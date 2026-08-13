@@ -4,11 +4,16 @@ import { SiteFooter, SiteHeader } from '@/components/site/SiteChrome'
 import { loadBundle } from '@/lib/bundle/load'
 import { GUIDED, type GuidedViewId } from '@/lib/plate/guided'
 import { dictionary, format, isLocale, localePath, type Locale } from '@/lib/i18n'
+import { localeMetadata } from '@/lib/seo/locale-meta'
 
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
   const locale: Locale = isLocale(params.locale) ? params.locale : 'id'
   const strings = dictionary(locale)
-  return { title: strings.guided.title, description: strings.guided.lead }
+  return {
+    title: strings.guided.title,
+    description: strings.guided.lead,
+    ...localeMetadata(locale, 'pandu'),
+  }
 }
 
 export default function GuidedIndexPage({ params }: { params: { locale: string } }) {

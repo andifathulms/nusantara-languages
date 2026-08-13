@@ -8,6 +8,7 @@ import { loadBundle } from '@/lib/bundle/load'
 import { relativeReport } from '@/lib/tree/relatives'
 import { aesStep } from '@/lib/bundle/types'
 import { LOCALES, dictionary, isLocale, localePath, type Locale } from '@/lib/i18n'
+import { localeMetadata } from '@/lib/seo/locale-meta'
 
 /**
  * One page per language, per locale — 726 languages, statically exported. The route is keyed
@@ -60,6 +61,7 @@ export function generateMetadata({
   return {
     title: `${found.detail.name} (${found.detail.glottocode})`,
     description: `${found.detail.name} — ${strings.panel.family}: ${family}. ${strings.siteDescription}`,
+    ...localeMetadata(locale, `bahasa/${found.detail.glottocode}`),
   }
 }
 

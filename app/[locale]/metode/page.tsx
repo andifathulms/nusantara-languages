@@ -4,6 +4,7 @@ import { SiteFooter, SiteHeader } from '@/components/site/SiteChrome'
 import { loadBundle } from '@/lib/bundle/load'
 import { atlasPeriod } from '@/lib/bundle/types'
 import { dictionary, format, isLocale, localePath, type Locale } from '@/lib/i18n'
+import { localeMetadata } from '@/lib/seo/locale-meta'
 
 /**
  * Sources, coverage, and what the map does not claim — linked from the plate rather than
@@ -14,7 +15,11 @@ import { dictionary, format, isLocale, localePath, type Locale } from '@/lib/i18
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
   const locale: Locale = isLocale(params.locale) ? params.locale : 'id'
   const strings = dictionary(locale)
-  return { title: strings.method.title, description: strings.method.lead }
+  return {
+    title: strings.method.title,
+    description: strings.method.lead,
+    ...localeMetadata(locale, 'metode'),
+  }
 }
 
 export default function MethodPage({ params }: { params: { locale: string } }) {

@@ -15,6 +15,19 @@ const OUT = new URL('../out/', import.meta.url).pathname
 
 writeFileSync(join(OUT, '.nojekyll'), '')
 
+/**
+ * `<link>` rels that name a document rather than fetch a resource.
+ *
+ * `rel="canonical"` and the hreflang alternates state where a page lives and which pages are
+ * its translations. Nothing fetches them — they are metadata read by crawlers, exactly like the
+ * absolute og:url this check has always ignored. They have to be absolute to do their job, so
+ * without this the site cannot declare its own canonical URL without failing its own gate.
+ *
+ * Narrow on purpose: `rel="alternate"` also covers feeds, which a reader's client does fetch,
+ * so only alternates carrying an hreflang are exempt.
+ */
+const DOCUMENT_LINK = /\brel=["']canonical["']|\bhreflang=/i
+
 /** Loading attributes, by element. `<a href>` is deliberately absent. */
 const LOADERS = [
   /<link\b[^>]*?\bhref=["']([^"']+)["']/gi,
@@ -55,6 +68,7 @@ for (const file of walk(OUT)) {
     for (const pattern of LOADERS) {
       for (const match of text.matchAll(pattern)) {
         const reference = match[1] ?? ''
+        if (DOCUMENT_LINK.test(match[0])) continue
         if (isExternal(reference)) problems.push(`${relative} loads ${reference}`)
       }
     }
