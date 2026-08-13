@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { isRowVisible } from '@/lib/plate/select'
+import { scrollBehaviour } from '@/lib/dom/motion'
 import { format, type Dictionary } from '@/lib/i18n'
 import type { TreeRow } from '@/lib/plate/build'
 
@@ -47,7 +48,11 @@ export function TreeColumn({
     if (container === null) return
     const row = container.querySelector<HTMLElement>(`[data-glottocode="${scrollTo}"]`)
     if (row === null) return
-    row.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    // The one place the reduced-motion preference was slipping through. globals.css sets
+    // scroll-behavior: auto under the query, but a `behavior` passed to scrollIntoView
+    // overrides the CSS property, so the guard never covered this call — and this is the app's
+    // signature movement: click a territory, the tree travels to it.
+    row.scrollIntoView({ block: 'center', behavior: scrollBehaviour() })
   }, [scrollTo, open])
 
   const visible = rows.filter((row) => isRowVisible(row.ancestors, open))
