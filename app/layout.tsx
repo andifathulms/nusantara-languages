@@ -66,12 +66,14 @@ export const metadata: Metadata = {
   // convention hardcodes its <link> at the origin root, which 404s under a project-pages
   // basePath. tests/site/brand.test.ts holds the two in agreement.
   manifest: `${basePath}/manifest.webmanifest`,
+  // No `title` or `description` here on purpose. Setting them pins every page's card to the
+  // site's own name: all 1,469 pages shared as "Nusantara Languages — Peta rumpun bahasa…",
+  // whatever was actually shared. Left absent, Next fills them from each route's own title and
+  // description, so the card and the page say the same thing and cannot drift apart.
   openGraph: {
     type: 'website',
     url: SITE_URL,
     siteName: strings.siteTitle,
-    title: `${strings.siteTitle} — ${strings.siteTagline}`,
-    description: strings.siteDescription,
     locale: 'id_ID',
     images: [
       {
@@ -84,8 +86,6 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: `${strings.siteTitle} — ${strings.siteTagline}`,
-    description: strings.siteDescription,
     images: [OG_IMAGE],
   },
 }
