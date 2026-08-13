@@ -169,9 +169,18 @@
     @apply link;
   }
 
-  /* A pulled-out caveat: the honesty notes the map has to carry. */
+  /* A pulled-out caveat: the honesty notes the map has to carry.
+   *
+   * The rule was accent red, which was defensible when three caveats existed. There are now
+   * twelve across nine files — three stacked on every language page, two on the seam view —
+   * and red bars scattered down every page drain the one signal the accent exists to carry:
+   * on the plate, saturation means *selected*. The accent is rationed to the primary action,
+   * the current page, selection and the focus ring (CLAUDE.md), and a caveat is none of those.
+   *
+   * Boundary ink at low opacity still pulls the note out of the column, which is all the rule
+   * was ever doing. */
   .caveat {
-    @apply border-l-2 border-accent/50 pl-4 text-body-s text-ink-soft;
+    @apply border-l-2 border-boundary/25 pl-4 text-body-s text-ink-soft;
   }
 }
 
