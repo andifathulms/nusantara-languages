@@ -213,6 +213,7 @@ export function PlateView({
     <div className="space-y-4">
       <PlateToolbar
         strings={strings}
+        locale={locale}
         entries={searchEntries}
         onChoose={selectFromPlate}
         onSelectBranch={selectBranch}
@@ -224,6 +225,7 @@ export function PlateView({
         hasSubgroups={model.subgroupLegend.length > model.legend.length}
         selectionLabel={scopedRow?.name ?? selectedDetail?.name ?? null}
         selectionCount={scopedRow?.languageCount ?? null}
+        selectionExtentKm={scopedRow?.extentKm ?? null}
         onClear={clear}
       />
 

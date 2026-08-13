@@ -322,3 +322,45 @@ describe('the tree’s open set', () => {
     expect(open).toEqual(new Set(['aust1307', 'mala1545']))
   })
 })
+
+/**
+ * Extent is a number the site prints, so it needs a rule that can be checked. It is also the
+ * one figure here that invites over-reading: it is measured between midpoints, so it is a floor.
+ */
+describe('branch extent', () => {
+  it('gives a single language no extent rather than zero', () => {
+    for (const row of model.rows) {
+      if (row.languageCount === 1) expect(row.extentKm).toBeNull()
+    }
+  })
+
+  it('gives every multi-language branch an extent', () => {
+    for (const row of model.rows) {
+      if (row.languageCount > 1) expect(row.extentKm).not.toBeNull()
+    }
+  })
+
+  it('never lets a branch span more than the branch above it', () => {
+    const byCode = new Map(model.rows.map((row) => [row.glottocode, row]))
+    for (const row of model.rows) {
+      const parent = row.ancestors[row.ancestors.length - 1]
+      if (parent === undefined || row.extentKm === null) continue
+      const above = byCode.get(parent)?.extentKm
+      if (above === undefined || above === null) continue
+      expect(row.extentKm).toBeLessThanOrEqual(above)
+    }
+  })
+
+  it('separates an archipelago-wide family from an island one — the point of the figure', () => {
+    const austronesian = model.rows.find((row) => row.glottocode === 'aust1307')
+    const timor = model.rows.find((row) => row.glottocode === 'timo1261')
+    expect(austronesian?.extentKm).toBeGreaterThan(4000)
+    expect(timor?.extentKm).toBeLessThan(1000)
+  })
+
+  it('rounds to 10 km, because the inputs are midpoints', () => {
+    for (const row of model.rows) {
+      if (row.extentKm !== null) expect(row.extentKm % 10).toBe(0)
+    }
+  })
+})

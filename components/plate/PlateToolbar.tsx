@@ -2,7 +2,7 @@
 
 import { SearchBox } from './SearchBox'
 import type { SearchEntry } from '@/lib/search'
-import { format, type Dictionary } from '@/lib/i18n'
+import { format, type Dictionary, type Locale } from '@/lib/i18n'
 
 /**
  * One row above the plate holding everything the reader can *do*: search, the three worked
@@ -16,6 +16,7 @@ import { format, type Dictionary } from '@/lib/i18n'
 
 type PlateToolbarProps = {
   readonly strings: Dictionary
+  readonly locale: Locale
   readonly entries: readonly SearchEntry[]
   readonly onChoose: (glottocode: string) => void
   readonly onSelectBranch: (glottocode: string) => void
@@ -28,11 +29,14 @@ type PlateToolbarProps = {
   readonly hasSubgroups: boolean
   readonly selectionLabel: string | null
   readonly selectionCount: number | null
+  /** How far apart the branch's two furthest recorded points are. Null for a single language. */
+  readonly selectionExtentKm: number | null
   readonly onClear: () => void
 }
 
 export function PlateToolbar({
   strings,
+  locale,
   entries,
   onChoose,
   onSelectBranch,
@@ -44,6 +48,7 @@ export function PlateToolbar({
   hasSubgroups,
   selectionLabel,
   selectionCount,
+  selectionExtentKm,
   onClear,
 }: PlateToolbarProps) {
   return (
@@ -121,12 +126,29 @@ export function PlateToolbar({
                 {format(strings.tree.languages, { count: selectionCount })}
               </span>
             ) : null}
+            {/* Extent is what makes one family comparable to another. Without it the map
+                implies every colour names a thing of the same size, and the largest single
+                fact about this archipelago — that one branch crossed an ocean and another
+                stayed on three islands — is invisible. */}
+            {selectionExtentKm !== null ? (
+              <span className="figure text-body-s text-ink-soft">
+                {format(strings.plate.extent, { km: selectionExtentKm.toLocaleString(locale) })}
+              </span>
+            ) : null}
             <button type="button" onClick={onClear} className="btn ml-auto">
               {strings.plate.clearSelection}
             </button>
           </>
         )}
       </div>
+
+      {/* What "membentang" means, spelled out rather than hidden in a tooltip. A number the
+          reader cannot trace to a rule is exactly what this project does not ship, and the
+          rule here — furthest-apart recorded points, so a floor rather than a true span — is
+          the kind of thing a tooltip would let them miss. */}
+      {selectionExtentKm !== null ? (
+        <p className="caveat">{strings.plate.extentNote}</p>
+      ) : null}
     </div>
   )
 }

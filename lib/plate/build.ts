@@ -33,6 +33,7 @@ import {
 } from '../bundle/types'
 import type { SerialTreeNode, TreeData, TreeIndex } from '../tree'
 import { ancestors as ancestorsOf, groupOf, informativeCut, subtreeLanguages } from '../tree'
+import { furthestPair } from '../geo'
 
 export type ShapeColour = {
   /** CSS custom property holding the muted base fill. */
@@ -110,6 +111,17 @@ export type TreeRow = {
   readonly family: string
   readonly colour: ShapeColour
   readonly withPolygon: number
+  /**
+   * How far apart the two furthest-apart recorded points in this branch are, in kilometres.
+   *
+   * Null for a single language, which has no extent — reporting 0 would imply it had been
+   * measured. This is the one number that makes "family" comparable: the map's most misleading
+   * impression is that every colour names a thing of the same kind, and extent is what shows
+   * that one branch is an ocean-spanning dispersal and another is three islands.
+   *
+   * Measured between midpoints, so it is a floor rather than a span, and the UI says so.
+   */
+  readonly extentKm: number | null
 }
 
 /**
@@ -334,6 +346,9 @@ export function buildPlateModel(input: BuildPlateInput): PlateModel {
   const nodesByCode = new Map<string, SerialTreeNode>(
     input.tree.nodes.map((node) => [node.glottocode, node]),
   )
+  const languoidByCode = new Map<string, Languoid>(
+    input.languoids.map((languoid) => [languoid.glottocode, languoid]),
+  )
   const polygonCodes = new Set(input.geometry.map((entry) => entry.glottocode))
 
   // The tree, flattened once in full. The client filters by its open set — it never walks
@@ -344,6 +359,13 @@ export function buildPlateModel(input: BuildPlateInput): PlateModel {
     if (node === undefined) return
     const languages = subtreeLanguages(input.treeIndex, glottocode)
     const chain = ancestorsOf(input.treeIndex, glottocode)
+    const spread = furthestPair(
+      languages.flatMap((code) => {
+        const languoid = languoidByCode.get(code)
+        return languoid === undefined ? [] : [languoid]
+      }),
+      (languoid) => [languoid.lon, languoid.lat],
+    )
     rows.push({
       glottocode,
       name: node.name,
@@ -355,6 +377,9 @@ export function buildPlateModel(input: BuildPlateInput): PlateModel {
       family: chain[0] ?? glottocode,
       colour: colourVars(input.colours, chain[0] ?? glottocode),
       withPolygon: languages.filter((code) => polygonCodes.has(code)).length,
+      // Rounded to 10 km at the source, so the figure that ships is the figure that renders and
+      // no component has to decide how much precision the midpoints justify.
+      extentKm: spread === null ? null : Math.round(spread.km / 10) * 10,
     })
     for (const child of node.children) walk(child, depth + 1)
   }

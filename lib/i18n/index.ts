@@ -56,6 +56,13 @@ export type Dictionary = {
     readonly selectedFamily: string
     /** Empty state for the selection line, which is a live region and must say something. */
     readonly noSelection: string
+    /**
+     * How far apart the two furthest recorded points in the selected branch are. The one figure
+     * that makes "family" comparable — Austronesian spans 5,010 km here, Timor-Alor-Pantar 350.
+     * Template. Placeholder: {km}.
+     */
+    readonly extent: string
+    readonly extentNote: string
     readonly index: string
     readonly attribution: string
     /** Legend for the tree column's per-language mark. */
@@ -240,6 +247,9 @@ const id: Dictionary = {
     clearSelection: 'Hapus pilihan',
     selectedFamily: 'Rumpun terpilih',
     noSelection: 'Belum ada rumpun terpilih.',
+    extent: 'membentang {km} km',
+    extentNote:
+      'Membentang = jarak antara dua titik tercatat yang paling berjauhan dalam cabang ini. Diukur antara titik tengah, sehingga angkanya batas bawah, bukan rentang wilayah sebenarnya.',
     index: 'Indeks',
     attribution:
       'Sumber: Glottolog 5.3 (CC-BY-4.0), Glottography (CC-BY-4.0), Natural Earth (domain publik).',
@@ -441,6 +451,9 @@ const en: Dictionary = {
     clearSelection: 'Clear selection',
     selectedFamily: 'Selected family',
     noSelection: 'No family selected yet.',
+    extent: 'spans {km} km',
+    extentNote:
+      'Span is the distance between the two furthest-apart recorded points in this branch. Measured between midpoints, so it is a floor rather than the true reach of the territory.',
     index: 'Index',
     attribution:
       'Sources: Glottolog 5.3 (CC-BY-4.0), Glottography (CC-BY-4.0), Natural Earth (public domain).',
