@@ -250,6 +250,41 @@ codebase. Two bugs were caught by fixtures rather than by the data: vertex-to-se
 sampling misses edges that *cross*, and containment shares no boundary at all. It is
 segment-to-segment with a point-in-polygon pre-check, ring-culled to 238 ms.
 
+### The accessibility pass (2026-08-13)
+
+**The tree is the headline.** It declared `role="tree"` and implemented none of what that role
+promises, so a screen reader announced a tree and the arrow keys did nothing — worse than no
+role, because it tells the user to try a gesture that fails. Measured against the shipped
+bundle: **92 tab stops on load, 1,716 fully expanded**, with the footer behind all of them. It
+is now a roving tabindex with the full ARIA navigation model: **one tab stop.** The decision
+lives in `lib/tree/navigate` as a pure function with tests, because a promise this component
+already broke once should be checkable.
+
+**Three of the fixes removed ARIA rather than adding it** — the map/tree switch claimed
+`role="tablist"` with no tabpanel or arrow keys, the search claimed `role="combobox"` with no
+activedescendant and `role="option"` elements illegally containing buttons, and the tree
+announced its own name three times over. Native elements said everything true; the roles were
+promising behaviour that did not exist. Prefer deleting ARIA to propping it up.
+
+**Two corrections to that audit, kept here so they are not re-derived.** Panning was *not*
+pointer-only — `Plate.tsx` has handled arrows, `+`/`-` and `0` since the viewport landed, and
+the real gap was that nothing said so (now an `aria-describedby`). And the `.hit` token takes
+real space rather than clawing it back with a negative margin: the margin version keeps the row
+identical but the overhang sits on top of the next control and swallows its clicks, which in
+the tree is the language name. Room a target needs is room it gets — paid for by capping the
+tree indent, which was 127px at depth 11 and starved the name column at 320px.
+
+**`prefers-reduced-motion` had one hole**: the CSS guard cannot reach a `behavior` passed to
+`scrollIntoView`, because the argument overrides the property. That was the tree's scroll-to-row
+— the app's signature movement. `lib/dom/motion` reads the query per call; it is `lib/dom` and
+not one of the three pure modules because it touches the DOM deliberately.
+
+**Known flaky gate, pre-existing, not yet fixed.** `bench:plate`'s `hover worst` is
+`Math.max(...samples)` — a single worst sample, so one GC pause blows the 16 ms budget. Four
+consecutive local runs gave 0.57, 10.39, 0.71 and **27.34 ms (over)** while p50/p95 held at
+0.00/0.01 ms. It gates deploys and can fail at random. Fixing it means changing what the gate
+measures, which is a judgement call, not a tidy-up — do not simply raise the budget.
+
 ### Next, in rough order
 
 1. **Look at it on a real screen.** Still the top item, and now more so: the interface has been
