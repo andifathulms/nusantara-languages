@@ -29,6 +29,8 @@ export type Dictionary = {
   readonly home: {
     readonly lead: string
     readonly openPlate: string
+    /** The no-script fallback on the root redirect page. */
+    readonly enter: string
     readonly whatThisIs: string
     readonly whatThisIsNot: string
     readonly personalProject: string
@@ -185,6 +187,7 @@ const id: Dictionary = {
   home: {
     lead: 'Sorot satu cabang pada pohon kekerabatan, dan seluruh wilayah rumpun itu menyala di peta. Klik satu wilayah, dan pohon bergulir ke bahasa itu lalu membuka garis keturunannya dari rumpun induk ke bawah.',
     openPlate: 'Buka peta',
+    enter: 'Masuk ke situs',
     whatThisIs:
       'Indonesia adalah salah satu wilayah dengan kepadatan bahasa tertinggi di dunia. Peta ini menunjukkan struktur itu: warna membawa rumpun, sehingga batas antara rumpun Austronesia dan rumpun-rumpun Papua terlihat begitu peta terbuka.',
     whatThisIsNot:
@@ -367,6 +370,7 @@ const en: Dictionary = {
   home: {
     lead: 'Hover a branch of the family tree and every territory in that subgroup lights up. Click a territory and the tree scrolls to that language and opens its ancestry from the root family down.',
     openPlate: 'Open the map',
+    enter: 'Enter the site',
     whatThisIs:
       'Indonesia is one of the most linguistically dense territories on earth. This map shows that structure: colour carries family, so the boundary between Austronesian and the Papuan families is visible the moment the map opens.',
     whatThisIsNot:
