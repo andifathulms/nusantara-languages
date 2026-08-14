@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { LOCALES, DEFAULT_LOCALE, localePath, type Locale } from '../i18n'
+import { LOCALES, DEFAULT_LOCALE, dictionary, localePath, type Locale } from '../i18n'
 
 /**
  * The per-locale half of every route's metadata, in one place.
@@ -14,10 +14,17 @@ import { LOCALES, DEFAULT_LOCALE, localePath, type Locale } from '../i18n'
  * Indonesian page.
  *
  * The og:locale in the root layout was hardcoded `id_ID`, so all 733 English pages declared
- * themselves Indonesian to every scraper. Overridden here per route.
+ * themselves Indonesian to every scraper. Set here per route instead.
+ *
+ * This owns the *whole* openGraph object, image included, and the layout sets none. Next
+ * replaces `openGraph` wholesale rather than merging it, so a partial object here silently
+ * deleted the layout's images, type and siteName — every share card lost its picture and
+ * nothing failed. One owner is the only arrangement that cannot do that again;
+ * tests/seo/metadata.test.ts holds it.
  */
 
 const SITE = 'https://andifathulms.github.io/nusantara-languages'
+const OG_IMAGE = `${SITE}/brand/og.png`
 
 /** Open Graph wants a territory-qualified tag, not a bare language code. */
 const OG_LOCALE: Readonly<Record<Locale, string>> = {
@@ -26,6 +33,7 @@ const OG_LOCALE: Readonly<Record<Locale, string>> = {
 }
 
 export function localeMetadata(locale: Locale, path = ''): Metadata {
+  const siteName = dictionary(locale).siteTitle
   const languages: Record<string, string> = {}
   for (const candidate of LOCALES) {
     languages[candidate] = `${SITE}${localePath(candidate, path)}/`
@@ -39,11 +47,14 @@ export function localeMetadata(locale: Locale, path = ''): Metadata {
       languages,
     },
     openGraph: {
+      type: 'website',
+      siteName,
       url: `${SITE}${localePath(locale, path)}/`,
       locale: OG_LOCALE[locale],
       alternateLocale: LOCALES.filter((candidate) => candidate !== locale).map(
         (candidate) => OG_LOCALE[candidate],
       ),
+      images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: siteName }],
     },
   }
 }
