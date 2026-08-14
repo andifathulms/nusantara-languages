@@ -266,6 +266,9 @@ export type Dictionary = {
   }
   readonly export: {
     readonly png: string
+    /** Confirms the download the way `copied` confirms the link — a silent success on one
+        button and a spoken one on its neighbour is a real asymmetry, not a stylistic choice. */
+    readonly downloaded: string
     readonly copyLink: string
     readonly copied: string
     readonly failed: string
@@ -540,6 +543,7 @@ const id: Dictionary = {
   },
   export: {
     png: 'Unduh PNG',
+    downloaded: 'Terunduh',
     copyLink: 'Salin tautan tampilan ini',
     copied: 'Tautan disalin',
     failed: 'Gagal. Coba lagi atau gunakan tangkapan layar.',
@@ -794,6 +798,7 @@ const en: Dictionary = {
   },
   export: {
     png: 'Download PNG',
+    downloaded: 'Downloaded',
     copyLink: 'Copy a link to this view',
     copied: 'Link copied',
     failed: 'That did not work. Try again, or take a screenshot.',

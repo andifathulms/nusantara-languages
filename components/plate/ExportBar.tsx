@@ -25,7 +25,9 @@ type ExportBarProps = {
 }
 
 export function ExportBar({ strings, getPlate, slug, scale = 2 }: ExportBarProps) {
-  const [state, setState] = useState<'idle' | 'working' | 'copied' | 'failed'>('idle')
+  const [state, setState] = useState<'idle' | 'working' | 'downloaded' | 'copied' | 'failed'>(
+    'idle',
+  )
 
   async function exportPng(): Promise<void> {
     const plate = getPlate()
@@ -57,7 +59,11 @@ export function ExportBar({ strings, getPlate, slug, scale = 2 }: ExportBarProps
       link.download = exportFileName(slug, new Date().toISOString().slice(0, 10))
       link.click()
       URL.revokeObjectURL(url)
-      setState('idle')
+      // Mirrors copyLink's confirmation: a silent success on this button and a spoken one on
+      // its neighbour was a real asymmetry, not a stylistic choice — a screen-reader or
+      // low-vision user otherwise has no way to know the download actually happened.
+      setState('downloaded')
+      window.setTimeout(() => setState('idle'), 2000)
     } catch {
       setState('failed')
     }
@@ -81,7 +87,7 @@ export function ExportBar({ strings, getPlate, slug, scale = 2 }: ExportBarProps
         disabled={state === 'working'}
         className="btn disabled:opacity-60"
       >
-        {strings.export.png}
+        {state === 'downloaded' ? strings.export.downloaded : strings.export.png}
       </button>
       <button
         type="button"
