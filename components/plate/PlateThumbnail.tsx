@@ -1,4 +1,5 @@
 import type { PlateModel } from '@/lib/plate/build'
+import { familyVarRef } from '@/lib/colour'
 
 /**
  * A still of the plate, for the front page. Server-rendered, no interaction, no client cost.
@@ -62,7 +63,7 @@ export function PlateThumbnail({
           <path
             key={shape.glottocode}
             d={shape.d}
-            fill={`var(${shape.colour.base})`}
+            fill={familyVarRef(shape.colour, 'base')}
             fillOpacity={0.95}
             stroke="var(--plate-boundary)"
             strokeWidth={0.3}
@@ -75,7 +76,7 @@ export function PlateThumbnail({
             cy={shape.y}
             r={1.6}
             fill="var(--plate-plate)"
-            stroke={`var(${shape.colour.base})`}
+            stroke={familyVarRef(shape.colour, 'base')}
             strokeWidth={0.9}
           />
         ),

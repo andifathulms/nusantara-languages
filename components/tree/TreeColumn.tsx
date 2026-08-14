@@ -6,6 +6,7 @@ import { treeKeyAction } from '@/lib/tree/navigate'
 import { scrollBehaviour } from '@/lib/dom/motion'
 import { format, type Dictionary } from '@/lib/i18n'
 import type { TreeRow } from '@/lib/plate/build'
+import { familyVarRef } from '@/lib/colour'
 
 /**
  * The tree, beside the map rather than beneath it, because the linkage only works when both
@@ -208,7 +209,7 @@ export function TreeColumn({
                     aria-hidden="true"
                     className="mt-1 inline-block h-2.5 w-2.5 shrink-0 border border-boundary/40"
                     style={{
-                      backgroundColor: `var(${isScoped ? row.colour.selected : row.colour.base})`,
+                      backgroundColor: familyVarRef(row.colour, isScoped ? 'selected' : 'base'),
                     }}
                   />
 

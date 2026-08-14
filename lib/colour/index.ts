@@ -138,4 +138,16 @@ export function fillOf(colour: FamilyColour, state: PaintState): string {
 export function cssVariable(colour: FamilyColour, state: 'base' | 'selected'): string {
   return `--family-${colour.token}${state === 'selected' ? '-selected' : ''}`
 }
+/**
+ * A `var()` reference to a family colour, built from its palette token.
+ *
+ * The plate model used to carry both variable *names* on every shape and every tree row —
+ * `{base:'--family-ochre', selected:'--family-ochre-selected'}`, 5,739 long strings in the
+ * payload for what is one short token. It carries the token now and the reference is built
+ * here, at the point of use. Same output, same single source of truth for the naming pattern.
+ */
+export function familyVarRef(token: FamilyColourToken, state: 'base' | 'selected'): string {
+  return `var(--family-${token}${state === 'selected' ? '-selected' : ''})`
+}
+
 export * from './subgroup'

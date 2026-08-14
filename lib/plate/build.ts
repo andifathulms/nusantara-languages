@@ -31,16 +31,20 @@ import {
   type LandKind,
   type Languoid,
 } from '../bundle/types'
+import type { FamilyColourToken } from '../colour'
 import type { SerialTreeNode, TreeData, TreeIndex } from '../tree'
 import { ancestors as ancestorsOf, groupOf, informativeCut, subtreeLanguages } from '../tree'
 import { furthestPair } from '../geo'
 
-export type ShapeColour = {
-  /** CSS custom property holding the muted base fill. */
-  readonly base: string
-  /** CSS custom property holding the saturated fill, used only when selected. */
-  readonly selected: string
-}
+/**
+ * A palette token — `ochre`, `cerulean` — not a CSS variable name.
+ *
+ * This used to be `{base:'--family-ochre', selected:'--family-ochre-selected'}` on every shape,
+ * every subgroup colour and every tree row: 5,739 long strings, ~165 KB of the payload, all of
+ * it reconstructible from one short token. Components call `familyVarRef` at the point of use,
+ * which is also the only place the naming pattern is written down.
+ */
+export type ShapeColour = FamilyColourToken
 
 type ShapeCommon = {
   readonly glottocode: string
@@ -166,8 +170,7 @@ export type PlateModel = {
 }
 
 function colourVars(assignment: ColourAssignment, family: string | null): ShapeColour {
-  const colour = colourOf(assignment, family)
-  return { base: cssVariable(colour, 'base'), selected: cssVariable(colour, 'selected') }
+  return colourOf(assignment, family).token
 }
 
 /** Degree label in the cartographic convention: 5°S, 120°E. */
@@ -274,13 +277,10 @@ export function buildPlateModel(input: BuildPlateInput): PlateModel {
       aesStep: aesStep(languoid.aes),
       colour: colourVars(input.colours, languoid.familyGlottocode ?? languoid.glottocode),
       subgroup: subgroupOf.get(languoid.glottocode) as string,
-      subgroupColour: (() => {
-        const colour = subgroupColourOf(
-          subgroupColours,
-          subgroupOf.get(languoid.glottocode) ?? null,
-        )
-        return { base: cssVariable(colour, 'base'), selected: cssVariable(colour, 'selected') }
-      })(),
+      subgroupColour: subgroupColourOf(
+        subgroupColours,
+        subgroupOf.get(languoid.glottocode) ?? null,
+      ).token,
     }
 
     const entry = geometryByCode.get(languoid.glottocode)
@@ -333,7 +333,7 @@ export function buildPlateModel(input: BuildPlateInput): PlateModel {
         languageCount: members.length,
         withPolygon: members.filter((member) => member.geometry.type === 'polygon').length,
         isIsolate: members.length === 1 && subgroup.family === subgroup.glottocode,
-        colour: { base: cssVariable(colour, 'base'), selected: cssVariable(colour, 'selected') },
+        colour: colour.token,
         familyName: nodeNameOf(subgroup.family),
       }
     })

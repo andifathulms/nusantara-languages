@@ -22,7 +22,7 @@ const row = (
   hasChildren: languageCount > 1,
   languageCount,
   family: ancestors[0] ?? glottocode,
-  colour: { base: '--x', selected: '--x-selected' },
+  colour: 'ochre',
   withPolygon: 1,
   extentKm,
 })

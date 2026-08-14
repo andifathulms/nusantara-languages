@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { INDONESIA_BBOX, createProjection } from '@/lib/geo'
-import { assignFamilyColours } from '@/lib/colour'
+import { ALL_FAMILY_COLOURS, assignFamilyColours, familyVarRef } from '@/lib/colour'
 import { buildGraticule, buildPlateModel } from '@/lib/plate/build'
 import {
   NO_SELECTION,
@@ -88,13 +88,31 @@ describe('the plate model', () => {
 
   it('never assigns a colour by index order — the family decides', () => {
     const austronesian = model.shapes.find((shape) => shape.family === 'aust1307')
-    expect(austronesian?.colour.base).toBe('--family-ochre')
+    expect(austronesian?.colour).toBe('ochre')
   })
 
-  it('gives every shape both a base and a selected colour variable', () => {
+  it('gives every shape a token the palette actually defines', () => {
+    // The model carries the token now, not the two variable names, and the components build
+    // the var() reference. That makes this assertion stronger than the one it replaces: a
+    // shape used to be able to carry '--family-nonsense' and pass, because nothing checked the
+    // name against the palette. Now an unknown token means PaletteVars never emits the
+    // variable and the shape renders unpainted, and this catches it.
+    const known = new Set(ALL_FAMILY_COLOURS.map((colour) => colour.token))
     for (const shape of model.shapes) {
-      expect(shape.colour.base).toMatch(/^--family-[a-z]+$/)
-      expect(shape.colour.selected).toBe(`${shape.colour.base}-selected`)
+      expect(known.has(shape.colour), shape.glottocode).toBe(true)
+      expect(known.has(shape.subgroupColour), shape.glottocode).toBe(true)
+      expect(familyVarRef(shape.colour, 'base')).toBe(`var(--family-${shape.colour})`)
+      expect(familyVarRef(shape.colour, 'selected')).toBe(
+        `var(--family-${shape.colour}-selected)`,
+      )
+    }
+  })
+
+  it('gives every tree row and legend entry a defined token too', () => {
+    const known = new Set(ALL_FAMILY_COLOURS.map((colour) => colour.token))
+    for (const row of model.rows) expect(known.has(row.colour), row.glottocode).toBe(true)
+    for (const entry of [...model.legend, ...model.subgroupLegend]) {
+      expect(known.has(entry.colour), entry.glottocode).toBe(true)
     }
   })
 

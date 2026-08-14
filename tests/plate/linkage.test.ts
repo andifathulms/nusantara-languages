@@ -179,7 +179,7 @@ describe('the Austronesian–Papuan seam, which is the reason the map exists', (
   it('separates North Halmahera from its Austronesian neighbours by colour', () => {
     const halmahera = model.shapes.find((shape) => shape.family === 'nort2923')
     const austronesian = model.shapes.find((shape) => shape.family === 'aust1307')
-    expect(halmahera?.colour.base).not.toBe(austronesian?.colour.base)
+    expect(halmahera?.colour).not.toBe(austronesian?.colour)
   })
 
   it('lights the Papuan side without lighting the Austronesian side', () => {

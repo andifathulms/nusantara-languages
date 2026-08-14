@@ -3,6 +3,7 @@
 import type { LegendEntry } from '@/lib/plate/build'
 import type { Coverage } from '@/lib/bundle/types'
 import { format, type Dictionary } from '@/lib/i18n'
+import { familyVarRef } from '@/lib/colour'
 
 /**
  * The index panel. An atlas plate states its legend, its period and its sources on the face, not
@@ -174,7 +175,7 @@ function LegendRow({
           aria-hidden="true"
           className="mt-[0.3em] inline-block h-3 w-3 shrink-0 border border-boundary/40"
           style={{
-            backgroundColor: `var(${isScoped ? entry.colour.selected : entry.colour.base})`,
+            backgroundColor: familyVarRef(entry.colour, isScoped ? 'selected' : 'base'),
           }}
         />
         <span className="min-w-0 flex-1 truncate">

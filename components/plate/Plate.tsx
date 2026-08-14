@@ -15,8 +15,9 @@ import {
   zoomBy,
   type Viewport,
 } from '@/lib/plate/viewport'
-import type { PlateModel, PlateShape } from '@/lib/plate/build'
+import type { PlateModel, PlateShape, ShapeColour } from '@/lib/plate/build'
 import type { Dictionary } from '@/lib/i18n'
+import { familyVarRef } from '@/lib/colour'
 
 /**
  * The plate. Flat spot colours, hairline boundaries, a 5° graticule for reference, and
@@ -67,11 +68,11 @@ function Area({
   state: 'base' | 'selected' | 'muted'
   isSelected: boolean
   showHatching: boolean
-  colours: { base: string; selected: string }
+  colours: ShapeColour
   onHover: (glottocode: string | null) => void
   onSelect: (glottocode: string) => void
 }) {
-  const fill = state === 'selected' ? `var(${colours.selected})` : `var(${colours.base})`
+  const fill = state === 'selected' ? familyVarRef(colours, 'selected') : familyVarRef(colours, 'base')
   const hatch = showHatching && shape.aesStep > 0 ? HATCH_IDS[shape.aesStep - 1] : undefined
 
   return (
@@ -114,13 +115,13 @@ function PointMark({
   shape: PlateShape & { type: 'point' }
   state: 'base' | 'selected' | 'muted'
   isSelected: boolean
-  colours: { base: string; selected: string }
+  colours: ShapeColour
   /** Current map scale, so the mark can hold its drawn size while the map grows under it. */
   zoom: number
   onHover: (glottocode: string | null) => void
   onSelect: (glottocode: string) => void
 }) {
-  const colour = state === 'selected' ? `var(${colours.selected})` : `var(${colours.base})`
+  const colour = state === 'selected' ? familyVarRef(colours, 'selected') : familyVarRef(colours, 'base')
   const size = isSelected ? 4.2 : 3
   return (
     <g
