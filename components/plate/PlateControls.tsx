@@ -81,7 +81,13 @@ export function PlateControls({
           aria-live="polite"
         >
           <span className="figure text-micro text-ink-soft">{scale.toFixed(1)}×</span>
-          <button type="button" onClick={onReset} className="font-label text-micro uppercase text-accent hover:underline">
+          {/* Ink, not accent: this is a reset link, not one of the four rationed uses
+              (primary action / current page / selection / focus ring). */}
+          <button
+            type="button"
+            onClick={onReset}
+            className="font-label text-micro uppercase text-ink-soft transition-colors hover:text-accent hover:underline"
+          >
             {strings.plate.zoomReset}
           </button>
         </div>
