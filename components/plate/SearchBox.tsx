@@ -24,6 +24,11 @@ export function SearchBox({ entries, strings, onChoose }: SearchBoxProps) {
   const [isOpen, setIsOpen] = useState(false)
   const listId = useId()
   const inputRef = useRef<HTMLInputElement | null>(null)
+  // One result can be reached by Enter; every other one previously needed individual Tabbing.
+  // Real focus moves into the list instead of a synthetic aria-activedescendant highlight, the
+  // same reasoning the accessibility pass already used elsewhere: native focus says everything
+  // true without promising a listbox pattern that isn't there.
+  const itemRefs = useRef<(HTMLButtonElement | null)[]>([])
 
   const results = useMemo(() => searchLanguages(entries, query), [entries, query])
   const showing = isOpen && query.length >= 2
@@ -31,6 +36,10 @@ export function SearchBox({ entries, strings, onChoose }: SearchBoxProps) {
   const close = (): void => {
     setIsOpen(false)
     inputRef.current?.focus()
+  }
+
+  const focusItem = (index: number): void => {
+    itemRefs.current[index]?.focus()
   }
 
   return (
@@ -66,6 +75,11 @@ export function SearchBox({ entries, strings, onChoose }: SearchBoxProps) {
               onChoose(first.entry.glottocode)
               setIsOpen(false)
             }
+            return
+          }
+          if (event.key === 'ArrowDown' && showing && results.length > 0) {
+            event.preventDefault()
+            focusItem(0)
           }
         }}
         className="field mt-1"
@@ -90,15 +104,28 @@ export function SearchBox({ entries, strings, onChoose }: SearchBoxProps) {
                 {format(strings.search.resultCount, { count: results.length })}
               </p>
               <ul id={listId} className="max-h-72 overflow-y-auto">
-                {results.map((result) => (
+                {results.map((result, index) => (
                   <li key={result.entry.glottocode}>
                     <button
+                      ref={(element) => {
+                        itemRefs.current[index] = element
+                      }}
                       type="button"
                       onClick={() => {
                         onChoose(result.entry.glottocode)
                         setIsOpen(false)
                       }}
-                      className="flex w-full items-baseline gap-2 px-2 py-1 text-left text-body-s hover:bg-accent/10"
+                      onKeyDown={(event) => {
+                        if (event.key === 'ArrowDown') {
+                          event.preventDefault()
+                          focusItem(index + 1)
+                        } else if (event.key === 'ArrowUp') {
+                          event.preventDefault()
+                          if (index === 0) inputRef.current?.focus()
+                          else focusItem(index - 1)
+                        }
+                      }}
+                      className="flex w-full items-baseline gap-2 px-2 py-1 text-left text-body-s hover:bg-accent/10 focus-visible:bg-accent/10"
                     >
                       <span className="min-w-0 flex-1 truncate">{result.entry.name}</span>
                       {result.matched === 'altName' ? (
