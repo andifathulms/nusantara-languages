@@ -157,10 +157,18 @@ export function PlateToolbar({
       {/* What "membentang" means, spelled out rather than hidden in a tooltip. A number the
           reader cannot trace to a rule is exactly what this project does not ship, and the
           rule here — furthest-apart recorded points, so a floor rather than a true span — is
-          the kind of thing a tooltip would let them miss. */}
-      {selectionExtentKm !== null ? (
-        <p className="caveat">{strings.plate.extentNote}</p>
-      ) : null}
+          the kind of thing a tooltip would let them miss.
+          Always mounted, never conditionally: hovering across the tree flips this in and out
+          on every branch, and unmounting it let the toolbar's height change on every hover,
+          which shoved the map itself up and down beneath it. `invisible` reserves the line's
+          real height without showing it, so the map holds still; `aria-hidden` keeps a screen
+          reader from hearing a note that doesn't apply to the current selection. */}
+      <p
+        className={`caveat ${selectionExtentKm === null ? 'invisible' : ''}`}
+        aria-hidden={selectionExtentKm === null ? true : undefined}
+      >
+        {strings.plate.extentNote}
+      </p>
     </div>
   )
 }
