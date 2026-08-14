@@ -18,6 +18,12 @@ import { format, localePath, type Dictionary, type Locale } from '@/lib/i18n'
 
 type LanguageFactsProps = {
   readonly detail: LanguageDetail
+  /**
+   * Resolves an ancestor glottocode to its name. The detail carries codes only — `rows` already
+   * holds a name for every node, and carrying them twice cost ~101 KB of payload — so whoever
+   * renders the chain supplies the lookup it already has.
+   */
+  readonly nameOf: (glottocode: string) => string
   readonly strings: Dictionary
   readonly locale: Locale
   readonly manifest?: BundleManifest
@@ -26,6 +32,7 @@ type LanguageFactsProps = {
 
 export function LanguageFacts({
   detail,
+  nameOf,
   strings,
   locale,
   manifest,
@@ -95,10 +102,10 @@ export function LanguageFacts({
             {detail.ancestry.length === 0 ? (
               <span>{strings.tree.isolate}</span>
             ) : (
-              detail.ancestry.map((step, index) => (
-                <span key={step.glottocode}>
+              detail.ancestry.map((code, index) => (
+                <span key={code}>
                   {index > 0 ? <span aria-hidden="true" className="text-ink-soft"> › </span> : null}
-                  <span>{step.name}</span>
+                  <span>{nameOf(code)}</span>
                 </span>
               ))
             )}

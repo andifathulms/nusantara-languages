@@ -147,7 +147,13 @@ export type LanguageDetail = {
     | { readonly type: 'polygon'; readonly source: string }
     | { readonly type: 'point' }
   /** Root first, with names, for the classification line. */
-  readonly ancestry: readonly { readonly glottocode: string; readonly name: string }[]
+  /**
+   * Ancestry as glottocodes, root first. Names are *not* carried here: `rows` already holds a
+   * name for all 1,221 nodes, so shipping them again per language duplicated ~101 KB of the
+   * payload to say the same thing twice. Whoever renders the chain resolves names from the
+   * rows it already has.
+   */
+  readonly ancestry: readonly string[]
 }
 
 export type PlateModel = {
@@ -409,10 +415,7 @@ export function buildPlateModel(input: BuildPlateInput): PlateModel {
       lon: languoid.lon,
       lat: languoid.lat,
       geometry: languoid.geometry,
-      ancestry: languoid.ancestors.map((glottocode) => ({
-        glottocode,
-        name: nameOfNode(glottocode),
-      })),
+      ancestry: languoid.ancestors,
     }
   }
 

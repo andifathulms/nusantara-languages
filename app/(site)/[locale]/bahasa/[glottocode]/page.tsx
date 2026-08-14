@@ -40,10 +40,7 @@ function detailOf(glottocode: string) {
       lon: languoid.lon,
       lat: languoid.lat,
       geometry: languoid.geometry,
-      ancestry: languoid.ancestors.map((code) => ({
-        glottocode: code,
-        name: bundle.treeIndex.nodes.get(code)?.name ?? code,
-      })),
+      ancestry: languoid.ancestors,
     },
   }
 }
@@ -57,7 +54,11 @@ export function generateMetadata({
   if (found === null) return {}
   const locale: Locale = isLocale(params.locale) ? params.locale : 'id'
   const strings = dictionary(locale)
-  const family = found.detail.ancestry[0]?.name ?? strings.tree.isolate
+  const rootCode = found.detail.ancestry[0]
+  const family =
+    rootCode === undefined
+      ? strings.tree.isolate
+      : (found.bundle.treeIndex.nodes.get(rootCode)?.name ?? rootCode)
   return {
     title: `${found.detail.name} (${found.detail.glottocode})`,
     description: `${found.detail.name} — ${strings.panel.family}: ${family}. ${strings.siteDescription}`,
@@ -76,7 +77,8 @@ export default function LanguagePage({
   if (found === null) notFound()
 
   const { detail, bundle } = found
-  const family = detail.ancestry[0]
+  const nameOf = (code: string): string => bundle.treeIndex.nodes.get(code)?.name ?? code
+  const rootCode = detail.ancestry[0]
 
   return (
     <>
@@ -84,7 +86,7 @@ export default function LanguagePage({
 
       <main id="content" className="mx-auto max-w-prose px-4 py-section sm:px-6">
         <p className="index-label">
-          {family === undefined ? strings.tree.isolate : family.name}
+          {rootCode === undefined ? strings.tree.isolate : nameOf(rootCode)}
         </p>
         <h1 className="mt-1 font-display text-title-l">{detail.name}</h1>
 
@@ -103,6 +105,7 @@ export default function LanguagePage({
             strings={strings}
             locale={locale}
             manifest={bundle.manifest}
+            nameOf={nameOf}
           />
         </div>
 

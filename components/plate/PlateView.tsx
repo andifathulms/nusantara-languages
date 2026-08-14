@@ -100,6 +100,17 @@ export function PlateView({
     [emphasis],
   )
 
+  /**
+   * Node name by glottocode, from the rows already in the model. The details carry ancestry as
+   * codes rather than repeating every ancestor's name per language, which was ~101 KB of the
+   * payload spent saying the same thing twice. Derived here beside searchEntries, which is
+   * already derived the same way from the same model.
+   */
+  const nameOf = useMemo(() => {
+    const names = new Map(model.rows.map((row) => [row.glottocode, row.name]))
+    return (glottocode: string): string => names.get(glottocode) ?? glottocode
+  }, [model.rows])
+
   const searchEntries = useMemo<readonly SearchEntry[]>(
     () =>
       Object.values(model.details).map((detail) => ({
@@ -107,10 +118,11 @@ export function PlateView({
         name: detail.name,
         altNames: detail.altNames,
         iso639P3: detail.iso639P3,
-        familyName: detail.ancestry[0]?.name ?? strings.tree.isolate,
+        familyName:
+          detail.ancestry[0] === undefined ? strings.tree.isolate : nameOf(detail.ancestry[0]),
         hasPolygon: detail.geometry.type === 'polygon',
       })),
-    [model.details, strings.tree.isolate],
+    [model.details, nameOf, strings.tree.isolate],
   )
 
   const scope = scopeOf(hovered, selection)
@@ -302,7 +314,9 @@ export function PlateView({
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <p className="index-label">
-                      {selectedDetail.ancestry[0]?.name ?? strings.tree.isolate}
+                      {selectedDetail.ancestry[0] === undefined
+                      ? strings.tree.isolate
+                      : nameOf(selectedDetail.ancestry[0])}
                     </p>
                     <h2 className="mt-0.5 font-display text-title-m">{selectedDetail.name}</h2>
                   </div>
@@ -316,6 +330,7 @@ export function PlateView({
                     strings={strings}
                     locale={locale}
                     manifest={manifest}
+                    nameOf={nameOf}
                     compact
                   />
                 </div>
