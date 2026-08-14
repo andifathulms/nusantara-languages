@@ -3,9 +3,11 @@ import type { Metadata } from 'next'
 import { SiteFooter, SiteHeader } from '@/components/site/SiteChrome'
 import { PlateView } from '@/components/plate/PlateView'
 import { MapKey } from '@/components/plate/MapKey'
+import { WorkedExample } from '@/components/plate/WorkedExample'
 import { loadBundle } from '@/lib/bundle/load'
 import { buildPlateModel } from '@/lib/plate/build'
 import { atlasPeriod } from '@/lib/bundle/types'
+import { exampleLadder } from '@/lib/plate/example'
 import { INDONESIA_BBOX } from '@/lib/geo'
 import { dictionary, format, isLocale, localePath, type Locale } from '@/lib/i18n'
 import { localeMetadata } from '@/lib/seo/locale-meta'
@@ -54,6 +56,15 @@ export default function PlatePage({ params }: { params: { locale: string } }) {
   const examples = EXAMPLE_FAMILIES.flatMap((glottocode) => {
     const row = model.rows.find((candidate) => candidate.glottocode === glottocode)
     return row === undefined ? [] : [{ label: row.name, glottocode }]
+  })
+
+  // Same ladder the front page teaches with (see that page for why Bima). A reader who lands
+  // on /peta directly — search, a shared link, a bookmark — is the second reader who never
+  // sees the front page at all, and this is the one artifact built to teach "language family"
+  // from zero rather than to be pressed.
+  const ladder = exampleLadder(model.rows, 'bima1247', {
+    treeIndex: bundle.treeIndex,
+    byCode: bundle.byCode,
   })
 
   return (
@@ -112,6 +123,15 @@ export default function PlatePage({ params }: { params: { locale: string } }) {
           <h2 className="mt-block font-display text-title-s">{strings.guide.howWeKnowTitle}</h2>
           <p className="mt-2 text-ink-soft">{strings.guide.howWeKnow}</p>
         </section>
+
+        {/* The worked example the front page teaches with, so a reader who lands on /peta
+            directly still meets it — not everyone who reaches "the product" comes through the
+            front door. */}
+        {ladder === null ? null : (
+          <section className="mt-section-lg">
+            <WorkedExample rungs={ladder} strings={strings} locale={locale} />
+          </section>
+        )}
       </main>
 
       <SiteFooter locale={locale} />
