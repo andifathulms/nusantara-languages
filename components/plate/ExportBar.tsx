@@ -90,7 +90,9 @@ export function ExportBar({ strings, getPlate, slug, scale = 2 }: ExportBarProps
       >
         {state === 'copied' ? strings.export.copied : strings.export.copyLink}
       </button>
-      <span aria-live="polite" className="text-body-s text-accent">
+      {/* Boundary ink, not accent: accent is rationed to primary action / current page /
+          selection / focus ring, and a failure notice is none of those (DESIGN.md). */}
+      <span aria-live="polite" className="text-body-s text-ink-soft">
         {state === 'failed' ? strings.export.failed : ''}
       </span>
     </div>
