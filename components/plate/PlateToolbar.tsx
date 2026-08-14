@@ -119,18 +119,37 @@ export function PlateToolbar({
       </div>
 
       {/* The current selection, stated in words. The plate says it in colour; a reader who
-          arrived by keyboard, or who cannot separate two tints, needs it in text as well. */}
-      <div
-        className="rule flex min-h-[2.25rem] flex-wrap items-baseline gap-x-3 gap-y-1 pt-3"
-        aria-live="polite"
-      >
-        {selectionLabel === null ? (
-          /* The linkage sentence used to sit here, which made the one line explaining the whole
-             product the smallest, faintest text on the page and put it below the search box.
-             It leads the page header now; this slot states the empty state and nothing more. */
-          <p className="text-body-s text-ink-soft">{strings.plate.noSelection}</p>
-        ) : (
-          <>
+          arrived by keyboard, or who cannot separate two tints, needs it in text as well.
+
+          Both states are always mounted, stacked in the same grid cell, rather than swapped
+          by a ternary: a `min-h` on a single swapped element only sets a *floor*, and the
+          selected state's own natural height — an index-label, a title-s name, a figure, and
+          a bordered `.btn` all baseline-aligned — routinely runs past that floor. Hovering the
+          tree flips between the two on every branch, so the toolbar (and the map sitting right
+          below it) grew and shrank on every hover. Stacking both in one grid cell makes the
+          row's height the max of the two, permanently, however either one's content changes;
+          `invisible` + `aria-hidden` hide whichever one isn't current without unmounting it. */}
+      <div className="rule pt-3" aria-live="polite">
+        <div className="grid">
+          <div
+            className={`col-start-1 row-start-1 flex min-h-[2.25rem] flex-wrap items-baseline gap-x-3 gap-y-1 ${
+              selectionLabel === null ? '' : 'invisible'
+            }`}
+            aria-hidden={selectionLabel === null ? undefined : true}
+          >
+            {/* The linkage sentence used to sit here, which made the one line explaining the
+                whole product the smallest, faintest text on the page and put it below the
+                search box. It leads the page header now; this slot states the empty state and
+                nothing more. */}
+            <p className="text-body-s text-ink-soft">{strings.plate.noSelection}</p>
+          </div>
+
+          <div
+            className={`col-start-1 row-start-1 flex min-h-[2.25rem] flex-wrap items-baseline gap-x-3 gap-y-1 ${
+              selectionLabel === null ? 'invisible' : ''
+            }`}
+            aria-hidden={selectionLabel === null ? true : undefined}
+          >
             <span className="index-label">{strings.plate.selectedFamily}</span>
             <span className="font-display text-title-s">{selectionLabel}</span>
             {selectionCount !== null ? (
@@ -150,8 +169,8 @@ export function PlateToolbar({
             <button type="button" onClick={onClear} className="btn ml-auto">
               {strings.plate.clearSelection}
             </button>
-          </>
-        )}
+          </div>
+        </div>
       </div>
 
       {/* What "membentang" means, spelled out rather than hidden in a tooltip. A number the
