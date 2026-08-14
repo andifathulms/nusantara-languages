@@ -1,6 +1,7 @@
 /**
- * After the export: write `.nojekyll` so GitHub Pages serves Next's `_next/` directory, and
- * assert the zero-runtime-request claim rather than trusting it.
+ * After the export: write `.nojekyll` so GitHub Pages serves Next's `_next/` directory,
+ * promote the site's 404 page to where GitHub Pages looks for it, and assert the
+ * zero-runtime-request claim rather than trusting it.
  *
  * The check is positive, not a blocklist: every resource the exported HTML and CSS *loads* —
  * stylesheets, scripts, images, fonts, preloads — must be same-origin. A blocklist of font
@@ -8,12 +9,36 @@
  * mentions those hosts precisely in order to strip links to them. Anchors are left alone:
  * a link the reader can follow is not a request the page makes.
  */
-import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
+import { copyFileSync, existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 const OUT = new URL('../out/', import.meta.url).pathname
 
 writeFileSync(join(OUT, '.nojekyll'), '')
+
+/**
+ * `app/(root)/404-source/page.tsx` renders the site's 404 with full chrome, but Next has no way
+ * to make an ordinary page *be* `out/404.html` — a static export's global fallback requires a
+ * true top-level `not-found.tsx`, which in turn requires a true top-level `app/layout.tsx`,
+ * which this project deliberately doesn't have (see that page's own comment: only the layout
+ * inside `[locale]` can know which `lang` to declare, and unifying to one root layout would undo
+ * the fix for that). So the page renders normally and this copies its output to the name GitHub
+ * Pages actually looks for.
+ *
+ * The source route is deliberately *not* named `404` — a literal `/404` output path hits a
+ * different, special-cased render inside Next's static exporter (the same generic, metadata-less
+ * shell as the framework's own built-in not-found page) rather than this page's own RSC output,
+ * which silently dropped the `<title>` tag when tried. `404-source` renders through the normal
+ * path and gets copied to the reserved name afterward instead.
+ */
+const rendered404 = join(OUT, '404-source', 'index.html')
+if (!existsSync(rendered404)) {
+  console.error(
+    'postbuild refused: out/404-source/index.html is missing — did app/(root)/404-source/page.tsx build?',
+  )
+  process.exit(1)
+}
+copyFileSync(rendered404, join(OUT, '404.html'))
 
 /**
  * `<link>` rels that name a document rather than fetch a resource.

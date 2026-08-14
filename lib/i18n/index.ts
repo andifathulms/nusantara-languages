@@ -264,6 +264,17 @@ export type Dictionary = {
     readonly copied: string
     readonly failed: string
   }
+  /**
+   * The static export's one global 404 (`out/404.html`) — GitHub Pages serves it for any
+   * unmatched path, so it carries no `params.locale` and always renders in the default locale,
+   * the same constraint the bare-origin redirect page already lives under.
+   */
+  readonly notFound: {
+    readonly title: string
+    readonly body: string
+    readonly backToPlate: string
+    readonly backToHome: string
+  }
   readonly a11y: {
     readonly skipToContent: string
     /** Names what the control does. Not the current language — that is its value, not its job. */
@@ -507,6 +518,12 @@ const id: Dictionary = {
       columnAustronesian: 'Bersentuhan dengan',
       columnDistance: 'Jarak',
     },
+  },
+  notFound: {
+    title: 'Halaman tidak ditemukan',
+    body: 'Tidak ada apa pun di alamat ini — mungkin salah ketik, atau tautan lama ke kode yang sudah tidak ada di kumpulan data saat ini.',
+    backToPlate: 'Buka peta',
+    backToHome: 'Kembali ke depan',
   },
   search: {
     label: 'Cari bahasa',
@@ -754,6 +771,12 @@ const en: Dictionary = {
       columnAustronesian: 'In contact with',
       columnDistance: 'Distance',
     },
+  },
+  notFound: {
+    title: 'Page not found',
+    body: 'There is nothing at this address — a typo, most likely, or an old link to a code no longer in the current dataset.',
+    backToPlate: 'Open the map',
+    backToHome: 'Back to the front page',
   },
   search: {
     label: 'Search languages',
