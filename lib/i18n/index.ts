@@ -77,6 +77,12 @@ export type Dictionary = {
     readonly hatchingToggle: string
     /** Template. Placeholder: {total}. */
     readonly hatchingNote: string
+    /**
+     * The disclosure that folds colour-by and hatching behind one summary, so the toolbar's row
+     * of search, examples, colour-by, and hatching doesn't stay four simultaneous clusters at
+     * once — the same `<details>` idiom the legend already uses for its minor families.
+     */
+    readonly displayOptions: string
     readonly colourBy: string
     readonly colourByFamily: string
     readonly colourBySubgroup: string
@@ -362,6 +368,7 @@ const id: Dictionary = {
     hatchingToggle: 'tampilkan arsir',
     hatchingNote:
       'Kebertahanan digambarkan sebagai kerapatan arsir di atas warna rumpun, bukan sebagai warna tersendiri: warna sudah dipakai untuk rumpun, sehingga kedua lapisan dapat dibaca bersamaan. Status mengikuti AES Glottolog untuk {total} bahasa.',
+    displayOptions: 'Tampilan',
   },
   guide: {
     leadPlain:
@@ -616,6 +623,7 @@ const en: Dictionary = {
     hatchingToggle: 'show hatching',
     hatchingNote:
       'Endangerment is drawn as hatch density over the family colour rather than as a colour of its own: hue already carries family, so the two layers stay readable at once. Status follows Glottolog AES for all {total} languages.',
+    displayOptions: 'Display',
   },
   guide: {
     leadPlain:

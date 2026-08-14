@@ -72,38 +72,50 @@ export function PlateToolbar({
           ))}
         </div>
 
-        {hasSubgroups ? (
-          <div className="flex items-center gap-2">
-            <span className="index-label">{strings.plate.colourBy}</span>
-            <div className="flex" role="group" aria-label={strings.plate.colourBy}>
-              {(['family', 'subgroup'] as const).map((mode) => (
-                <button
-                  key={mode}
-                  type="button"
-                  onClick={() => onColourMode(mode)}
-                  aria-pressed={colourMode === mode}
-                  className={`btn ${
-                    colourMode === mode ? 'border-boundary bg-boundary text-plate' : ''
-                  }`}
-                >
-                  {mode === 'family'
-                    ? strings.plate.colourByFamily
-                    : strings.plate.colourBySubgroup}
-                </button>
-              ))}
-            </div>
-          </div>
-        ) : null}
+        {/* Colour-by and hatching folded behind one disclosure, the same idiom the legend
+            already uses for its minor families: search and the worked examples are what a
+            first-time reader needs immediately, and these two are display refinements a
+            reader can reach for once they're oriented, not four simultaneous clusters
+            competing for attention before the map has even settled. */}
+        <details className="ml-auto">
+          <summary className="index-label cursor-pointer hover:text-boundary">
+            {strings.plate.displayOptions}
+          </summary>
+          <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-3">
+            {hasSubgroups ? (
+              <div className="flex items-center gap-2">
+                <span className="index-label">{strings.plate.colourBy}</span>
+                <div className="flex" role="group" aria-label={strings.plate.colourBy}>
+                  {(['family', 'subgroup'] as const).map((mode) => (
+                    <button
+                      key={mode}
+                      type="button"
+                      onClick={() => onColourMode(mode)}
+                      aria-pressed={colourMode === mode}
+                      className={`btn ${
+                        colourMode === mode ? 'border-boundary bg-boundary text-plate' : ''
+                      }`}
+                    >
+                      {mode === 'family'
+                        ? strings.plate.colourByFamily
+                        : strings.plate.colourBySubgroup}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
 
-        <label className="flex items-center gap-2 text-body-s">
-          <input
-            type="checkbox"
-            checked={hatching}
-            onChange={onToggleHatching}
-            className="h-4 w-4 accent-accent"
-          />
-          {strings.plate.hatchingToggle}
-        </label>
+            <label className="flex items-center gap-2 text-body-s">
+              <input
+                type="checkbox"
+                checked={hatching}
+                onChange={onToggleHatching}
+                className="h-4 w-4 accent-accent"
+              />
+              {strings.plate.hatchingToggle}
+            </label>
+          </div>
+        </details>
       </div>
 
       {/* The current selection, stated in words. The plate says it in colour; a reader who
