@@ -50,6 +50,8 @@ export function SearchBox({ entries, strings, onChoose }: SearchBoxProps) {
       }
       event.preventDefault()
       inputRef.current?.focus()
+      // Select what is there, so typing starts a new search instead of appending to the last one.
+      inputRef.current?.select()
     }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)

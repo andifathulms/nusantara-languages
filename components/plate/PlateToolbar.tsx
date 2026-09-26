@@ -23,6 +23,8 @@ type PlateToolbarProps = {
   readonly onChoose: (glottocode: string) => void
   readonly onSelectBranch: (glottocode: string) => void
   readonly examples: readonly { readonly label: string; readonly glottocode: string }[]
+  /** Selects a language at random. Absent where a random jump would fight the page's purpose. */
+  readonly onRandom?: () => void
 }
 
 export function PlateToolbar({
@@ -31,6 +33,7 @@ export function PlateToolbar({
   onChoose,
   onSelectBranch,
   examples,
+  onRandom,
 }: PlateToolbarProps) {
   return (
     <div className="flex flex-col gap-3 md:flex-row md:items-end md:gap-6">
@@ -51,6 +54,17 @@ export function PlateToolbar({
               {example.label}
             </button>
           ))}
+          {onRandom === undefined ? null : (
+            <button type="button" onClick={onRandom} className="btn px-2.5 py-1">
+              <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.4">
+                <rect x="2" y="2" width="12" height="12" />
+                <circle cx="5.5" cy="5.5" r="0.9" fill="currentColor" />
+                <circle cx="10.5" cy="10.5" r="0.9" fill="currentColor" />
+                <circle cx="8" cy="8" r="0.9" fill="currentColor" />
+              </svg>
+              {strings.workspace.random}
+            </button>
+          )}
         </div>
       ) : null}
     </div>

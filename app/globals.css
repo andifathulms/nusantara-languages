@@ -261,6 +261,25 @@ html[data-tips='off'] .first-visit-tips {
   }
 }
 
+/* The line of descent draws down the tree's gutter from the root, one row after another. */
+@keyframes trail-draw {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+.trail-draw {
+  transform-origin: top;
+  animation: trail-draw 240ms cubic-bezier(0.2, 0, 0.2, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .trail-draw {
+    animation: none;
+  }
+}
+
 /* The tree sheet rises and falls on a phone. */
 @media (prefers-reduced-motion: no-preference) {
   .tree-sheet {

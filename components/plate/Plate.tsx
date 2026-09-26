@@ -50,6 +50,8 @@ type PlateProps = {
   readonly model: PlateModel
   readonly scope: string | null
   readonly selectedLanguage: string | null
+  /** A second language drawn as selected, while two are being compared. */
+  readonly pairedLanguage?: string | null
   readonly onHover: (glottocode: string | null) => void
   readonly onSelect: (glottocode: string) => void
   readonly label: string
@@ -78,8 +80,6 @@ type PlateProps = {
    * names; placed here, which knows where the pointer is. Mouse only — touch has no hover.
    */
   readonly hoverCard?: React.ReactNode
-  /** Cards laid over the plate, positioned by the caller. They show in full screen too. */
-  readonly overlay?: React.ReactNode
 }
 
 const HATCH_IDS = ['hatch-1', 'hatch-2', 'hatch-3', 'hatch-4', 'hatch-5', 'hatch-6'] as const
@@ -185,6 +185,7 @@ export function Plate({
   model,
   scope,
   selectedLanguage,
+  pairedLanguage = null,
   onHover,
   onSelect,
   label,
@@ -197,7 +198,6 @@ export function Plate({
   narrowCentreX,
   focus = null,
   hoverCard = null,
-  overlay = null,
 }: PlateProps) {
   const [viewport, setViewport] = useState<Viewport>(IDENTITY)
   const [isFullscreen, setIsFullscreen] = useState(false)
@@ -590,7 +590,8 @@ export function Plate({
       <g transform={transform}>
       {model.shapes.map((shape) => {
         const state = paintStateFor(shape.glottocode, shape.ancestors, scope, emphasis)
-        const isSelected = selectedLanguage === shape.glottocode
+        const isSelected =
+          selectedLanguage === shape.glottocode || pairedLanguage === shape.glottocode
         const colours = colourMode === 'subgroup' ? shape.subgroupColour : shape.colour
         return shape.type === 'area' ? (
           <MemoArea
@@ -623,6 +624,7 @@ export function Plate({
           (shape) =>
             shape.type === 'area' &&
             (shape.glottocode === selectedLanguage ||
+              shape.glottocode === pairedLanguage ||
               (scope !== null && shape.glottocode === scope)),
         )
         .map((shape) =>
@@ -677,7 +679,6 @@ export function Plate({
         {hoverCard}
       </div>
 
-      {overlay}
       </div>
 
       {/* The plate has taken arrow keys, +/- and 0 since the viewport landed, and nothing ever

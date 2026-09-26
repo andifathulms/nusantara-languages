@@ -5,12 +5,12 @@ import { familyVarRef, type FamilyColourToken } from '@/lib/colour'
 import { format, localePath, type Dictionary, type Locale } from '@/lib/i18n'
 
 /**
- * What is selected, said in words, laid over the plate's sea.
+ * What is selected, said in words, directly under the plate.
  *
- * It replaced a row above the map that was always mounted — an empty "nothing selected" line most
+ * It replaced a row *above* the map that was always mounted — an empty "nothing selected" line most
  * of the time, and a height that had to be pinned so hovering the tree did not push the map up and
- * down. Laid over the plate it takes no room in the page at all, so it can appear only when there
- * is something to say.
+ * down. Below the map it can appear only when there is something to say, and moves nothing but
+ * what is under it.
  *
  * The lineage is a row of buttons: each ancestor can be selected in turn, which is the tree's
  * climb made available from the map.
@@ -51,7 +51,7 @@ export function SelectionCard({
   return (
     <section
       aria-label={summary.name}
-      className={`border border-boundary/30 bg-plate/95 px-3 py-2.5 shadow-lifted ${className}`}
+      className={`border border-boundary/25 bg-plate px-4 py-3 shadow-sheet ${className}`}
     >
       <p className="index-label">
         {summary.kind === 'branch' ? strings.plate.selectedFamily : strings.workspace.selectedLanguage}

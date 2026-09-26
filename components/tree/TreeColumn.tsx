@@ -32,6 +32,8 @@ type TreeColumnProps = {
   readonly scrollTo: string | null
   /** Languages in the largest family: every count bar is drawn against this one scale. */
   readonly barScale: number
+  /** Rows on the selected line of descent — or two lines, when comparing — marked in the gutter. */
+  readonly trail?: ReadonlySet<string>
 }
 
 /**
@@ -66,6 +68,7 @@ export function TreeColumn({
   onSelect,
   scrollTo,
   barScale,
+  trail,
 }: TreeColumnProps) {
   const listRef = useRef<HTMLDivElement | null>(null)
   /**
@@ -187,12 +190,24 @@ export function TreeColumn({
                 className="outline-offset-[-2px]"
               >
                 <div
-                  className={`flex items-baseline gap-1.5 px-1 py-[0.1rem] transition-colors ${
+                  className={`relative flex items-baseline gap-1.5 px-1 py-[0.1rem] transition-colors ${
                     isExactScope || isSelected ? 'bg-accent/10' : 'hover:bg-boundary/5'
                   }`}
                   style={{ paddingLeft: `${indentRem(row.depth)}rem` }}
                   onPointerEnter={() => onHover(row.glottocode)}
                 >
+                  {/* The line of descent, drawn down the gutter from the root, one row after the
+                      next: the tree's answer to "how did we get here?". */}
+                  {trail?.has(row.glottocode) ? (
+                    <span
+                      aria-hidden="true"
+                      className="trail-draw absolute inset-y-0 left-0 w-[3px]"
+                      style={{
+                        backgroundColor: familyVarRef(row.colour, 'selected'),
+                        animationDelay: `${Math.min(row.depth, 10) * 24}ms`,
+                      }}
+                    />
+                  ) : null}
                   {row.hasChildren ? (
                     <span
                       aria-hidden="true"

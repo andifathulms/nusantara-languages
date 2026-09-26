@@ -193,3 +193,24 @@ describe('the Austronesian–Papuan seam, which is the reason the map exists', (
     expect(lit.size).toBeGreaterThan(5)
   })
 })
+
+describe('a random language, and the trail of a selection', () => {
+  it('picks by the roll it is given, so a roll always lands on the same code', async () => {
+    const { pickAt } = await import('@/lib/plate/select')
+    const codes = ['a', 'b', 'c', 'd']
+    expect(pickAt(codes, 0)).toBe('a')
+    expect(pickAt(codes, 0.5)).toBe('c')
+    expect(pickAt(codes, 0.999)).toBe('d')
+    expect(pickAt(codes, 1)).toBe('d')
+    expect(pickAt([], 0.3)).toBeNull()
+  })
+
+  it('draws the trail through both lines of descent and the languages themselves', async () => {
+    const { trailOf } = await import('@/lib/plate/select')
+    const trail = trailOf([
+      { glottocode: 'java1254', ancestors: ['aust1307', 'mala1545'] },
+      { glottocode: 'bugi1244', ancestors: ['aust1307', 'mala1545', 'sout2917'] },
+    ])
+    expect([...trail].sort()).toEqual(['aust1307', 'bugi1244', 'java1254', 'mala1545', 'sout2917'])
+  })
+})

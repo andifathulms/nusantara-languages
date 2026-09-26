@@ -360,6 +360,18 @@ export type Dictionary = {
     readonly display: string
     /** One line under an extent figure on the selection card: the full rule is in the key and on the method page. */
     readonly extentShort: string
+    readonly compare: string
+    readonly compareTitle: string
+    /** Template. Placeholder: {name}. */
+    readonly comparePick: string
+    readonly compareShared: string
+    /** Template. Placeholder: {count}. */
+    readonly compareSharedCount: string
+    /** Template. Placeholders: {a}, {fa}, {b}, {fb}. */
+    readonly compareNone: string
+    readonly compareCaveat: string
+    readonly compareDone: string
+    readonly random: string
   }
   readonly a11y: {
     readonly skipToContent: string
@@ -684,6 +696,15 @@ const id: Dictionary = {
     treeClose: 'Tutup pohon',
     display: 'Tampilan',
     extentShort: 'Membentang: jarak dua titik tercatat terjauh, diukur antartitik tengah — batas bawah.',
+    compare: 'Bandingkan…',
+    compareTitle: 'Bandingkan dua bahasa',
+    comparePick: 'Pilih bahasa kedua untuk dibandingkan dengan {name}: klik di peta, di pohon, atau cari.',
+    compareShared: 'Leluhur bersama terdekat',
+    compareSharedCount: '{count} bahasa di bawahnya pada peta ini, semuanya menyala.',
+    compareNone: 'Tidak ada leluhur bersama yang tercatat. {a} termasuk {fa}, {b} termasuk {fb}: dua rumpun yang tidak terbukti berkerabat.',
+    compareCaveat: 'Pohon ini tidak punya panjang cabang: yang ditunjukkan adalah titik temu dua garis keturunan, bukan seberapa lama keduanya berpisah.',
+    compareDone: 'Selesai',
+    random: 'Bahasa acak',
   },
   a11y: {
     skipToContent: 'Lewati ke konten utama',
@@ -999,6 +1020,15 @@ const en: Dictionary = {
     treeClose: 'Close the tree',
     display: 'Display',
     extentShort: 'Spans: the distance between the two furthest recorded points, midpoint to midpoint — a floor.',
+    compare: 'Compare…',
+    compareTitle: 'Compare two languages',
+    comparePick: 'Pick a second language to compare with {name}: click the map, the tree, or search.',
+    compareShared: 'Closest shared ancestor',
+    compareSharedCount: '{count} languages under it on this map, all lit.',
+    compareNone: 'No shared ancestor on record. {a} belongs to {fa}, {b} to {fb}: two families with no demonstrated relationship.',
+    compareCaveat: 'The tree carries no branch lengths: this shows where two lines of descent meet, not how long ago they parted.',
+    compareDone: 'Done',
+    random: 'Random language',
   },
   a11y: {
     skipToContent: 'Skip to main content',

@@ -77,3 +77,21 @@ export function toggleOpen(open: ReadonlySet<string>, glottocode: string): Set<s
   else next.add(glottocode)
   return next
 }
+
+/**
+ * One code from a list, chosen by a number in [0, 1). The caller supplies the number — this module
+ * has no clock and no randomness of its own — so "a random language" is testable and the same
+ * roll always lands on the same language.
+ */
+export function pickAt(codes: readonly string[], roll: number): string | null {
+  if (codes.length === 0) return null
+  const index = Math.min(codes.length - 1, Math.max(0, Math.floor(roll * codes.length)))
+  return codes[index] ?? null
+}
+
+/** Everything on the line of descent of the given languages, themselves included. */
+export function trailOf(
+  chains: readonly { readonly glottocode: string; readonly ancestors: readonly string[] }[],
+): ReadonlySet<string> {
+  return new Set(chains.flatMap((chain) => [...chain.ancestors, chain.glottocode]))
+}

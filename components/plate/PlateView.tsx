@@ -10,13 +10,17 @@ import { MapKey } from './MapKey'
 import { DisplayControls } from './DisplayControls'
 import { FirstVisitTips } from './FirstVisitTips'
 import { SelectionCard, type SelectionSummary } from './SelectionCard'
+import { CompareCard, type CompareSide } from './CompareCard'
+import { sharedAncestor } from '@/lib/tree'
 import { TreeColumn } from '@/components/tree/TreeColumn'
 import { LanguageFacts } from '@/components/panel/LanguageFacts'
 import {
   NO_SELECTION,
   openAncestry,
+  pickAt,
   scopeOf,
   toggleOpen,
+  trailOf,
   type PlateSelection,
 } from '@/lib/plate/select'
 import { parseViewHash, toViewHash, type ColourMode } from '@/lib/plate/hash'
@@ -107,6 +111,8 @@ export function PlateView({
   const [hatching, setHatching] = useState(initialHatching)
   const [colourMode, setColourMode] = useState<ColourMode>('family')
   const [sheetOpen, setSheetOpen] = useState(false)
+  /** Two languages being compared. `second` is null while the reader is choosing it. */
+  const [compare, setCompare] = useState<{ first: string; second: string | null } | null>(null)
   const plateRef = useRef<SVGSVGElement | null>(null)
   const groundRef = useRef<SVGSVGElement | null>(null)
 
@@ -158,39 +164,69 @@ export function PlateView({
     [shapeByCode, rowByCode],
   )
 
-  // The hash is read once on mount, so a shared link opens on the view it names, and written as
-  // the reader changes it. replaceState rather than a push: the plate is one page, and the back
-  // button should leave it rather than walk a history of clicks.
+  // The view lives in the URL hash, so a shared link opens on the view it names.
+  //
+  // Each *selection* is a history entry, so Back undoes a click — the reader asked for that, and
+  // it is what every map they use does. Display changes (colour-by, hatching) replace the entry
+  // instead, and hover never touches history at all. The entry being restored by Back, or read
+  // from the link on arrival, must not be pushed again, which is what `restoring` guards.
+  const restoring = useRef(true)
+  const lastSelection = useRef<string | null>(null)
+
+  const applyHash = useCallback(
+    (hash: string, withDisplay: boolean) => {
+      const state = parseViewHash(hash)
+      const named = state.selection
+      restoring.current = true
+      setSelection(named)
+      if (named.kind !== 'none') {
+        setOpen((current) =>
+          openAncestry(current, [...ancestryOf(named.glottocode), named.glottocode]),
+        )
+        setScrollTo(named.glottocode)
+      }
+      if (withDisplay) {
+        if (state.hatching) setHatching(true)
+        if (state.colourMode === 'subgroup') setColourMode('subgroup')
+      }
+    },
+    [ancestryOf],
+  )
+
   useEffect(() => {
     if (!syncHash) return
-    const state = parseViewHash(window.location.hash)
-    const named = state.selection
-    if (named.kind !== 'none') {
-      setSelection(named)
-      setOpen((current) =>
-        openAncestry(current, [...ancestryOf(named.glottocode), named.glottocode]),
-      )
-      setScrollTo(named.glottocode)
-    }
-    if (state.hatching) setHatching(true)
-    if (state.colourMode === 'subgroup') setColourMode('subgroup')
-    // Deliberately mount-only: after this, the reader's interaction owns the state.
+    applyHash(window.location.hash, true)
+    const onPop = () => applyHash(window.location.hash, false)
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+    // Mount-only: after this, the reader's interaction and Back own the state.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [syncHash])
 
   useEffect(() => {
     if (!syncHash) return
     const hash = toViewHash({ selection, hatching, colourMode })
-    window.history.replaceState(
-      null,
-      '',
-      `${window.location.pathname}${window.location.search}${hash}`,
-    )
+    const url = `${window.location.pathname}${window.location.search}${hash}`
+    const key = selection.kind === 'none' ? 'none' : `${selection.kind}:${selection.glottocode}`
+    const changed = lastSelection.current !== null && key !== lastSelection.current
+    if (changed && !restoring.current) window.history.pushState(null, '', url)
+    else window.history.replaceState(null, '', url)
+    lastSelection.current = key
+    restoring.current = false
   }, [syncHash, selection, hatching, colourMode])
 
   /** Clicking a territory: select it, open its ancestry, scroll the tree to it. */
   const selectFromPlate = useCallback(
     (glottocode: string) => {
+      // Choosing the second language of a comparison: it joins the first rather than replacing it.
+      if (compare !== null && compare.second === null) {
+        if (glottocode !== compare.first) {
+          setCompare({ first: compare.first, second: glottocode })
+          setOpen((current) => openAncestry(current, ancestryOf(glottocode)))
+          setScrollTo(glottocode)
+        }
+        return
+      }
       setSelection((current) =>
         current.kind === 'language' && current.glottocode === glottocode
           ? NO_SELECTION
@@ -199,11 +235,15 @@ export function PlateView({
       setOpen((current) => openAncestry(current, ancestryOf(glottocode)))
       setScrollTo(glottocode)
     },
-    [ancestryOf],
+    [ancestryOf, compare],
   )
 
   /** Clicking a tree row: a language behaves like a territory, a subgroup scopes the plate. */
   const selectFromTree = useCallback((row: TreeRow) => {
+    if (compare !== null && compare.second === null && row.level === 'language') {
+      if (row.glottocode !== compare.first) setCompare({ first: compare.first, second: row.glottocode })
+      return
+    }
     setSelection((current) => {
       const kind = row.level === 'language' ? 'language' : 'branch'
       const isSame = current.kind === kind && current.glottocode === row.glottocode
@@ -211,7 +251,7 @@ export function PlateView({
     })
     if (row.hasChildren) setOpen((current) => new Set([...current, row.glottocode]))
     setScrollTo(null)
-  }, [])
+  }, [compare])
 
   const selectBranch = useCallback(
     (glottocode: string) => {
@@ -234,8 +274,46 @@ export function PlateView({
 
   const clear = useCallback(() => {
     setSelection(NO_SELECTION)
+    setCompare(null)
     setScrollTo(null)
   }, [])
+
+  /** A language at random, from the whole bundle with equal weight: small families come up too. */
+  const allCodes = useMemo(() => Object.keys(model.details).sort(), [model.details])
+  const selectRandom = useCallback(() => {
+    const code = pickAt(allCodes, Math.random())
+    if (code === null) return
+    setCompare(null)
+    setSelection({ kind: 'language', glottocode: code })
+    setOpen((current) => openAncestry(current, ancestryOf(code)))
+    setScrollTo(code)
+  }, [allCodes, ancestryOf])
+
+  // A comparison, once both languages are chosen: where their lines of descent meet, if anywhere.
+  const pairDone = compare !== null && compare.second !== null ? compare : null
+  const shared =
+    pairDone === null || pairDone.second === null
+      ? null
+      : sharedAncestor(ancestryOf(pairDone.first), ancestryOf(pairDone.second))
+  const pairEmphasis = useMemo(
+    () =>
+      pairDone === null || pairDone.second === null || shared !== null
+        ? null
+        : new Set([pairDone.first, pairDone.second]),
+    [pairDone, shared],
+  )
+  // While comparing, the shared branch is what is lit; with no shared branch, just the two
+  // languages. Hover still wins, as it always does.
+  const plateScope = hovered ?? (pairDone === null ? scope : shared)
+  const trail = useMemo(() => {
+    const codes =
+      compare === null
+        ? selection.kind === 'none'
+          ? []
+          : [selection.glottocode]
+        : [compare.first, ...(compare.second === null ? [] : [compare.second])]
+    return trailOf(codes.map((code) => ({ glottocode: code, ancestors: ancestryOf(code) })))
+  }, [compare, selection, ancestryOf])
 
   const selectedDetail = selectedLanguage === null ? undefined : model.details[selectedLanguage]
 
@@ -309,8 +387,40 @@ export function PlateView({
             count: rowByCode.get(selection.glottocode)?.languageCount ?? 0,
           })
 
-  const card = (className: string) =>
-    summary === null ? null : (
+  const sideOf = (code: string): CompareSide | null => {
+    const detail = model.details[code]
+    const shape = shapeByCode.get(code)
+    if (detail === undefined || shape === undefined) return null
+    return {
+      glottocode: code,
+      name: detail.name,
+      familyName: detail.ancestry[0] === undefined ? strings.tree.isolate : nameOf(detail.ancestry[0]),
+      colour: shape.colour,
+    }
+  }
+
+  const card = (className: string) => {
+    if (compare !== null) {
+      const first = sideOf(compare.first)
+      if (first === null) return null
+      const sharedRow = shared === null ? undefined : rowByCode.get(shared)
+      return (
+        <CompareCard
+          first={first}
+          second={compare.second === null ? null : sideOf(compare.second)}
+          shared={
+            sharedRow === undefined
+              ? null
+              : { name: sharedRow.name, languageCount: sharedRow.languageCount }
+          }
+          strings={strings}
+          locale={locale}
+          onDone={() => setCompare(null)}
+          className={className}
+        />
+      )
+    }
+    return summary === null ? null : (
       <SelectionCard
         key={`${summary.kind}-${summary.glottocode}`}
         summary={summary}
@@ -319,8 +429,20 @@ export function PlateView({
         onSelectBranch={selectBranch}
         onClear={clear}
         className={className}
+        actions={
+          summary.kind === 'language' ? (
+            <button
+              type="button"
+              onClick={() => setCompare({ first: summary.glottocode, second: null })}
+              className="btn px-2 py-1"
+            >
+              {strings.workspace.compare}
+            </button>
+          ) : null
+        }
       />
     )
+  }
 
   return (
     <div className="space-y-4">
@@ -330,6 +452,7 @@ export function PlateView({
         onChoose={selectFromPlate}
         onSelectBranch={selectBranch}
         examples={examples}
+        onRandom={syncHash ? selectRandom : undefined}
       />
 
       {/* Above the map where there is room; below it on a phone, so the map comes first. The
@@ -348,8 +471,9 @@ export function PlateView({
               plateRef={plateRef}
               groundRef={groundRef}
               model={model}
-              scope={scope}
-              selectedLanguage={selectedLanguage}
+              scope={plateScope}
+              selectedLanguage={compare === null ? selectedLanguage : compare.first}
+              pairedLanguage={compare?.second ?? null}
               onHover={setHovered}
               onSelect={selectFromPlate}
               label={`${strings.plate.title} — ${format(strings.plate.coverage, {
@@ -359,17 +483,18 @@ export function PlateView({
               })}`}
               showHatching={hatching}
               colourMode={colourMode}
-              emphasis={emphasisSet}
+              emphasis={pairEmphasis ?? emphasisSet}
               strings={strings}
               narrowCentreX={narrowCentreX}
               focus={focus}
               hoverCard={hoverCard}
-              // Over the plate's sea on a wide screen — bottom left is the Indian Ocean. On a
-              // phone there is no sea to spare, so the card sits under the plate instead.
-              overlay={card('card-enter absolute bottom-3 left-3 hidden w-[20rem] max-w-[calc(100%-1.5rem)] lg:block')}
             />
 
-            {card('card-enter lg:hidden')}
+            {/* Directly under the plate, at every width. It was laid over the plate's sea at
+                first, and measured that way it covered a third of the map — in a comparison it
+                hid one of the two languages being compared. Here it moves only what is below it;
+                the map itself never shifts. */}
+            {card('card-enter')}
 
             {showTips ? <FirstVisitTips strings={strings} className="lg:hidden" /> : null}
 
@@ -489,6 +614,7 @@ export function PlateView({
               onSelect={selectFromTree}
               scrollTo={scrollTo}
               barScale={model.largestFamily}
+              trail={trail}
             />
           </div>
         </div>
