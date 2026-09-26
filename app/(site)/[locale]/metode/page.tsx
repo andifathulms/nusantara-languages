@@ -153,6 +153,26 @@ export default function MethodPage({ params }: { params: { locale: string } }) {
 
         {/* Refusals are published, not hidden: the atlas this project was designed around is
             the one source it cannot ship, and the reason belongs on the page. */}
+        {/* Every layer beyond the family map, with the limit that goes with it — the same rule as
+            every figure on this site: a claim ships with its boundary. */}
+        <section className="mt-section">
+          <h2 className="font-display text-title-m">{strings.method.layers}</h2>
+          <p className="mt-2 text-ink-soft">{strings.method.layersLead}</p>
+          <ul className="mt-block space-y-3">
+            {[
+              strings.method.layerDocs,
+              strings.method.layerWords,
+              strings.method.layerGrammar,
+              strings.method.layerScripts,
+              strings.method.layerReference,
+            ].map((text) => (
+              <li key={text} className="caveat">
+                {text}
+              </li>
+            ))}
+          </ul>
+        </section>
+
         <section className="mt-section">
           <h2 className="font-display text-title-m">{strings.method.refused}</h2>
           <ul className="mt-4 space-y-5">

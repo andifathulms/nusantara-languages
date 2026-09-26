@@ -312,6 +312,13 @@ export type Dictionary = {
     readonly bundled: string
     readonly period: string
     readonly nameProviders: string
+    readonly layers: string
+    readonly layersLead: string
+    readonly layerDocs: string
+    readonly layerWords: string
+    readonly layerGrammar: string
+    readonly layerScripts: string
+    readonly layerReference: string
   }
   readonly guided: {
     readonly title: string
@@ -518,7 +525,7 @@ const id: Dictionary = {
       'Membentang = jarak antara dua titik tercatat yang paling berjauhan dalam cabang ini. Diukur antara titik tengah, sehingga angkanya batas bawah, bukan rentang wilayah sebenarnya.',
     index: 'Indeks',
     attribution:
-      'Sumber: Glottolog 5.3 (CC-BY-4.0), Glottography (CC-BY-4.0), Natural Earth (domain publik).',
+      'Sumber: Glottolog 5.3 (CC-BY-4.0), Glottography (CC-BY-4.0), Natural Earth (domain publik), ABVD (CC-BY-4.0), Grambank (CC-BY-4.0).',
     geometryArea: 'punya wilayah',
     geometryPoint: 'hanya titik',
     colourBy: 'Warna menurut',
@@ -729,6 +736,13 @@ const id: Dictionary = {
     bundled: 'Disertakan',
     period: 'Periode',
     nameProviders: 'Penyedia nama lain',
+    layers: 'Lapisan tambahan, dan batasnya',
+    layersLead: 'Setiap lapisan di atas peta rumpun menjawab satu pertanyaan, dari sumber berlisensi terbuka yang tercantum di atas, dan setiap lapisan punya batas yang perlu diketahui pembaca.',
+    layerDocs: 'Dokumentasi. Karya terlengkap tentang tiap bahasa dan jumlah rujukannya, menurut Glottolog. Bukan ukuran kebertahanan: bahasa yang terdokumentasi baik bisa terancam, dan sebaliknya.',
+    layerWords: 'Satu kata. Bentuk kata dan himpunan seasalnya dari ABVD, yang berfokus pada rumpun Austronesia; bahasa tanpa entri tidak tercatat di sumber itu, bukan tanpa kata. Bila ABVD punya beberapa daftar kata untuk satu bahasa, yang bernomor terkecil dipakai. Penilaian seasal adalah milik para penyusun ABVD.',
+    layerGrammar: 'Tata bahasa. Empat ciri dari Grambank, dikode dari tata bahasa yang terbit. Hanya kode pasti (ya/tidak) yang dipakai; “?” dibiarkan kosong, bukan dianggap “tidak”.',
+    layerScripts: 'Aksara. Disusun tangan: satu bahasa dikaitkan dengan satu aksara hanya bila Standar Unicode 15.1, bab 17, menyebutnya. Contohnya huruf dari blok Unicode aksara itu, bukan ejaan nama bahasa. Aksara yang belum masuk Unicode, seperti Lampung dan Incung, tidak dapat ditampilkan.',
+    layerReference: 'Latar geografi. Nama laut, kota, dan kedalaman 200 m dari Natural Earth. Kota dipilih menurut peringkat kepentingan Natural Earth, bukan sebagai ibu kota. Dua label dikoreksi: Bandjarmasin menjadi Banjarmasin, dan Laut Seram. Batas provinsi tidak ditampilkan: edisi Natural Earth yang dipakai masih mencatat 33 provinsi, sebelum Kalimantan Utara (2012) dan pemekaran Papua (2022).',
   },
   guided: {
     title: 'Panduan',
@@ -903,7 +917,7 @@ const en: Dictionary = {
       'Span is the distance between the two furthest-apart recorded points in this branch. Measured between midpoints, so it is a floor rather than the true reach of the territory.',
     index: 'Index',
     attribution:
-      'Sources: Glottolog 5.3 (CC-BY-4.0), Glottography (CC-BY-4.0), Natural Earth (public domain).',
+      'Sources: Glottolog 5.3 (CC-BY-4.0), Glottography (CC-BY-4.0), Natural Earth (public domain), ABVD (CC-BY-4.0), Grambank (CC-BY-4.0).',
     geometryArea: 'has a territory',
     geometryPoint: 'point only',
     colourBy: 'Colour by',
@@ -1113,6 +1127,13 @@ const en: Dictionary = {
     bundled: 'Bundled',
     period: 'Period',
     nameProviders: 'Alternate-name providers',
+    layers: 'Further layers, and their limits',
+    layersLead: 'Each layer over the family map answers one question, from an openly licensed source listed above, and each has limits a reader should know.',
+    layerDocs: 'Documentation. The fullest work on each language and its number of references, per Glottolog. Not a measure of vitality: a well-documented language can be endangered, and the reverse.',
+    layerWords: 'One word. Word forms and their cognate sets from ABVD, which focuses on the Austronesian family; a language without an entry is not recorded there, not without the word. Where ABVD has several wordlists for a language, the lowest-numbered is used. Cognate judgements are ABVD\'s compilers\'.',
+    layerGrammar: 'Grammar. Four features from Grambank, coded from published grammars. Only definite codes (yes/no) are used; a “?” is left blank, never taken as “no”.',
+    layerScripts: 'Scripts. Hand-curated: a language is linked to a script only where the Unicode Standard 15.1, chapter 17, names it. The specimen is letters from the script\'s Unicode block, not a spelling of the language\'s name. Scripts not yet in Unicode, such as Lampung and Incung, cannot be shown.',
+    layerReference: 'Geography. Sea names, towns and the 200 m depth line from Natural Earth. Towns are chosen by Natural Earth\'s importance rank, not as capitals. Two labels are corrected: Bandjarmasin to Banjarmasin, and Laut Seram. Province boundaries are not shown: the Natural Earth edition used still records 33 provinces, before North Kalimantan (2012) and the Papua split (2022).',
   },
   guided: {
     title: 'Guided views',
