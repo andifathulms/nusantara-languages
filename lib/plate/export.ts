@@ -61,8 +61,8 @@ export function toStandaloneSvg(markup: string, options: ExportOptions): string 
   const head =
     `<title>${escapeXml(options.title)}</title>` +
     `<style>${paletteStyleBlock()}</style>` +
-    // The paper is painted explicitly: a PNG has no page behind it to inherit.
-    `<rect x="0" y="0" width="${options.width}" height="${options.height}" fill="${PLATE_COLOURS.plate}"/>`
+    // The sea is painted explicitly: a PNG has no page behind it to inherit.
+    `<rect x="0" y="0" width="${options.width}" height="${options.height}" fill="${PLATE_COLOURS.sea}"/>`
 
   return sized.replace(/>/, `>${head}`)
 }
@@ -73,6 +73,25 @@ function escapeXml(text: string): string {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
+}
+
+/**
+ * Puts the ground back under the plate. On screen the sea, coastline and graticule are a separate
+ * SVG stacked beneath the interactive one, so a hover never repaints them; an exported PNG has to
+ * be one document, so the ground's contents go in first, right after the plate's opening tag.
+ *
+ * Both SVGs share one viewBox and one transform, so nothing needs re-projecting. Anything that is
+ * not an `<svg>` is refused, as in `toStandaloneSvg`.
+ */
+export function mergeGround(plateMarkup: string, groundMarkup: string): string | null {
+  if (!plateMarkup.trimStart().startsWith('<svg')) return null
+  if (!groundMarkup.trimStart().startsWith('<svg')) return null
+  const groundOpen = groundMarkup.indexOf('>')
+  const groundClose = groundMarkup.lastIndexOf('</svg>')
+  if (groundOpen === -1 || groundClose === -1 || groundClose < groundOpen) return null
+  const inner = groundMarkup.slice(groundOpen + 1, groundClose)
+  const plateOpen = plateMarkup.indexOf('>')
+  return `${plateMarkup.slice(0, plateOpen + 1)}${inner}${plateMarkup.slice(plateOpen + 1)}`
 }
 
 /** `nusantara-bahasa-2026-08-12.png`-shaped, with the date passed in rather than read. */

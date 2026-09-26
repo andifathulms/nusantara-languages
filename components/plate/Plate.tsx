@@ -18,6 +18,7 @@ import {
 import type { PlateModel, PlateShape, ShapeColour } from '@/lib/plate/build'
 import type { Dictionary } from '@/lib/i18n'
 import { familyVarRef } from '@/lib/colour'
+import { Coastline, LandFill, WaterLines } from './Ground'
 
 /**
  * The plate. Flat spot colours, hairline boundaries, a 5° graticule for reference, and
@@ -29,8 +30,10 @@ import { familyVarRef } from '@/lib/colour'
  *
  * The land beneath comes from Natural Earth (public domain), sourced properly rather than traced
  * from the language areas themselves — a silhouette derived from the data would have drawn a
- * country that stops where the documentation stops. Land with no speaker area over it stays grey,
- * which is the honest reading: the coast is known, the language is not recorded there.
+ * country that stops where the documentation stops. Land with no speaker area over it stays blank,
+ * which is the honest reading: the coast is known, the language is not recorded there. The
+ * land is blank paper and the sea is tinted and water-lined, so figure and ground read the right
+ * way round.
  *
  * The land layer is `pointer-events-none` and `aria-hidden`, and it lives in its own list in the
  * model with no glottocode attached, so it cannot be hovered, selected, searched or announced.
@@ -50,6 +53,8 @@ type PlateProps = {
   readonly emphasis: ReadonlySet<string> | null
   /** The view holds this so the PNG export can serialise the plate that is on screen. */
   readonly plateRef?: React.Ref<SVGSVGElement>
+  /** The ground layer, so the PNG export can put it back under the plate. */
+  readonly groundRef?: React.Ref<SVGSVGElement>
   readonly strings: Dictionary
 }
 
@@ -138,7 +143,7 @@ function PointMark({
       <circle r={7} fill="transparent" />
       <circle
         r={size}
-        fill="var(--plate-plate)"
+        fill="var(--plate-land)"
         stroke={colour}
         strokeWidth={isSelected ? 1.6 : 1.1}
       />
@@ -148,6 +153,7 @@ function PointMark({
 }
 
 const MemoPointMark = memo(PointMark)
+
 
 export function Plate({
   model,
@@ -160,6 +166,7 @@ export function Plate({
   colourMode,
   emphasis,
   plateRef,
+  groundRef,
   strings,
 }: PlateProps) {
   const limits = limitsFor(model.width, model.height)
@@ -294,8 +301,85 @@ export function Plate({
   return (
     <div
       ref={frameRef}
-      className={`relative bg-plate ${isFullscreen ? 'flex items-center justify-center p-4' : ''}`}
+      className={`relative bg-sea ${isFullscreen ? 'flex items-center justify-center p-4' : ''}`}
     >
+      {/* Two stacked SVGs sharing one viewBox and one transform. The ground — sea, water-lines,
+          land, graticule — never changes on hover, but as part of the interactive SVG it was
+          repainted on every hover, and the water-lines stroke the whole coastline six times:
+          measured in a browser, p95 hover went from ~27 ms to ~54 ms. On its own composited
+          layer it is painted once per pan or zoom and never on hover. */}
+      <div className={`relative ${isFullscreen ? 'h-full w-full' : ''}`}>
+      <svg
+        ref={groundRef}
+        viewBox={model.viewBox}
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 h-full w-full"
+        style={{ willChange: 'transform' }}
+      >
+        <defs>
+          <Coastline land={model.land} prefix="plate" nonScaling />
+        </defs>
+
+        {/* The sea fills the frame at every zoom, so it sits outside the moving group. */}
+        <rect x={0} y={0} width={model.width} height={model.height} fill="var(--plate-sea)" />
+
+        <g transform={transform}>
+          {/* Sea, then water-lining, then land, so every language area is drawn onto land and a
+              gap in coverage reads as unrecorded rather than as sea. The land is drawn through
+              <use>, which is what lets the same coastline be stroked three times for the
+              water-lines without shipping it three times. */}
+          <WaterLines prefix="plate" />
+          <LandFill prefix="plate" />
+
+          {/* The graticule sits over the land but under the data: a printed plate carries its
+              grid quietly. */}
+          {model.graticule.map((line) => (
+            <line
+              key={`${line.kind}-${line.degrees}`}
+              x1={line.x1}
+              y1={line.y1}
+              x2={line.x2}
+              y2={line.y2}
+              stroke="var(--plate-boundary)"
+              strokeWidth={line.degrees === 0 ? 0.5 : 0.28}
+              vectorEffect="non-scaling-stroke"
+              strokeOpacity={line.degrees === 0 ? 0.3 : 0.16}
+              strokeDasharray={line.degrees === 0 ? undefined : '3 4'}
+            />
+          ))}
+          {model.graticule
+            .filter((line) => line.kind === 'meridian')
+            .map((line) => (
+              <text
+                key={`label-${line.degrees}`}
+                x={line.x1 + 3}
+                y={model.height - 20}
+                className="font-label"
+                fontSize={hairline(9)}
+                fill="var(--plate-boundary)"
+                fillOpacity={0.45}
+              >
+                {line.label}
+              </text>
+            ))}
+          {model.graticule
+            .filter((line) => line.kind === 'parallel')
+            .map((line) => (
+              <text
+                key={`label-lat-${line.degrees}`}
+                x={4}
+                y={line.y1 - 3}
+                className="font-label"
+                fontSize={hairline(9)}
+                fill="var(--plate-boundary)"
+                fillOpacity={0.45}
+              >
+                {line.label}
+              </text>
+            ))}
+        </g>
+      </svg>
+
       <svg
         ref={(node) => {
           svgRef.current = node
@@ -310,7 +394,7 @@ export function Plate({
         aria-label={label}
         aria-describedby={keysId}
         tabIndex={0}
-        className={`plate-frame w-full bg-plate ${
+        className={`plate-frame relative block w-full ${
           isFullscreen ? 'h-full max-h-full' : 'h-auto'
         } ${viewport.scale > 1.001 ? 'cursor-grab active:cursor-grabbing' : ''}`}
         style={{
@@ -361,71 +445,6 @@ export function Plate({
           so the attribution below stays pinned to the frame and the PNG export picks up whatever
           view is on screen without any extra work. */}
       <g transform={transform}>
-      {/* The ground: coastline first, so every language area is drawn onto land rather than onto
-          paper, and the gaps in coverage read as unrecorded rather than as sea. */}
-      <g aria-hidden="true" className="pointer-events-none">
-        {model.land.map((land, index) => (
-          <path
-            key={`${land.kind}-${index}`}
-            d={land.d}
-            fill={land.kind === 'neighbour' ? 'var(--plate-landNeighbour)' : 'var(--plate-land)'}
-            stroke="var(--plate-landEdge)"
-            strokeWidth={land.kind === 'neighbour' ? 0.25 : 0.4}
-            strokeOpacity={land.kind === 'neighbour' ? 0.35 : 0.6}
-            vectorEffect="non-scaling-stroke"
-          />
-        ))}
-      </g>
-
-      {/* The graticule sits over the land but under the data: a printed plate carries its grid
-          quietly. */}
-      <g aria-hidden="true">
-        {model.graticule.map((line) => (
-          <line
-            key={`${line.kind}-${line.degrees}`}
-            x1={line.x1}
-            y1={line.y1}
-            x2={line.x2}
-            y2={line.y2}
-            stroke="var(--plate-boundary)"
-            strokeWidth={line.degrees === 0 ? 0.5 : 0.28}
-            vectorEffect="non-scaling-stroke"
-            strokeOpacity={line.degrees === 0 ? 0.3 : 0.16}
-            strokeDasharray={line.degrees === 0 ? undefined : '3 4'}
-          />
-        ))}
-        {model.graticule
-          .filter((line) => line.kind === 'meridian')
-          .map((line) => (
-            <text
-              key={`label-${line.degrees}`}
-              x={line.x1 + 3}
-              y={model.height - 20}
-              className="font-label"
-              fontSize={hairline(9)}
-              fill="var(--plate-boundary)"
-              fillOpacity={0.45}
-            >
-              {line.label}
-            </text>
-          ))}
-        {model.graticule
-          .filter((line) => line.kind === 'parallel')
-          .map((line) => (
-            <text
-              key={`label-lat-${line.degrees}`}
-              x={4}
-              y={line.y1 - 3}
-              className="font-label"
-              fontSize={hairline(9)}
-              fill="var(--plate-boundary)"
-              fillOpacity={0.45}
-            >
-              {line.label}
-            </text>
-          ))}
-      </g>
-
       {model.shapes.map((shape) => {
         const state = paintStateFor(shape.glottocode, shape.ancestors, scope, emphasis)
         const isSelected = selectedLanguage === shape.glottocode
@@ -501,6 +520,7 @@ export function Plate({
         Glottolog 5.3 (CC-BY-4.0) · Glottography (CC-BY-4.0) · Natural Earth · CC-BY-SA-4.0
       </text>
       </svg>
+      </div>
 
       {/* The plate has taken arrow keys, +/- and 0 since the viewport landed, and nothing ever
           said so. A focusable element whose controls cannot be discovered is, for a keyboard

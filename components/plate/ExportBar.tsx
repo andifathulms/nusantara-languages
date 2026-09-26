@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { exportFileName, toStandaloneSvg } from '@/lib/plate/export'
+import { exportFileName, mergeGround, toStandaloneSvg } from '@/lib/plate/export'
 import type { Dictionary } from '@/lib/i18n'
 
 /**
@@ -20,11 +20,13 @@ type ExportBarProps = {
   readonly strings: Dictionary
   /** Finds the plate to export. The view owns the element; this only asks for it. */
   readonly getPlate: () => SVGSVGElement | null
+  /** The ground layer beneath the plate — sea, coastline, graticule — merged back in. */
+  readonly getGround?: () => SVGSVGElement | null
   readonly slug: string
   readonly scale?: number
 }
 
-export function ExportBar({ strings, getPlate, slug, scale = 2 }: ExportBarProps) {
+export function ExportBar({ strings, getPlate, getGround, slug, scale = 2 }: ExportBarProps) {
   const [state, setState] = useState<'idle' | 'working' | 'downloaded' | 'copied' | 'failed'>(
     'idle',
   )
@@ -41,7 +43,9 @@ export function ExportBar({ strings, getPlate, slug, scale = 2 }: ExportBarProps
     const width = Math.round(box.width * scale)
     const height = Math.round(box.height * scale)
 
-    const document_ = toStandaloneSvg(plate.outerHTML, {
+    const ground = getGround?.() ?? null
+    const markup = ground === null ? plate.outerHTML : mergeGround(plate.outerHTML, ground.outerHTML)
+    const document_ = markup === null ? null : toStandaloneSvg(markup, {
       width,
       height,
       title: strings.plate.title,

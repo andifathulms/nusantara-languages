@@ -259,6 +259,7 @@ describe('the plate furniture', () => {
   it('meets WCAG AA for text on both washes', () => {
     for (const wash of [PLATE_COLOURS.plate, PLATE_COLOURS.index, PLATE_COLOURS.indexDeep]) {
       expect(contrast(PLATE_COLOURS.boundary, wash)).toBeGreaterThanOrEqual(7)
+      expect(contrast(PLATE_COLOURS.ink, wash)).toBeGreaterThanOrEqual(7)
       expect(contrast(PLATE_COLOURS.inkSoft, wash)).toBeGreaterThanOrEqual(4.5)
       expect(contrast(PLATE_COLOURS.accent, wash)).toBeGreaterThanOrEqual(4.5)
     }
@@ -295,17 +296,51 @@ describe('the plate furniture', () => {
     }
   })
 
-  it('makes land read as land against the paper, without competing with it', () => {
-    const step = distance(PLATE_COLOURS.land, PLATE_COLOURS.plate)
+  it('makes land read as land against the sea, without competing with it', () => {
+    // The plate's ground is the sea now. Land was once darker than the paper that stood in for
+    // water, which inverted figure and ground; blank land must be the lighter of the two.
+    const step = distance(PLATE_COLOURS.land, PLATE_COLOURS.sea)
     expect(step).toBeGreaterThan(5)
     expect(step).toBeLessThan(14)
+    expect(oklabLightness(PLATE_COLOURS.land)).toBeGreaterThan(oklabLightness(PLATE_COLOURS.sea))
   })
 
-  it('keeps foreign land recessive but distinguishable from Indonesian land', () => {
+  it('keeps foreign land recessive but distinguishable from Indonesian land and from the sea', () => {
     expect(distance(PLATE_COLOURS.landNeighbour, PLATE_COLOURS.land)).toBeGreaterThan(3)
-    expect(oklabLightness(PLATE_COLOURS.landNeighbour)).toBeGreaterThan(
-      oklabLightness(PLATE_COLOURS.land),
+    expect(distance(PLATE_COLOURS.landNeighbour, PLATE_COLOURS.sea)).toBeGreaterThan(3)
+    // Recessive means one step toward the water: between the sea and Indonesian land.
+    const lightness = oklabLightness(PLATE_COLOURS.landNeighbour)
+    expect(lightness).toBeLessThan(oklabLightness(PLATE_COLOURS.land))
+    expect(lightness).toBeGreaterThan(oklabLightness(PLATE_COLOURS.sea))
+  })
+
+  it('never lets the sea be read as a family, in any of the four visions', () => {
+    // The sea is cool and the Papuan families are cool. Chroma is held under the palest cool
+    // family, and every family keeps a clear distance from the water however it is seen.
+    const wedgwood = ALL_FAMILY_COLOURS.find((colour) => colour.token === 'wedgwood')
+    if (wedgwood === undefined) throw new Error('wedgwood missing')
+    expect(Math.hypot(...toOklab(PLATE_COLOURS.sea).slice(1))).toBeLessThan(
+      Math.hypot(...toOklab(wedgwood.base).slice(1)),
     )
+    for (const vision of VISIONS) {
+      for (const colour of ALL_FAMILY_COLOURS) {
+        expect(
+          distance(seenAs(PLATE_COLOURS.sea, vision), seenAs(colour.base, vision)),
+          `sea/${colour.token} under ${vision}`,
+        ).toBeGreaterThan(6)
+      }
+    }
+  })
+
+  it('never lets blank land be read as a family, in any of the four visions', () => {
+    for (const vision of VISIONS) {
+      for (const colour of ALL_FAMILY_COLOURS) {
+        expect(
+          distance(seenAs(PLATE_COLOURS.land, vision), seenAs(colour.base, vision)),
+          `land/${colour.token} under ${vision}`,
+        ).toBeGreaterThan(8)
+      }
+    }
   })
 
   it('gives the coastline an edge that reads under the palest tint', () => {
@@ -318,6 +353,7 @@ describe('the plate furniture', () => {
       PLATE_COLOURS.plate,
       PLATE_COLOURS.index,
       PLATE_COLOURS.indexDeep,
+      PLATE_COLOURS.sea,
     ]) {
       expect(contrast(PLATE_COLOURS.landEdge, ground)).toBeGreaterThanOrEqual(3)
     }

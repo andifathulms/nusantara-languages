@@ -1,5 +1,6 @@
 import type { PlateModel } from '@/lib/plate/build'
 import { familyVarRef } from '@/lib/colour'
+import { Coastline, LandFill, WaterLines } from './Ground'
 
 /**
  * A still of the plate, for the front page. Server-rendered, no interaction, no client cost.
@@ -15,10 +16,13 @@ export function PlateThumbnail({
   model,
   label,
   className,
+  idPrefix = 'still',
 }: {
   model: PlateModel
   label: string
   className?: string
+  /** Unique per still on a page, so the coastline defs do not collide. */
+  idPrefix?: string
 }) {
   return (
     <svg
@@ -28,19 +32,14 @@ export function PlateThumbnail({
       className={className}
       preserveAspectRatio="xMidYMid meet"
     >
-      <rect x={0} y={0} width={model.width} height={model.height} fill="var(--plate-plate)" />
+      <defs>
+        <Coastline land={model.land} prefix={idPrefix} />
+      </defs>
+      <rect x={0} y={0} width={model.width} height={model.height} fill="var(--plate-sea)" />
 
       <g aria-hidden="true">
-        {model.land.map((land, index) => (
-          <path
-            key={`${land.kind}-${index}`}
-            d={land.d}
-            fill={land.kind === 'neighbour' ? 'var(--plate-landNeighbour)' : 'var(--plate-land)'}
-            stroke="var(--plate-landEdge)"
-            strokeWidth={0.25}
-            strokeOpacity={0.45}
-          />
-        ))}
+        <WaterLines prefix={idPrefix} />
+        <LandFill prefix={idPrefix} />
       </g>
 
       <g aria-hidden="true">
@@ -75,7 +74,7 @@ export function PlateThumbnail({
             cx={shape.x}
             cy={shape.y}
             r={1.6}
-            fill="var(--plate-plate)"
+            fill="var(--plate-land)"
             stroke={familyVarRef(shape.colour, 'base')}
             strokeWidth={0.9}
           />

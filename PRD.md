@@ -147,7 +147,7 @@ Glottolog + Glottography (build time)
 
 The material world is the **lithographic atlas plate** — flat spot colours, hairline boundaries, letterpress index, aged paper. Authentic, since a language atlas is literally what this is, and flat fills are exactly what family colouring wants.
 
-**Palette.** Plate `#F1ECE0`. Boundary hairline `#2A2620`. Sea `#DDE4E4`, pale enough to recede entirely.
+**Palette.** Paper `#F4F1E9`. Boundary hairline `#2A2620`. Sea `#D6E2E2`, pale enough to recede entirely, and actually painted, with three engraved water-lines along the sourced coastline. Land with no language polygon is blank paper (`#FAF7F0`), lighter than the sea, so figure and ground read the right way round. *(Revised 2026-09-26: the first build left the sea unpainted and drew unrecorded land as a grey darker than the paper, which inverted figure and ground. The paper moved from `#F1ECE0` so the sea tint reads against it.)*
 
 **Family colours are a curated muted set** — ochre, terracotta, sage, slate blue, mauve, olive, dusty rose, teal — assigned stably by family, never generated from a rainbow ramp. Muted is not a stylistic preference here: with this many categories, saturation must be **reserved for the selected family**, so that selecting one thing makes it the only saturated object on the plate. That contrast is the interaction.
 

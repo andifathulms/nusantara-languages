@@ -388,9 +388,9 @@ const id: Dictionary = {
     hatch: 'Arsir menandai kebertahanan',
     hatchNote:
       'Semakin rapat arsirnya, semakin dekat bahasa itu pada kepunahan. Arsir dipakai agar warna tetap bisa membawa rumpun.',
-    land: 'Kelabu berarti belum ada data',
+    land: 'Kosong berarti belum tercatat',
     landNote:
-      'Daratan yang tidak tertutup warna adalah wilayah yang tidak tercakup sumber poligon yang dipakai. Garis pantainya diketahui, sebaran bahasanya tidak tercatat — jadi bagian itu kelabu dan tidak dapat diklik.',
+      'Daratan yang tidak tertutup warna adalah wilayah yang tidak tercakup sumber poligon yang dipakai. Garis pantainya diketahui, sebaran bahasanya tidak tercatat — jadi bagian itu dibiarkan kosong seperti kertas, dan tidak dapat diklik.',
     tryThis: 'Coba',
     tryAustronesian: 'Rumpun Austronesia',
     trySeam: 'Jahitan Austronesia–Papua',
@@ -644,9 +644,9 @@ const en: Dictionary = {
     hatch: 'Hatching marks endangerment',
     hatchNote:
       'The denser the hatching, the closer the language is to extinction. Hatching is used so that colour can keep carrying family.',
-    land: 'Grey means no data yet',
+    land: 'Blank means not recorded',
     landNote:
-      'Land not covered by a colour is territory the polygon sources do not reach. The coastline is known; the language distribution there is unrecorded — so it stays grey and is not clickable.',
+      'Land not covered by a colour is territory the polygon sources do not reach. The coastline is known; the language distribution there is unrecorded — so it is left blank, like the paper, and is not clickable.',
     tryThis: 'Try',
     tryAustronesian: 'The Austronesian family',
     trySeam: 'The Austronesian–Papuan seam',

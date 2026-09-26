@@ -110,7 +110,7 @@ function PointSpecimen() {
         strokeWidth={0.6}
       />
       <g transform="translate(23 7)">
-        <circle r={3} fill="var(--plate-plate)" stroke="var(--family-verdigris)" strokeWidth={1.1} />
+        <circle r={3} fill="var(--plate-land)" stroke="var(--family-verdigris)" strokeWidth={1.1} />
         <circle r={0.9} fill="var(--family-verdigris)" />
       </g>
     </svg>
@@ -121,6 +121,8 @@ function PointSpecimen() {
 function LandSpecimen() {
   return (
     <svg width={46} height={22} viewBox="0 0 46 22" aria-hidden="true">
+      {/* On sea, as on the plate: blank land only reads as land against water. */}
+      <rect x={0} y={0} width={46} height={18} fill="var(--plate-sea)" />
       <path
         d="M0.5 3.5h20v11h-20z"
         fill="var(--plate-land)"

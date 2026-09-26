@@ -37,7 +37,9 @@ const config: Config = {
       colors: {
         plate: PLATE_COLOURS.plate,
         boundary: PLATE_COLOURS.boundary,
+        ink: PLATE_COLOURS.ink,
         sea: PLATE_COLOURS.sea,
+        'water-line': PLATE_COLOURS.waterLine,
         index: PLATE_COLOURS.index,
         'index-deep': PLATE_COLOURS.indexDeep,
         'ink-soft': PLATE_COLOURS.inkSoft,

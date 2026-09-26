@@ -94,6 +94,7 @@ export function PlateView({
   const [colourMode, setColourMode] = useState<ColourMode>('family')
   const [tab, setTab] = useState<'map' | 'tree'>('map')
   const plateRef = useRef<SVGSVGElement | null>(null)
+  const groundRef = useRef<SVGSVGElement | null>(null)
 
   const emphasisSet = useMemo(
     () => (emphasis === undefined ? null : new Set(emphasis)),
@@ -284,6 +285,7 @@ export function PlateView({
           <div className="space-y-4">
             <Plate
               plateRef={plateRef}
+              groundRef={groundRef}
               model={model}
               scope={scope}
               selectedLanguage={selectedLanguage}
@@ -300,7 +302,12 @@ export function PlateView({
               strings={strings}
             />
 
-            <ExportBar strings={strings} getPlate={() => plateRef.current} slug={slug} />
+            <ExportBar
+              strings={strings}
+              getPlate={() => plateRef.current}
+              getGround={() => groundRef.current}
+              slug={slug}
+            />
 
             {mapKey}
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { exportFileName, paletteStyleBlock, toStandaloneSvg } from '@/lib/plate/export'
+import { exportFileName, mergeGround, paletteStyleBlock, toStandaloneSvg } from '@/lib/plate/export'
 import { ALL_FAMILY_COLOURS, PLATE_COLOURS } from '@/lib/colour'
 
 const options = { width: 1600, height: 620, title: 'Peta rumpun bahasa' }
@@ -38,9 +38,10 @@ describe('the PNG export document', () => {
     expect(document).not.toContain('width="100%"')
   })
 
-  it('paints the paper, because a PNG has no page behind it', () => {
+  it('paints the sea, because a PNG has no page behind it', () => {
+    // The plate's ground is the sea, which the plate itself only paints inside its viewBox.
     expect(toStandaloneSvg('<svg viewBox="0 0 10 10"></svg>', options)).toContain(
-      `fill="${PLATE_COLOURS.plate}"`,
+      `fill="${PLATE_COLOURS.sea}"`,
     )
   })
 
@@ -72,5 +73,26 @@ describe('the export file name', () => {
     expect(exportFileName('Jahitan Austronesia/Papua', '2026-08-12')).toBe(
       'nusantara-jahitan-austronesia-papua-2026-08-12.png',
     )
+  })
+})
+
+describe('putting the ground back under the plate', () => {
+  const ground = '<svg viewBox="0 0 10 10" aria-hidden="true"><rect id="sea"/><g id="land"/></svg>'
+  const plate = '<svg id="plate" viewBox="0 0 10 10"><g id="shapes"/><text>Glottolog</text></svg>'
+
+  it('draws the ground first, inside the plate, so the shapes sit on it', () => {
+    const merged = mergeGround(plate, ground)
+    expect(merged).toBe(
+      '<svg id="plate" viewBox="0 0 10 10"><rect id="sea"/><g id="land"/><g id="shapes"/><text>Glottolog</text></svg>',
+    )
+  })
+
+  it('keeps one svg element, so the export is still one document', () => {
+    expect(mergeGround(plate, ground)?.match(/<svg/g)).toHaveLength(1)
+  })
+
+  it('refuses markup that is not an svg rather than producing an empty export', () => {
+    expect(mergeGround('<div></div>', ground)).toBeNull()
+    expect(mergeGround(plate, '<div></div>')).toBeNull()
   })
 })

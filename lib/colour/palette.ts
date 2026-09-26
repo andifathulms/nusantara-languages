@@ -112,26 +112,45 @@ export const ALL_FAMILY_COLOURS: readonly FamilyColour[] = [
 /**
  * Plate furniture. Never varies with data.
  *
- * `plate`, `boundary` and `sea` are the values PRD §9 specifies and are left exactly as
- * given. The rest are derived tones that the interface needs and the PRD did not name:
- * two panel washes for the index and the cards, a soft ink for secondary text, and one
- * accent — the red an engraver would use for annotation, kept for primary actions and the
- * current page only. Every text tone clears WCAG AA on both the paper and the panel.
+ * The ground was redrawn on 2026-09-26, after the plate was looked at on a real screen for the
+ * first time. PRD §9 always specified a sea (`#DDE4E4`), but the plate never painted one: the
+ * water was the paper colour, and land with no language polygon was a cool grey *darker* than
+ * that paper. Figure and ground came out inverted — the Kalimantan interior read as lakes, and
+ * the sea read as the page. The family colours were not touched; only what sits beneath them.
+ *
+ *   sea        a pale grey-green, now actually painted. Chroma is held below the lightest cool
+ *              family (wedgwood), so a Papuan tint can never be read as water.
+ *   land       blank paper, lighter than the page: "no polygon recorded here" reads as land that
+ *              has not been coloured in, which is what it is.
+ *   neighbour  one step toward the sea from Indonesian land, so the national frame shows without
+ *              drawing a border.
+ *
+ * Every one of those relationships is asserted in tests/colour/vision.
  */
 export const PLATE_COLOURS = {
-  /** Aged paper. */
-  plate: '#F1ECE0',
-  /** Hairline boundary ink. Boundaries are gradients; the line stays thin. */
+  /** Paper. Slightly less yellow than PRD §9's #F1ECE0, so the sea tint reads against it. */
+  plate: '#F4F1E9',
+  /** Hairline boundary ink, on the map. Boundaries are gradients; the line stays thin. */
   boundary: '#2A2620',
-  /** Pale enough to recede entirely. */
-  sea: '#DDE4E4',
+  /** Interface text. A cooler near-black than the boundary ink, which stays on the map. */
+  ink: '#1F2226',
+  /**
+   * The sea, painted. Pale enough to recede behind every family tint, and chroma-capped below
+   * the palest cool family so it is never mistaken for one.
+   */
+  sea: '#D6E2E2',
+  /**
+   * Engraved water-lining along the coast — three rings drawn from the Natural Earth coastline,
+   * never from language areas (invariant 5a). Always drawn at low opacity.
+   */
+  waterLine: '#6E8C90',
   /** Letterpress index panel. */
   index: '#EAE6DC',
   /** A second, deeper wash, for a card sitting on the index. */
   indexDeep: '#E2DCD1',
-  /** Secondary text. 6.07:1 on paper. */
+  /** Secondary text. 6.3:1 on paper. */
   inkSoft: '#5C5751',
-  /** Annotation red. 6.50:1 on paper, and paper on it is the same, so it works as a fill. */
+  /** Annotation red. 6.8:1 on paper, and paper on it is the same, so it works as a fill. */
   accent: '#96301F',
   /** The same red, lightened for hairlines and hover washes. */
   accentSoft: '#C36954',
@@ -139,23 +158,19 @@ export const PLATE_COLOURS = {
   point: '#4F463C',
 
   /**
-   * Land with no language polygon over it. Cool and light: it has to be unmistakable against
-   * `isolate`, which is itself a near-neutral warm grey and *is* data. Lightness does most of
-   * that work — this sits 0.13 above it in OKLCH — and the cool cast keeps them from sharing a
-   * tone. 12.7 perceptual units apart, asserted in tests/colour/vision.
+   * Land with no language polygon over it: blank paper. It has to be unmistakable against
+   * `isolate`, a near-neutral warm grey that *is* data — it sits 0.24 above it in OKLab
+   * lightness and 23 perceptual units away, asserted in tests/colour/vision.
    */
-  land: '#D0D3D6',
-  /** Land outside Indonesia. Present for context only, and deliberately recessive. */
-  landNeighbour: '#E1E3E5',
+  land: '#FAF7F0',
+  /** Land outside Indonesia. Present for context only, and recedes toward the sea. */
+  landNeighbour: '#EDEAE2',
   /**
    * The coastline hairline, so a pale tint on a pale coast still has an edge.
    *
-   * A graphical object rather than text, so 3:1 is the bar it has to clear — and it has to
-   * clear it on every ground it is ever drawn on, not just paper. At #7C8186 it made 3.34:1 on
-   * paper but fell to 2.88:1 on `indexDeep` and 2.62:1 on `land` itself, which is the ground it
-   * spends most of its life on. Darkened until the worst of those cases passes: 4.19 on paper,
-   * 3.62 on indexDeep, 3.29 on land. Still three times lighter than the boundary ink, so it
-   * reads as a coast and not as a border.
+   * A graphical object rather than text, so 3:1 is the bar it has to clear — on every ground it
+   * is ever drawn against, the sea included. Worst case is indexDeep at 3.6:1. Still three times
+   * lighter than the boundary ink, so it reads as a coast and not as a border.
    */
   landEdge: '#6B7176',
 } as const
