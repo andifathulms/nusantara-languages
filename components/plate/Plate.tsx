@@ -1,20 +1,27 @@
 'use client'
 
-import { memo, useCallback, useEffect, useId, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import { isInScope, paintStateFor } from '@/lib/plate/select'
 import { PlateControls } from './PlateControls'
 import {
   IDENTITY,
   ZOOM_STEP,
+  centredOn,
   counterScale,
+  easeInOutCubic,
+  frameWidthFor,
+  interpolateViewport,
   limitsFor,
   panBy,
   pinchDistance,
   toTransform,
   zoomAt,
   zoomBy,
+  zoomToBox,
   type Viewport,
 } from '@/lib/plate/viewport'
+import type { PlateBox } from '@/lib/plate/focus'
+import { prefersReducedMotion } from '@/lib/dom/motion'
 import type { PlateModel, PlateShape, ShapeColour } from '@/lib/plate/build'
 import type { Dictionary } from '@/lib/i18n'
 import { familyVarRef } from '@/lib/colour'
@@ -56,6 +63,23 @@ type PlateProps = {
   /** The ground layer, so the PNG export can put it back under the plate. */
   readonly groundRef?: React.Ref<SVGSVGElement>
   readonly strings: Dictionary
+  /**
+   * Where a narrow frame opens, in plate x. On a phone the map fills the screen's height and
+   * shows a window of the plate; this is where that window starts.
+   */
+  readonly narrowCentreX?: number
+  /**
+   * A frame to move to, for a guided story. A new `key` animates the plate to `box` (or back to
+   * the whole plate when `box` is null). Pan and zoom stay the reader's afterwards.
+   */
+  readonly focus?: { readonly key: string; readonly box: PlateBox | null } | null
+  /**
+   * The label that follows the pointer over a language. Rendered by the view, which knows the
+   * names; placed here, which knows where the pointer is. Mouse only — touch has no hover.
+   */
+  readonly hoverCard?: React.ReactNode
+  /** Cards laid over the plate, positioned by the caller. They show in full screen too. */
+  readonly overlay?: React.ReactNode
 }
 
 const HATCH_IDS = ['hatch-1', 'hatch-2', 'hatch-3', 'hatch-4', 'hatch-5', 'hatch-6'] as const
@@ -168,14 +192,32 @@ export function Plate({
   plateRef,
   groundRef,
   strings,
+  narrowCentreX,
+  focus = null,
+  hoverCard = null,
+  overlay = null,
 }: PlateProps) {
-  const limits = limitsFor(model.width, model.height)
   const [viewport, setViewport] = useState<Viewport>(IDENTITY)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [fullscreenAvailable, setFullscreenAvailable] = useState(false)
+  /** A phone: the map fills a fixed height and the frame becomes a window onto the plate. */
+  const [isNarrow, setIsNarrow] = useState(false)
+  const [frameWidth, setFrameWidth] = useState(model.width)
+  const [pointerInside, setPointerInside] = useState(false)
   const keysId = useId()
   const frameRef = useRef<HTMLDivElement | null>(null)
+  const stackRef = useRef<HTMLDivElement | null>(null)
   const svgRef = useRef<SVGSVGElement | null>(null)
+  const cardRef = useRef<HTMLDivElement | null>(null)
+  const limits = limitsFor(model.width, model.height, frameWidth, model.height)
+  const fills = isNarrow || isFullscreen
+  const home = useCallback(
+    (bounds: typeof limits): Viewport =>
+      bounds.width < bounds.contentWidth - 0.5
+        ? centredOn(narrowCentreX ?? bounds.contentWidth / 2, bounds)
+        : IDENTITY,
+    [narrowCentreX],
+  )
 
   /** Live pointers, so one is a drag and two are a pinch. */
   const pointers = useRef(new Map<number, { x: number; y: number }>())
@@ -183,6 +225,90 @@ export function Plate({
     moved: false,
     lastDistance: null,
   })
+
+  useEffect(() => {
+    const query = window.matchMedia('(max-width: 639px)')
+    const update = () => setIsNarrow(query.matches)
+    update()
+    query.addEventListener('change', update)
+    return () => query.removeEventListener('change', update)
+  }, [])
+
+  // In fill mode the frame takes the element's proportions at the plate's full height. The frame
+  // is measured, not assumed, because the element's size is set by CSS.
+  useEffect(() => {
+    const stack = stackRef.current
+    if (!fills || stack === null) {
+      setFrameWidth(model.width)
+      return
+    }
+    const measure = () =>
+      setFrameWidth(frameWidthFor(model.width, model.height, stack.clientWidth, stack.clientHeight))
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(stack)
+    return () => observer.disconnect()
+  }, [fills, model.width, model.height])
+
+  // When the frame changes shape, open it where it should open.
+  useEffect(() => {
+    setViewport(home(limitsFor(model.width, model.height, frameWidth, model.height)))
+  }, [frameWidth, home, model.width, model.height])
+
+  // A guided story moves the frame. Animated along one curve, or cut when motion is unwelcome.
+  const focusKey = focus?.key ?? null
+  const animation = useRef<number | null>(null)
+  useEffect(() => {
+    if (focus === null) return
+    const bounds = limitsFor(model.width, model.height, frameWidth, model.height)
+    const target = focus.box === null ? home(bounds) : zoomToBox(focus.box, bounds, 0.12)
+    if (animation.current !== null) cancelAnimationFrame(animation.current)
+    if (prefersReducedMotion()) {
+      setViewport(target)
+      return
+    }
+    let from: Viewport | null = null
+    const started = performance.now()
+    const step = (now: number) => {
+      const t = Math.min(1, (now - started) / 600)
+      setViewport((current) => {
+        from ??= current
+        return interpolateViewport(from, target, easeInOutCubic(t))
+      })
+      animation.current = t < 1 ? requestAnimationFrame(step) : null
+    }
+    animation.current = requestAnimationFrame(step)
+    return () => {
+      if (animation.current !== null) cancelAnimationFrame(animation.current)
+    }
+    // Keyed on the focus key alone: a re-render with the same story step must not re-animate.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focusKey])
+
+  /** Moves the hover label to the pointer without a React render — this runs on every move. */
+  const lastPointer = useRef<{ x: number; y: number } | null>(null)
+  const placeCard = (clientX: number, clientY: number) => {
+    lastPointer.current = { x: clientX, y: clientY }
+    const card = cardRef.current
+    const stack = stackRef.current
+    if (card === null || stack === null) return
+    const box = stack.getBoundingClientRect()
+    const x = clientX - box.left
+    const y = clientY - box.top
+    // Flip to the left of the pointer near the right edge, and above it near the bottom.
+    const left = x + 16 + card.offsetWidth > box.width ? x - 12 - card.offsetWidth : x + 16
+    const top = y + 14 + card.offsetHeight > box.height ? y - 10 - card.offsetHeight : y + 14
+    card.style.transform = `translate(${Math.round(left)}px, ${Math.round(top)}px)`
+  }
+
+  // The label's content arrives a render after the move that found it, so its size — which decides
+  // whether it flips — is only known now. Place it again against the last pointer position.
+  useLayoutEffect(() => {
+    if (hoverCard === null || lastPointer.current === null) return
+    placeCard(lastPointer.current.x, lastPointer.current.y)
+    // placeCard reads refs only; the content is what changed.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hoverCard])
 
   useEffect(() => {
     setFullscreenAvailable(typeof document !== 'undefined' && document.fullscreenEnabled)
@@ -198,18 +324,21 @@ export function Plate({
       if (svg === null) return { x: 0, y: 0 }
       const box = svg.getBoundingClientRect()
       return {
-        x: ((clientX - box.left) / box.width) * model.width,
-        y: ((clientY - box.top) / box.height) * model.height,
+        x: ((clientX - box.left) / box.width) * limits.width,
+        y: ((clientY - box.top) / box.height) * limits.height,
       }
     },
-    [model.width, model.height],
+    [limits.width, limits.height],
   )
 
   const perPixel = useCallback(() => {
     const svg = svgRef.current
     if (svg === null) return 1
-    return model.width / Math.max(1, svg.getBoundingClientRect().width)
-  }, [model.width])
+    return limits.width / Math.max(1, svg.getBoundingClientRect().width)
+  }, [limits.width])
+
+  /** Whether a drag moves the map: zoomed in, or a narrow frame with more plate beside it. */
+  const canPan = viewport.scale > 1.001 || limits.width < limits.contentWidth - 0.5
 
   const onPointerDown = (event: React.PointerEvent<SVGSVGElement>) => {
     pointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY })
@@ -219,6 +348,7 @@ export function Plate({
   }
 
   const onPointerMove = (event: React.PointerEvent<SVGSVGElement>) => {
+    if (event.pointerType === 'mouse') placeCard(event.clientX, event.clientY)
     const previous = pointers.current.get(event.pointerId)
     if (previous === undefined) return
     const current = { x: event.clientX, y: event.clientY }
@@ -240,7 +370,7 @@ export function Plate({
       return
     }
 
-    if (viewport.scale <= 1.001) return
+    if (!canPan) return
     const deltaX = current.x - previous.x
     const deltaY = current.y - previous.y
     if (Math.abs(deltaX) > 3 || Math.abs(deltaY) > 3) gesture.current.moved = true
@@ -276,7 +406,7 @@ export function Plate({
       '+': () => setViewport((state) => zoomBy(state, ZOOM_STEP, limits)),
       '=': () => setViewport((state) => zoomBy(state, ZOOM_STEP, limits)),
       '-': () => setViewport((state) => zoomBy(state, 1 / ZOOM_STEP, limits)),
-      '0': () => setViewport(IDENTITY),
+      '0': () => setViewport(home(limits)),
       ArrowLeft: () => setViewport((state) => panBy(state, step, 0, limits)),
       ArrowRight: () => setViewport((state) => panBy(state, -step, 0, limits)),
       ArrowUp: () => setViewport((state) => panBy(state, 0, step, limits)),
@@ -296,6 +426,7 @@ export function Plate({
   }
 
   const transform = toTransform(viewport)
+  const viewBox = `0 0 ${Math.round(limits.width * 100) / 100} ${Math.round(model.height * 100) / 100}`
   const hairline = (width: number) => counterScale(viewport, width)
 
   return (
@@ -308,10 +439,13 @@ export function Plate({
           repainted on every hover, and the water-lines stroke the whole coastline six times:
           measured in a browser, p95 hover went from ~27 ms to ~54 ms. On its own composited
           layer it is painted once per pan or zoom and never on hover. */}
-      <div className={`relative ${isFullscreen ? 'h-full w-full' : ''}`}>
+      <div
+        ref={stackRef}
+        className={`relative ${isFullscreen ? 'h-full w-full' : isNarrow ? 'h-[56dvh]' : ''}`}
+      >
       <svg
         ref={groundRef}
-        viewBox={model.viewBox}
+        viewBox={viewBox}
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 h-full w-full"
         style={{ willChange: 'transform' }}
@@ -321,7 +455,7 @@ export function Plate({
         </defs>
 
         {/* The sea fills the frame at every zoom, so it sits outside the moving group. */}
-        <rect x={0} y={0} width={model.width} height={model.height} fill="var(--plate-sea)" />
+        <rect x={0} y={0} width={limits.width} height={model.height} fill="var(--plate-sea)" />
 
         <g transform={transform}>
           {/* Sea, then water-lining, then land, so every language area is drawn onto land and a
@@ -389,20 +523,27 @@ export function Plate({
           }
         }}
         id="plate"
-        viewBox={model.viewBox}
+        viewBox={viewBox}
         role="img"
         aria-label={label}
         aria-describedby={keysId}
         tabIndex={0}
         className={`plate-frame relative block w-full ${
-          isFullscreen ? 'h-full max-h-full' : 'h-auto'
-        } ${viewport.scale > 1.001 ? 'cursor-grab active:cursor-grabbing' : ''}`}
+          fills ? 'h-full max-h-full' : 'h-auto'
+        } ${canPan ? 'cursor-grab active:cursor-grabbing' : ''}`}
         style={{
           // At rest the page must scroll normally when a thumb crosses the map. Once the reader
-          // has zoomed in, the gestures are theirs: panning and pinching take over.
+          // has zoomed in, the gestures are theirs: panning and pinching take over. A narrow frame
+          // keeps vertical scrolling for the page and takes horizontal drags for the map.
           touchAction: viewport.scale > 1.001 ? 'none' : 'pan-y',
         }}
-        onPointerLeave={() => onHover(null)}
+        onPointerEnter={(event) => {
+          if (event.pointerType === 'mouse') setPointerInside(true)
+        }}
+        onPointerLeave={() => {
+          setPointerInside(false)
+          onHover(null)
+        }}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={endPointer}
@@ -509,7 +650,7 @@ export function Plate({
       {/* Attribution sits on its own baseline below the degree labels — the two used to collide
           in the bottom-right corner. */}
       <text
-        x={model.width - 6}
+        x={limits.width - 6}
         y={model.height - 5}
         textAnchor="end"
         className="font-label"
@@ -520,6 +661,21 @@ export function Plate({
         Glottolog 5.3 (CC-BY-4.0) · Glottography (CC-BY-4.0) · Natural Earth · CC-BY-SA-4.0
       </text>
       </svg>
+
+      {/* The hover label: positioned by placeCard, shown only while a mouse is over the plate and
+          a language is under it. aria-hidden, because the same name is announced by the live
+          region and carried by each shape's <title>. */}
+      <div
+        ref={cardRef}
+        aria-hidden="true"
+        className={`pointer-events-none absolute left-0 top-0 z-10 transition-opacity duration-100 ${
+          pointerInside && hoverCard !== null ? 'opacity-100' : 'opacity-0'
+        }`}
+      >
+        {hoverCard}
+      </div>
+
+      {overlay}
       </div>
 
       {/* The plate has taken arrow keys, +/- and 0 since the viewport landed, and nothing ever
@@ -540,7 +696,7 @@ export function Plate({
         fullscreenAvailable={fullscreenAvailable}
         onZoomIn={() => setViewport((state) => zoomBy(state, ZOOM_STEP, limits))}
         onZoomOut={() => setViewport((state) => zoomBy(state, 1 / ZOOM_STEP, limits))}
-        onReset={() => setViewport(IDENTITY)}
+        onReset={() => setViewport(home(limits))}
         onToggleFullscreen={toggleFullscreen}
       />
     </div>
