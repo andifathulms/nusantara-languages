@@ -11,6 +11,8 @@ import { branchFigures, languageLadder, type BranchFigures } from '@/lib/plate/e
 import { colourOf, familyVarRef } from '@/lib/colour'
 import { LanguageLocator } from '@/components/panel/LanguageLocator'
 import { LanguageLadder } from '@/components/panel/LanguageLadder'
+import { ScriptCard } from '@/components/panel/ScriptCard'
+import { scriptOf } from '@/lib/scripts'
 import { aesStep } from '@/lib/bundle/types'
 import { LOCALES, dictionary, isLocale, localePath, type Locale } from '@/lib/i18n'
 import { localeMetadata } from '@/lib/seo/locale-meta'
@@ -127,6 +129,7 @@ export default function LanguagePage({
           colours: bundle.colours,
           index: allBounds(bundle),
         })
+  const script = scriptOf(detail.glottocode)
   const ladder =
     languageLadder(bundle.treeIndex, bundle.byCode, detail.glottocode, allBranchFigures(bundle)) ?? []
 
@@ -191,6 +194,8 @@ export default function LanguagePage({
 
           <div className="space-y-block-lg lg:col-start-1 lg:row-start-1">
             <LanguageLadder rungs={ladder} strings={strings} locale={locale} colour={colour} />
+
+            {script === null ? null : <ScriptCard script={script} strings={strings} locale={locale} />}
 
             <LanguageFacts
               detail={detail}

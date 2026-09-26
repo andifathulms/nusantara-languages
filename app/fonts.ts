@@ -1,4 +1,14 @@
-import { IBM_Plex_Mono, IBM_Plex_Sans_Condensed, Newsreader } from 'next/font/google'
+import {
+  IBM_Plex_Mono,
+  IBM_Plex_Sans_Condensed,
+  Newsreader,
+  Noto_Sans_Balinese,
+  Noto_Sans_Batak,
+  Noto_Sans_Buginese,
+  Noto_Sans_Javanese,
+  Noto_Sans_Rejang,
+  Noto_Sans_Sundanese,
+} from 'next/font/google'
 
 /**
  * The three faces, defined once and shared by both root layouts.
@@ -44,3 +54,46 @@ export const mono = IBM_Plex_Mono({
 
 /** The class list every `<html>` needs, so neither root layout can forget one. */
 export const fontVariables = `${display.variable} ${label.variable} ${mono.variable}`
+
+/**
+ * Traditional scripts, for the language page's specimen (lib/scripts). Self-hosted like every
+ * face here, and never preloaded: @font-face only downloads a file when a glyph in it is drawn, so
+ * a reader pays for Aksara Jawa only on a page that shows it.
+ */
+// next/font reads its options at build time, so each call states them literally — no spread.
+export const javaneseScript = Noto_Sans_Javanese({
+  weight: '400',
+  display: 'swap',
+  preload: false,
+  subsets: ['javanese'],
+})
+export const balineseScript = Noto_Sans_Balinese({
+  weight: '400',
+  display: 'swap',
+  preload: false,
+  subsets: ['balinese'],
+})
+export const sundaneseScript = Noto_Sans_Sundanese({
+  weight: '400',
+  display: 'swap',
+  preload: false,
+  subsets: ['sundanese'],
+})
+export const bugineseScript = Noto_Sans_Buginese({
+  weight: '400',
+  display: 'swap',
+  preload: false,
+  subsets: ['buginese'],
+})
+export const batakScript = Noto_Sans_Batak({
+  weight: '400',
+  display: 'swap',
+  preload: false,
+  subsets: ['batak'],
+})
+export const rejangScript = Noto_Sans_Rejang({
+  weight: '400',
+  display: 'swap',
+  preload: false,
+  subsets: ['rejang'],
+})

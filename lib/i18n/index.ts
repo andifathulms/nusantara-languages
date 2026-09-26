@@ -209,6 +209,8 @@ export type Dictionary = {
     /** Template. Placeholder: {max}. */
     readonly ladderScale: string
     readonly ladderIsolate: string
+    readonly scriptTitle: string
+    readonly scriptNote: string
   }
   /** The documentation layer: Glottolog's most extensive description per language, and its bibliography count. */
   readonly docs: {
@@ -622,6 +624,8 @@ const id: Dictionary = {
     ladderLead: 'Setiap tingkat ke atas menambah kerabat dan memperluas wilayah yang mereka tempati. Klik satu tingkat untuk melihatnya menyala di peta.',
     ladderScale: 'Panjang batang: jumlah bahasa di peta ini, skala logaritmik dari 1 sampai {max}. Membentang: jarak dua titik tercatat terjauh, diukur antartitik tengah — batas bawah, bukan rentang wilayah.',
     ladderIsolate: 'Bahasa isolat: tidak ada tingkat di atasnya, karena belum ada kerabat yang terbukti.',
+    scriptTitle: 'Aksara tradisional',
+    scriptNote: 'Contoh huruf dari aksara ini, bukan ejaan nama bahasanya. Bahasa ini dicantumkan karena Standar Unicode menyebutnya di antara pemakai aksara tersebut.',
   },
   docs: {
     colourBy: 'Dokumentasi',
@@ -1005,6 +1009,8 @@ const en: Dictionary = {
     ladderLead: 'Each step up adds relatives and widens the ground they cover. Click a step to see it light up on the map.',
     ladderScale: 'Bar length: languages on this map, on a log scale from 1 to {max}. Spans: the distance between the two furthest recorded points, midpoint to midpoint — a floor, not the true extent.',
     ladderIsolate: 'An isolate: there is nothing above it, because no relative has been shown.',
+    scriptTitle: 'Traditional script',
+    scriptNote: 'Letters from this script, not a spelling of the language\'s name. The language is listed because the Unicode Standard names it among the script\'s users.',
   },
   docs: {
     colourBy: 'Documentation',
