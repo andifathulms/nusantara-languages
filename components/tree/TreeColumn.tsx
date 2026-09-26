@@ -7,6 +7,7 @@ import { scrollBehaviour } from '@/lib/dom/motion'
 import { format, type Dictionary } from '@/lib/i18n'
 import type { TreeRow } from '@/lib/plate/build'
 import { familyVarRef } from '@/lib/colour'
+import { countBar } from '@/lib/plate/bars'
 
 /**
  * The tree, beside the map rather than beneath it, because the linkage only works when both
@@ -29,6 +30,8 @@ type TreeColumnProps = {
   readonly onSelect: (row: TreeRow) => void
   /** Set when the plate selects a language: the column scrolls that row into view. */
   readonly scrollTo: string | null
+  /** Languages in the largest family: every count bar is drawn against this one scale. */
+  readonly barScale: number
 }
 
 /**
@@ -62,6 +65,7 @@ export function TreeColumn({
   onHover,
   onSelect,
   scrollTo,
+  barScale,
 }: TreeColumnProps) {
   const listRef = useRef<HTMLDivElement | null>(null)
   /**
@@ -221,12 +225,19 @@ export function TreeColumn({
                     {row.name}
                   </span>
 
+                  {row.level === 'language' ? null : (
+                    <CountBarMark
+                      bar={countBar(row.languageCount, row.withPolygon, barScale)}
+                      colour={familyVarRef(row.colour, isScoped ? 'selected' : 'base')}
+                    />
+                  )}
+
                   {/* Whether a language has a territory or is only a point is one of the
                       central distinctions this project makes, and it was carried by a glyph in
                       a title attribute — unreadable to a screen reader on a non-interactive
                       span, and unreachable on touch. The glyph is decorative now and the
                       meaning is in text. */}
-                  <span className="figure shrink-0 text-micro text-ink-soft">
+                  <span className="figure w-7 shrink-0 text-right text-micro text-ink-soft">
                     {row.level === 'language' ? (
                       <>
                         <span aria-hidden="true">{row.withPolygon === 1 ? '▣' : '○'}</span>
@@ -252,9 +263,38 @@ export function TreeColumn({
         </ul>
       </div>
 
-      <p className="border-t border-boundary/20 px-3 py-2 text-micro text-ink-soft">
-        ▣ {strings.plate.geometryArea} · ○ {strings.plate.geometryPoint}
+      <p className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-boundary/20 px-3 py-2 text-micro text-ink-soft">
+        <span>▣ {strings.plate.geometryArea} · ○ {strings.plate.geometryPoint}</span>
+        <span className="hidden items-center gap-1.5 sm:inline-flex">
+          <span aria-hidden="true" className="inline-block h-1.5 w-4 bg-boundary/40" />
+          {strings.tree.barAreas}
+          <span aria-hidden="true" className="tree-bar-points ml-1 inline-block h-1.5 w-4" />
+          {strings.tree.barPoints}
+        </span>
       </p>
     </aside>
+  )
+}
+
+/**
+ * A branch's size, drawn. Linear against the largest family, split into areas (solid) and
+ * points (ticked). Decorative for assistive technology: the count beside it says the same thing
+ * in words.
+ */
+function CountBarMark({ bar, colour }: { bar: ReturnType<typeof countBar>; colour: string }) {
+  return (
+    <span aria-hidden="true" className="relative hidden h-1.5 w-12 shrink-0 self-center bg-boundary/[0.07] sm:block">
+      <span
+        className="absolute inset-y-0 left-0"
+        style={{ width: `${Math.max(bar.areas * 100, bar.areas > 0 ? 4 : 0)}%`, backgroundColor: colour }}
+      />
+      <span
+        className="tree-bar-points absolute inset-y-0"
+        style={{
+          left: `${Math.max(bar.areas * 100, bar.areas > 0 ? 4 : 0)}%`,
+          width: `${Math.max(bar.points * 100, bar.points > 0 ? 4 : 0)}%`,
+        }}
+      />
+    </span>
   )
 }

@@ -382,3 +382,11 @@ describe('branch extent', () => {
     }
   })
 })
+
+describe('the count-bar scale', () => {
+  it('is the largest top-level unit, read from the coverage report rather than hardcoded', () => {
+    const largest = Math.max(...coverage.families.map((family) => family.languageCount))
+    expect(model.largestFamily).toBe(largest)
+    expect(model.rows.every((row) => row.languageCount <= model.largestFamily)).toBe(true)
+  })
+})

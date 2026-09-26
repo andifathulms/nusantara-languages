@@ -82,6 +82,16 @@
     @apply font-mono tabular;
   }
 
+  /* The point-only share of a tree count bar: ticks, not a fill, because a point is not a
+     territory. */
+  .tree-bar-points {
+    background-image: repeating-linear-gradient(
+      90deg,
+      rgb(42 38 32 / 0.45) 0 1px,
+      transparent 1px 3px
+    );
+  }
+
   /* --- Rules --------------------------------------------------------------------------- */
 
   .rule {

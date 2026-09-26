@@ -170,6 +170,8 @@ export type PlateModel = {
   /** The same map read one level down. Empty when no family splits. */
   readonly subgroupLegend: readonly LegendEntry[]
   readonly rows: readonly TreeRow[]
+  /** Languages in the largest top-level unit: the one scale every tree row's count bar uses. */
+  readonly largestFamily: number
   /** Keyed by glottocode, so the panel is a lookup with no map to build. */
   readonly details: Readonly<Record<string, LanguageDetail>>
   readonly vertices: number
@@ -433,6 +435,7 @@ export function buildPlateModel(input: BuildPlateInput): PlateModel {
     legend,
     subgroupLegend,
     rows,
+    largestFamily: legend.reduce((largest, entry) => Math.max(largest, entry.languageCount), 0),
     details,
     vertices: input.geometry.reduce((total, entry) => total + vertexCount(entry.geometry), 0),
   }

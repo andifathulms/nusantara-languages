@@ -151,6 +151,10 @@ export type Dictionary = {
     readonly isolate: string
     /** Template. Placeholder: {count}. */
     readonly languages: string
+    /** Count-bar key: the solid part. */
+    readonly barAreas: string
+    /** Count-bar key: the ticked part. */
+    readonly barPoints: string
   }
   readonly panel: {
     readonly glottocode: string
@@ -423,6 +427,8 @@ const id: Dictionary = {
     collapse: 'Tutup',
     isolate: 'bahasa isolat',
     languages: '{count} bahasa',
+    barAreas: 'berwilayah',
+    barPoints: 'titik',
   },
   panel: {
     glottocode: 'Glottocode',
@@ -679,6 +685,8 @@ const en: Dictionary = {
     collapse: 'Collapse',
     isolate: 'isolate',
     languages: '{count} languages',
+    barAreas: 'with an area',
+    barPoints: 'points',
   },
   panel: {
     glottocode: 'Glottocode',

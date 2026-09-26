@@ -382,6 +382,7 @@ export function PlateView({
             onHover={setHovered}
             onSelect={selectFromTree}
             scrollTo={scrollTo}
+            barScale={model.largestFamily}
           />
         </div>
       </div>
