@@ -28,6 +28,8 @@ type LanguageFactsProps = {
   readonly locale: Locale
   readonly manifest?: BundleManifest
   readonly compact?: boolean
+  /** The language page draws the classification as a ladder, so the line here would repeat it. */
+  readonly hideClassification?: boolean
 }
 
 export function LanguageFacts({
@@ -37,6 +39,7 @@ export function LanguageFacts({
   locale,
   manifest,
   compact = false,
+  hideClassification = false,
 }: LanguageFactsProps) {
   const aesLabel = strings.aes[detail.aes ?? 'unknown'] ?? (detail.aes ?? 'unknown')
   const geometry = detail.geometry
@@ -91,6 +94,7 @@ export function LanguageFacts({
           )}
         </Fact>
 
+        {hideClassification ? null : (
         <Fact
           label={strings.panel.classification}
           hint={
@@ -111,6 +115,7 @@ export function LanguageFacts({
             )}
           </span>
         </Fact>
+        )}
 
         <Fact label={strings.panel.altNames} wide>
           {detail.altNames.length === 0 ? (

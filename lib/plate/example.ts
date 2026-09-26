@@ -76,3 +76,77 @@ export function exampleLadder(
   // A ladder of one rung teaches nothing — an isolate would produce exactly that.
   return rungs.length < 3 ? null : rungs
 }
+
+/**
+ * The same ladder for any language, read straight from the tree index rather than from plate
+ * rows, because a language page does not build the plate model — building it 1,452 times to read
+ * six rungs would be most of the build. Figures are computed exactly as the plate computes them:
+ * members from `subtreeLanguages`, extent from `furthestPair`, rounded to 10 km.
+ *
+ * Returns the language alone for an isolate, which has no rungs to climb; the page says so.
+ */
+export function languageLadder(
+  treeIndex: TreeIndex,
+  byCode: ReadonlyMap<string, Languoid>,
+  glottocode: string,
+  figures?: ReadonlyMap<string, BranchFigures>,
+): readonly ExampleRung[] | null {
+  const self = byCode.get(glottocode)
+  if (self === undefined) return null
+
+  const rungs: ExampleRung[] = [
+    { glottocode, name: self.name, languageCount: 1, extentKm: null, between: null },
+  ]
+  for (const code of [...self.ancestors].reverse()) {
+    const known = figures?.get(code) ?? branchFigure(treeIndex, byCode, code)
+    rungs.push({
+      glottocode: code,
+      name: treeIndex.nodes.get(code)?.name ?? code,
+      languageCount: known.languageCount,
+      extentKm: known.extentKm,
+      between: known.between,
+    })
+  }
+  return rungs
+}
+
+export type BranchFigures = {
+  readonly languageCount: number
+  readonly extentKm: number | null
+  readonly between: { readonly from: string; readonly to: string } | null
+}
+
+function branchFigure(
+  treeIndex: TreeIndex,
+  byCode: ReadonlyMap<string, Languoid>,
+  code: string,
+): BranchFigures {
+  const members = subtreeLanguages(treeIndex, code).flatMap((member) => {
+    const languoid = byCode.get(member)
+    return languoid === undefined ? [] : [languoid]
+  })
+  const pair = furthestPair(members, (languoid) => [languoid.lon, languoid.lat])
+  return {
+    languageCount: members.length,
+    extentKm: pair === null ? null : Math.round(pair.km / 10) * 10,
+    between: pair === null ? null : { from: pair.a.name, to: pair.b.name },
+  }
+}
+
+/**
+ * Every branch's figures, once. The furthest pair is quadratic in a branch's size, and
+ * Austronesian and Malayo-Polynesian are 464 languages each: computed per language page, that was
+ * ~600 million distance calculations and turned a 23-second build into three minutes. A caller
+ * that builds many pages computes this once and passes it to `languageLadder`.
+ */
+export function branchFigures(
+  treeIndex: TreeIndex,
+  byCode: ReadonlyMap<string, Languoid>,
+): ReadonlyMap<string, BranchFigures> {
+  const out = new Map<string, BranchFigures>()
+  for (const [code, node] of treeIndex.nodes) {
+    if (node.level === 'language') continue
+    out.set(code, branchFigure(treeIndex, byCode, code))
+  }
+  return out
+}

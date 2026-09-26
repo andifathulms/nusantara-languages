@@ -6,6 +6,11 @@ import { LanguageFacts } from '@/components/panel/LanguageFacts'
 import { NearestRelatives } from '@/components/panel/NearestRelatives'
 import { loadBundle } from '@/lib/bundle/load'
 import { relativeReport } from '@/lib/tree/relatives'
+import { buildLocator, locatorIndex, type LocatorIndex } from '@/lib/plate/locator'
+import { branchFigures, languageLadder, type BranchFigures } from '@/lib/plate/example'
+import { colourOf, familyVarRef } from '@/lib/colour'
+import { LanguageLocator } from '@/components/panel/LanguageLocator'
+import { LanguageLadder } from '@/components/panel/LanguageLadder'
 import { aesStep } from '@/lib/bundle/types'
 import { LOCALES, dictionary, isLocale, localePath, type Locale } from '@/lib/i18n'
 import { localeMetadata } from '@/lib/seo/locale-meta'
@@ -23,6 +28,25 @@ export function generateStaticParams() {
 }
 
 export const dynamicParams = false
+
+/**
+ * Branch figures for the ladder, computed once per build process rather than once per page. The
+ * furthest-pair search is quadratic in branch size, and every Austronesian page climbs through two
+ * 464-language branches. This file is app code, not one of the pure modules, so a process-level
+ * cache is allowed here.
+ */
+let figures: ReadonlyMap<string, BranchFigures> | null = null
+function allBranchFigures(bundle: ReturnType<typeof loadBundle>): ReadonlyMap<string, BranchFigures> {
+  figures ??= branchFigures(bundle.treeIndex, bundle.byCode)
+  return figures
+}
+
+/** The locator's bounds index, once per process for the same reason. */
+let boundsIndex: LocatorIndex | null = null
+function allBounds(bundle: ReturnType<typeof loadBundle>): LocatorIndex {
+  boundsIndex ??= locatorIndex(bundle.geometry, bundle.basemap)
+  return boundsIndex
+}
 
 function detailOf(glottocode: string) {
   const bundle = loadBundle()
@@ -79,53 +103,109 @@ export default function LanguagePage({
   const { detail, bundle } = found
   const nameOf = (code: string): string => bundle.treeIndex.nodes.get(code)?.name ?? code
   const rootCode = detail.ancestry[0]
+  const report = relativeReport(bundle.treeIndex, bundle.byCode, detail.glottocode)
+  const target = bundle.byCode.get(detail.glottocode)
+  const colour = colourOf(bundle.colours, rootCode ?? detail.glottocode).token
+
+  // Built here, at build time, per page — and clipped to its window, so the page carries only the
+  // coastline it draws.
+  const locator =
+    target === undefined
+      ? null
+      : buildLocator({
+          target,
+          relatives: (report?.named ?? []).flatMap((relative) => {
+            const languoid = bundle.byCode.get(relative.glottocode)
+            return languoid === undefined ? [] : [languoid]
+          }),
+          closest: report?.closest ?? null,
+          languoids: bundle.languoids,
+          geometry: bundle.geometry,
+          basemap: bundle.basemap,
+          colours: bundle.colours,
+          index: allBounds(bundle),
+        })
+  const ladder =
+    languageLadder(bundle.treeIndex, bundle.byCode, detail.glottocode, allBranchFigures(bundle)) ?? []
 
   return (
     <>
       <SiteHeader locale={locale} current="peta" />
 
-      <main id="content" className="mx-auto max-w-prose px-4 py-section sm:px-6">
-        <p className="index-label">
-          {rootCode === undefined ? strings.tree.isolate : nameOf(rootCode)}
-        </p>
-        <h1 className="mt-1 font-display text-title-l">{detail.name}</h1>
+      <main id="content" className="mx-auto max-w-plate px-4 py-block-lg sm:px-6 sm:py-section">
+        <header className="max-w-prose">
+          <p className="flex items-center gap-2">
+            <span
+              aria-hidden="true"
+              className="inline-block h-3 w-3 border border-boundary/40"
+              style={{ backgroundColor: familyVarRef(colour, 'selected') }}
+            />
+            <span className="index-label">
+              {rootCode === undefined
+                ? strings.tree.isolate
+                : detail.ancestry.slice(0, 2).map(nameOf).join(' · ')}
+            </span>
+          </p>
+          <h1 className="mt-2 font-display text-title-l sm:text-title-xl">{detail.name}</h1>
+          {detail.altNames.length > 0 ? (
+            <p className="mt-2 text-lead text-ink-soft">{detail.altNames.join(' · ')}</p>
+          ) : null}
+          <p className="mt-block">
+            <Link
+              href={`${localePath(locale, 'peta')}#bahasa=${detail.glottocode}`}
+              className="btn btn-primary"
+            >
+              {strings.language.viewOnPlate}
+            </Link>
+          </p>
+        </header>
 
-        <p className="mt-4">
-          <Link
-            href={`${localePath(locale, 'peta')}#bahasa=${detail.glottocode}`}
-            className="link"
-          >
-            {strings.nav.plate}
-          </Link>
-        </p>
+        <div className="mt-block-lg grid gap-x-12 gap-y-block-lg lg:grid-cols-[minmax(0,1fr)_minmax(0,34rem)]">
+          {/* The map first on a phone: "where is it?" is the question a reader arrives with. */}
+          <div className="order-first space-y-4 lg:sticky lg:top-6 lg:order-none lg:col-start-2 lg:row-start-1 lg:self-start">
+            {locator === null ? null : (
+              <figure>
+                <LanguageLocator
+                  locator={locator}
+                  label={`${strings.language.locatorTitle}: ${detail.name}`}
+                />
+                <figcaption className="mt-2 text-micro text-ink-soft">
+                  {detail.geometry.type === 'point' ? `${strings.language.pointOnlyNote} ` : ''}
+                  {strings.language.locatorNote}
+                </figcaption>
+              </figure>
+            )}
 
-        <div className="mt-block-lg">
-          <LanguageFacts
-            detail={detail}
-            strings={strings}
-            locale={locale}
-            manifest={bundle.manifest}
-            nameOf={nameOf}
-          />
+            {/* Computed at build time, per page, rather than carried in the plate model: the plate
+                page already ships every language's ancestry and does not need a relatives report
+                for 726 languages to answer a question asked about one. */}
+            <NearestRelatives
+              report={report}
+              strings={strings}
+              locale={locale}
+              total={bundle.coverage.languages}
+            />
+          </div>
+
+          <div className="space-y-block-lg lg:col-start-1 lg:row-start-1">
+            <LanguageLadder rungs={ladder} strings={strings} locale={locale} colour={colour} />
+
+            <LanguageFacts
+              detail={detail}
+              strings={strings}
+              locale={locale}
+              manifest={bundle.manifest}
+              nameOf={nameOf}
+              hideClassification={ladder.length > 1}
+            />
+
+            <p className="text-body-s text-ink-soft">
+              <Link href={localePath(locale, 'metode')} className="link">
+                {strings.method.title}
+              </Link>
+            </p>
+          </div>
         </div>
-
-        {/* Computed at build time, per page, rather than carried in the plate model: the plate
-            page already ships every language's ancestry and does not need a relatives report
-            for 726 languages to answer a question asked about one. */}
-        <div className="mt-block">
-          <NearestRelatives
-            report={relativeReport(bundle.treeIndex, bundle.byCode, detail.glottocode)}
-            strings={strings}
-            locale={locale}
-            total={bundle.coverage.languages}
-          />
-        </div>
-
-        <p className="mt-section text-body-s text-ink-soft">
-          <Link href={localePath(locale, 'metode')} className="link">
-            {strings.method.title}
-          </Link>
-        </p>
       </main>
 
       <SiteFooter locale={locale} />

@@ -198,6 +198,18 @@ export type Dictionary = {
    * the answer is only true within the frame: among the languages mapped here, between recorded
    * points, and unranked because the classification carries no branch lengths.
    */
+  /** The language page: its locator map and its ladder up the tree. */
+  readonly language: {
+    readonly locatorTitle: string
+    readonly locatorNote: string
+    readonly pointOnlyNote: string
+    readonly viewOnPlate: string
+    readonly ladderTitle: string
+    readonly ladderLead: string
+    /** Template. Placeholder: {max}. */
+    readonly ladderScale: string
+    readonly ladderIsolate: string
+  }
   readonly relatives: {
     readonly title: string
     readonly sharedAncestor: string
@@ -497,6 +509,16 @@ const id: Dictionary = {
     openLanguage: 'Buka halaman bahasa',
     close: 'Tutup',
   },
+  language: {
+    locatorTitle: 'Letak di peta',
+    locatorNote: 'Wilayah dan titik dari sumber yang sama dengan peta utama. Kerabat terdekat ditandai lingkaran kecil; jarak diukur antartitik tengah, jadi batas bawah.',
+    pointOnlyNote: 'Bahasa ini tercatat sebagai titik, bukan wilayah: titik itu perkiraan letak, bukan batas.',
+    viewOnPlate: 'Buka di peta',
+    ladderTitle: 'Tangga kekerabatan',
+    ladderLead: 'Setiap tingkat ke atas menambah kerabat dan memperluas wilayah yang mereka tempati. Klik satu tingkat untuk melihatnya menyala di peta.',
+    ladderScale: 'Panjang batang: jumlah bahasa di peta ini, skala logaritmik dari 1 sampai {max}. Membentang: jarak dua titik tercatat terjauh, diukur antartitik tengah — batas bawah, bukan rentang wilayah.',
+    ladderIsolate: 'Bahasa isolat: tidak ada tingkat di atasnya, karena belum ada kerabat yang terbukti.',
+  },
   relatives: {
     title: 'Kerabat terdekat',
     sharedAncestor: 'Leluhur bersama terdekat',
@@ -778,6 +800,16 @@ const en: Dictionary = {
     sources: 'Sources',
     openLanguage: 'Open the language page',
     close: 'Close',
+  },
+  language: {
+    locatorTitle: 'Where it is',
+    locatorNote: 'Areas and points from the same sources as the main map. The nearest relatives are marked with small rings; the distance is measured between midpoints, so it is a floor.',
+    pointOnlyNote: 'This language is recorded as a point, not an area: the point is an approximate location, not a boundary.',
+    viewOnPlate: 'Open on the map',
+    ladderTitle: 'Up the family tree',
+    ladderLead: 'Each step up adds relatives and widens the ground they cover. Click a step to see it light up on the map.',
+    ladderScale: 'Bar length: languages on this map, on a log scale from 1 to {max}. Spans: the distance between the two furthest recorded points, midpoint to midpoint — a floor, not the true extent.',
+    ladderIsolate: 'An isolate: there is nothing above it, because no relative has been shown.',
   },
   relatives: {
     title: 'Nearest relatives',
