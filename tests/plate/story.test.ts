@@ -64,3 +64,30 @@ describe('the guided stories', () => {
     expect(countIn(languoids, ['buru1303'], [100, -4, 101, -3])).toBe(0)
   })
 })
+
+describe('one plate, three pictures', () => {
+  it('dims each language in exactly the views that do not light it', async () => {
+    const { dimmedBy } = await import('@/lib/plate/guided')
+    const dims = dimmedBy(languoids, coverage)
+    for (const view of GUIDED_VIEWS) {
+      const lit = new Set(GUIDED[view].emphasise(languoids, coverage))
+      for (const languoid of languoids) {
+        expect(dims.get(languoid.glottocode)?.includes(view)).toBe(!lit.has(languoid.glottocode))
+      }
+    }
+  })
+
+  it('groups every language into exactly one bucket, at most eight of them', async () => {
+    const { dimBuckets, dimmedBy } = await import('@/lib/plate/guided')
+    const buckets = dimBuckets(languoids, dimmedBy(languoids, coverage))
+    expect(buckets.length).toBeLessThanOrEqual(8)
+    expect(buckets.reduce((total, bucket) => total + bucket.shapes.length, 0)).toBe(languoids.length)
+  })
+})
+
+describe('index pictures', () => {
+  it.each(GUIDED_VIEWS)('frames %s around most of what it lights', (view) => {
+    const lit = GUIDED[view].emphasise(languoids, coverage)
+    expect(countIn(languoids, lit, GUIDED[view].thumbnail)).toBeGreaterThan(lit.length * 0.6)
+  })
+})

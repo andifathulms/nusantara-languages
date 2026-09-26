@@ -66,7 +66,13 @@ export const WATER_RINGS = [
   { width: 3.4, opacity: 0.34 },
 ] as const
 
-export function WaterLines({ prefix }: Prefixed) {
+export function WaterLines({
+  prefix,
+  scale = 1,
+}: Prefixed & {
+  /** For a still shown cropped and enlarged, so its rings keep the plate's spacing on screen. */
+  readonly scale?: number
+}) {
   return (
     <>
       {WATER_RINGS.map((ring) => (
@@ -75,9 +81,13 @@ export function WaterLines({ prefix }: Prefixed) {
             href={`#${prefix}-coast-all`}
             stroke="var(--plate-waterLine)"
             strokeOpacity={ring.opacity}
-            strokeWidth={ring.width}
+            strokeWidth={ring.width * scale}
           />
-          <use href={`#${prefix}-coast-all`} stroke="var(--plate-sea)" strokeWidth={ring.width - 1} />
+          <use
+            href={`#${prefix}-coast-all`}
+            stroke="var(--plate-sea)"
+            strokeWidth={(ring.width - 1) * scale}
+          />
         </g>
       ))}
     </>

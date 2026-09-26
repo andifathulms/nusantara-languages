@@ -52,6 +52,11 @@ export type GuidedView = {
   readonly emphasise: Emphasis
   /** The story, in order. The first step is what the view opens on. */
   readonly steps: readonly GuidedStep[]
+  /**
+   * Where the view's picture on the index is framed: around its subject, not the whole plate — the
+   * isolates are 22 of 23 in Papua, and a whole-archipelago crop cut exactly them off.
+   */
+  readonly thumbnail: BoundingBox
 }
 
 const notAustronesian: Emphasis = (languoids) =>
@@ -124,6 +129,7 @@ export const GUIDED: Readonly<Record<GuidedViewId, GuidedView>> = {
     frame: [122.0, -11.0, 142.5, 5.0],
     hatching: false,
     emphasise: notAustronesian,
+    thumbnail: [122.0, -11.0, 142.5, 5.0],
     steps: [
       { id: 'austronesian', box: null, emphasise: austronesian, countBox: null },
       { id: 'papuan', box: null, emphasise: notAustronesian, countBox: null },
@@ -153,6 +159,7 @@ export const GUIDED: Readonly<Record<GuidedViewId, GuidedView>> = {
     frame: INDONESIA_BBOX,
     hatching: false,
     emphasise: isolates,
+    thumbnail: [128.5, -9.5, 142.5, 0.8],
     steps: [
       { id: 'all', box: null, emphasise: isolates, countBox: null },
       { id: 'newGuinea', box: NEW_GUINEA_WEST, emphasise: isolates, countBox: NEW_GUINEA_WEST },
@@ -166,10 +173,57 @@ export const GUIDED: Readonly<Record<GuidedViewId, GuidedView>> = {
     frame: INDONESIA_BBOX,
     hatching: true,
     emphasise: nearestExtinction,
+    thumbnail: [121.5, -10.5, 142.5, 1.5],
     steps: [
       { id: 'all', box: null, emphasise: nearestExtinction, countBox: null },
       { id: 'maluku', box: MALUKU, emphasise: nearestExtinction, countBox: MALUKU },
       { id: 'papuaSouth', box: PAPUA_SOUTH, emphasise: nearestExtinction, countBox: PAPUA_SOUTH },
     ],
   },
+}
+
+/**
+ * For the guided-view index: which views dim each language. One copy of the plate is drawn and
+ * referenced once per view through <use>; each reference sets `--dim-<view>`, and every shape's
+ * opacity is the product of the variables for the views it is *not* emphasised in. So one plate
+ * serves three pictures, and each picture lights exactly what its view lights.
+ */
+export function dimmedBy(
+  languoids: readonly Languoid[],
+  coverage: Coverage,
+): ReadonlyMap<string, readonly GuidedViewId[]> {
+  const lit = GUIDED_VIEWS.map((view) => [view, new Set(GUIDED[view].emphasise(languoids, coverage))] as const)
+  return new Map(
+    languoids.map((languoid) => [
+      languoid.glottocode,
+      lit.filter(([, codes]) => !codes.has(languoid.glottocode)).map(([view]) => view),
+    ]),
+  )
+}
+
+/**
+ * Shapes grouped by the set of views that dim them — at most 2³ groups for three views. A picture
+ * nests one <g> per view around each group, and nested group opacities multiply by themselves, so
+ * one opacity per group replaces a `calc()` on every one of 726 shapes (91 KB of the page, twice).
+ * Order within a group follows the input, so the plate's painter's order holds inside each group.
+ */
+export function dimBuckets<T extends { readonly glottocode: string }>(
+  shapes: readonly T[],
+  dims: ReadonlyMap<string, readonly GuidedViewId[]> | Readonly<Record<string, readonly GuidedViewId[]>>,
+): readonly { readonly views: readonly GuidedViewId[]; readonly shapes: readonly T[] }[] {
+  const lookup = (code: string): readonly GuidedViewId[] =>
+    (dims instanceof Map ? dims.get(code) : (dims as Record<string, readonly GuidedViewId[]>)[code]) ?? []
+  const buckets = new Map<string, { views: readonly GuidedViewId[]; shapes: T[] }>()
+  for (const shape of shapes) {
+    const views = lookup(shape.glottocode)
+    const key = views.join('+')
+    const bucket = buckets.get(key) ?? { views, shapes: [] }
+    bucket.shapes.push(shape)
+    buckets.set(key, bucket)
+  }
+  // Undimmed first, most-dimmed last: a stable order, the same for every build.
+  return [...buckets.values()].sort(
+    (left, right) =>
+      left.views.length - right.views.length || left.views.join('+').localeCompare(right.views.join('+')),
+  )
 }
