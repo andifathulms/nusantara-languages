@@ -22,7 +22,9 @@ Read `PRD.md` before starting any task — **§3 and §4 in particular**. It fix
 - Vitest
 - pnpm
 - **No mapping library with a tile dependency, no Newick parser, no topology library.** The tree parser and the plate are the project.
-- Fonts via `next/font`, self-hosted.
+- Fonts via `next/font`, self-hosted: Newsreader (display and prose, optical sizes), IBM Plex Sans
+  Condensed (labels), IBM Plex Mono (data), and Noto for the six traditional scripts (never
+  preloaded).
 
 ## Commands
 
@@ -67,7 +69,8 @@ lib/
 scripts/
   build-sources.ts          # DEV/CI — fetch, filter, simplify, emit, report coverage
 data/
-  bundle/                   # emitted languoids, tree, geometry, coverage.json, manifest
+  bundle/                   # emitted languoids, tree, geometry, basemap, reference (towns, seas,
+                            #   deep water), words (ABVD), features (Grambank), coverage, manifest
 tests/
   integrity/
   tree/
@@ -85,6 +88,8 @@ tests/
 4. **Attribution is structural, not decorative.** Glottolog is CC-BY-SA. Attribution appears on the plate, in every PNG export, and in the repository. It is not a footer component that can be removed by a layout change. Derived bundles are published under the same terms.
 
 5. **Points are never inflated into territories.** A language without a polygon renders as a point, visually distinct and labelled as such. No convex hulls, no Voronoi in the default path. If a Voronoi approximation is ever added it is off by default and labelled an approximation in the UI.
+
+5b. **Reference layers are orientation, never data.** Towns, sea names and the 200 m depth line (Natural Earth) carry no glottocode, are drawn `pointer-events-none` and `aria-hidden`, and a test asserts `reference.json` holds no glottocode and no population figure. The ground (sea, deep water, water-lines, land, sea names, graticule) is its own SVG layer under the interactive one, because hover must never repaint it. Water-lines and deep water are drawn from the sourced coast and bathymetry — never from language areas.
 
 5a. **The coastline is sourced, never derived.** The plate draws land from Natural Earth (public domain, pinned) so that a gap in coverage reads as "unrecorded" rather than as sea. Do **not** replace it with a silhouette traced from the language areas: that would draw a country that stops where the documentation stops, which is the same error as inflating a point. Land carries no glottocode, sits in its own list in the plate model, and is `pointer-events-none` — it must stay structurally incapable of being hovered, selected, searched or announced.
 
@@ -285,13 +290,49 @@ consecutive local runs gave 0.57, 10.39, 0.71 and **27.34 ms (over)** while p50/
 0.00/0.01 ms. It gates deploys and can fail at random. Fixing it means changing what the gate
 measures, which is a judgement call, not a tidy-up — do not simply raise the budget.
 
+### The redesign (2026-09-26/27)
+
+A design proposal (published as an artifact) was accepted in full and built in four phases, each
+a run of small commits. What a future session most needs to know:
+
+- **Figure and ground were inverted, and that was the biggest visual fault.** The sea was never
+  painted (it was the paper) and unrecorded land was a grey *darker* than it. Now: sea `#D6E2E2`,
+  deep water `#CDDBDC`, land blank paper `#FAF7F0`, three water-lines, sea names in hydrographic
+  italic. Every relationship is in `tests/colour/vision`. A *lighter shelf* was tried and
+  rejected: Malaysia's land came within 1.9 units of the water.
+- **Performance rule learned:** the water-lines doubled hover p95 (27 → 54 ms, measured with
+  Playwright) until the ground moved to its own composited SVG. Measure hover in a real browser
+  after any change to what the plate draws; `bench:plate` only times hit-testing.
+- **Playwright is available** (global install at `/opt/homebrew/lib/node_modules/playwright`), so
+  the old "never visually verified" caveat no longer applies — build, `PORT=4199 node
+  scripts/preview.mjs`, screenshot. Port 4173 is taken by another process on this machine. `pnpm
+  dev` does not work with `output: 'export'` here; always check a real build.
+- **Layout:** `/peta` is map-first (the plate starts at ~330 px, not 548). The selection card sits
+  *under* the plate: laid over the sea it covered a third of the map and, when comparing, hid one
+  of the two languages. On a phone the frame is a window onto the plate at full height
+  (`frameWidthFor`, `limitsFor(content, frame)`), opening on 127°E; the tree is a bottom sheet.
+- **New interactions:** hover label, `/` search, random language, compare two languages
+  (`sharedAncestor`), line-of-descent trail in the tree, Back undoes a selection (pushState on
+  selection only), captioned PNG export.
+- **New pages:** language pages have a locator (clipped with `lib/geo/clip`, labels placed so none
+  overlap) and a ladder; guided views are three-step stories that move the frame; `/pandu/kata`
+  (ABVD word map) and `/pandu/tata-bahasa` (Grambank features).
+- **New layers and sources.** Glottolog MED + reference count (no new source); Natural Earth towns,
+  seas, 200 m contour (same source, new files); ABVD `v0.1` (role `lexicon`) and Grambank `v1.0.3`
+  (role `typology`), both CC-BY-4.0, verified in LICENSE *and* CLDF metadata before building;
+  traditional scripts hand-curated from the Unicode Standard 15.1 ch. 17 (`lib/scripts`).
+- **Refused, and why:** Natural Earth provinces (33 provinces, predates North Kalimantan 2012
+  and the 2022 Papua split); Natural Earth "capital" tags (wrong in places) — towns are by
+  importance rank instead.
+- **Two bugs caught only in the browser:** a `<style>` text child breaks hydration (React escapes
+  quotes; browsers never decode entities in `<style>`) — use `dangerouslySetInnerHTML`; and the
+  ground's land grouping silently dropped 273 minor islands (the kind `island`) — split by
+  "neighbour or not", never by a list of kinds.
+
 ### Next, in rough order
 
-1. **Look at it on a real screen.** Still the top item, and now more so: the interface has been
-   verified structurally and numerically, never visually. No headless browser was available.
-   Worth checking specifically — pale tints (blush, wedgwood, olive at L 0.82) against the
-   paper, the density of the tree column at 12px, and whether the accent red feels rationed or
-   scarce.
+1. ~~**Look at it on a real screen.**~~ Done with Playwright throughout the redesign. Still worth a
+   human eye on a real phone for touch gestures (the narrow-frame pan, the bottom sheet).
 2. **Trim the page payload**, now the more pressing of the two. The plate page is ~440 KB
    gzipped with the land layer; the front page is ~180 KB. `LanguageDetail.ancestry` repeats
    ancestor *names* per language (~150 KB raw) when the tree rows carry them, shapes/rows carry
