@@ -2,13 +2,13 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { SiteFooter, SiteHeader } from '@/components/site/SiteChrome'
 import { PlateView } from '@/components/plate/PlateView'
-import { MapKey } from '@/components/plate/MapKey'
 import { WorkedExample } from '@/components/plate/WorkedExample'
 import { loadBundle } from '@/lib/bundle/load'
 import { buildPlateModel } from '@/lib/plate/build'
 import { atlasPeriod } from '@/lib/bundle/types'
 import { exampleLadder } from '@/lib/plate/example'
 import { INDONESIA_BBOX } from '@/lib/geo'
+import { plateXForLon } from '@/lib/plate/focus'
 import { dictionary, format, isLocale, localePath, type Locale } from '@/lib/i18n'
 import { localeMetadata } from '@/lib/seo/locale-meta'
 
@@ -22,6 +22,13 @@ const PLATE_WIDTH = 1600
  * what the map is for.
  */
 const EXAMPLE_FAMILIES = ['aust1307', 'nort2923', 'timo1261'] as const
+
+/**
+ * Where the plate opens on a phone, as a meridian. A phone shows a window of the plate at its
+ * full height, and 127°E puts Halmahera and the Maluku seam in the middle of it — the place where
+ * the families interleave, rather than Sumatra, which is one colour.
+ */
+const NARROW_CENTRE_LON = 127
 
 export function generateMetadata({ params }: { params: { locale: string } }): Metadata {
   const locale: Locale = isLocale(params.locale) ? params.locale : 'id'
@@ -72,19 +79,20 @@ export default function PlatePage({ params }: { params: { locale: string } }) {
       <SiteHeader locale={locale} current="peta" />
 
       <main id="content" className="mx-auto max-w-plate px-4 py-block sm:px-6 sm:py-block-lg">
-        {/* Two sentences and one line of provenance, then the map. The header used to run to
-            roughly 700px with the legend stacked on top of it, which put the product itself
-            below the fold on a laptop — a reader met four explained concepts and a disclaimer
-            before they met the thing being explained. */}
-        <header className="max-w-prose">
-          <h1 className="font-display text-title-l sm:text-title-xl">{strings.plate.title}</h1>
-          <p className="mt-3 text-lead text-ink-soft">
-            {format(strings.guide.leadPlain, { total: bundle.coverage.languages })}
-          </p>
-          {/* What the reader can *do*. This sentence is the product, and it used to be set at
-              the smallest size on the page, in secondary ink, below the search box. */}
-          <p className="mt-3 text-body">{strings.guide.linkage}</p>
-          <p className="caveat mt-3">
+        {/* A title, one sentence and one line of provenance, then the map. The header once ran to
+            roughly 700px, and even trimmed it left the plate starting 548px down a 900px laptop
+            screen and off the first screen of a phone entirely. What the reader can *do* moved
+            into the first-visit tips, which a returning reader never sees again. */}
+        <header className="flex flex-col gap-x-8 gap-y-1 lg:flex-row lg:items-baseline">
+          <h1 className="shrink-0 font-display text-title-m sm:text-title-l">
+            {strings.plate.title}
+          </h1>
+          <p className="text-body-s text-ink-soft">
+            {/* On a phone the tips and the key teach this; the map gets the room instead. */}
+            <span className="hidden sm:inline">
+              {format(strings.guide.leadPlain, { total: bundle.coverage.languages })}{' '}
+            </span>
+            <span>
             {period === null
               ? strings.plate.periodCaveat
               : format(strings.plate.periodShort, {
@@ -94,10 +102,11 @@ export default function PlatePage({ params }: { params: { locale: string } }) {
             <Link href={localePath(locale, 'metode')} className="link">
               {strings.nav.method}
             </Link>
+            </span>
           </p>
         </header>
 
-        <div className="mt-block">
+        <div className="mt-4">
           <PlateView
             model={model}
             coverage={bundle.coverage}
@@ -106,7 +115,9 @@ export default function PlatePage({ params }: { params: { locale: string } }) {
             manifest={bundle.manifest}
             examples={examples}
             syncHash
-            mapKey={<MapKey strings={strings} />}
+            showKey
+            showTips
+            narrowCentreX={plateXForLon(INDONESIA_BBOX, PLATE_WIDTH, NARROW_CENTRE_LON)}
           />
         </div>
 

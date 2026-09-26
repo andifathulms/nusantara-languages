@@ -6,6 +6,10 @@ import { IndexPanel } from './IndexPanel'
 import { HatchLegend } from './HatchLegend'
 import { ExportBar } from './ExportBar'
 import { PlateToolbar } from './PlateToolbar'
+import { MapKey } from './MapKey'
+import { DisplayControls } from './DisplayControls'
+import { FirstVisitTips } from './FirstVisitTips'
+import { SelectionCard, type SelectionSummary } from './SelectionCard'
 import { TreeColumn } from '@/components/tree/TreeColumn'
 import { LanguageFacts } from '@/components/panel/LanguageFacts'
 import {
@@ -16,6 +20,7 @@ import {
   type PlateSelection,
 } from '@/lib/plate/select'
 import { parseViewHash, toViewHash, type ColourMode } from '@/lib/plate/hash'
+import type { PlateBox } from '@/lib/plate/focus'
 import type { SearchEntry } from '@/lib/search'
 import type { PlateModel, TreeRow } from '@/lib/plate/build'
 import type { BundleManifest, Coverage } from '@/lib/bundle/types'
@@ -32,9 +37,13 @@ import { format, type Dictionary, type Locale } from '@/lib/i18n'
  *
  * Hover wins over selection while it lasts, so exploring never costs the reader their choice.
  *
- * Layout: the tree sits beside the plate on a wide screen, because the binding only works when
- * both are visible at once. Below `lg` there is no width for that, so the two become tabs — a
- * stacked tree under a map would put the linkage off-screen, which is worse than a switch.
+ * Layout, map first. A slim row of search and examples, then the plate with the tree beside it,
+ * the selection stated on a card laid over the plate's sea, and the key directly under the map
+ * with the display controls on it. Everything that explains the map sits after the map.
+ *
+ * Below `lg` there is no room beside the plate, so the tree becomes a sheet pinned to the bottom
+ * of the screen. A sheet rather than the tab it replaced: a tab hides the plate to show the tree,
+ * and the binding only works when both are visible at once.
  */
 
 type PlateViewProps = {
@@ -58,15 +67,16 @@ type PlateViewProps = {
   readonly slug?: string
   /** Worked examples for the toolbar, as `[label, glottocode]`. */
   readonly examples?: readonly { readonly label: string; readonly glottocode: string }[]
-  /**
-   * Slot rendered directly under the plate, for the map key.
-   *
-   * It has to be *here* rather than after this component: everything else in the left column —
-   * the index panel, the endangerment legend — plus the whole tree column sits below, and a key
-   * placed after all of that lands 70 KB of markup away from the marks it decodes. A reader who
-   * needs it never reaches it, and the two legends above it assume the knowledge it supplies.
-   */
-  readonly mapKey?: React.ReactNode
+  /** The map key under the plate, with the display controls on it. The atlas page has it. */
+  readonly showKey?: boolean
+  /** The first-visit tips strip. The atlas page has it; a guided view has its own copy. */
+  readonly showTips?: boolean
+  /** Where the plate's frame opens on a phone, in plate x. Computed by the page, at build time. */
+  readonly narrowCentreX?: number
+  /** A frame to move the plate to — the guided stories drive this. */
+  readonly focus?: { readonly key: string; readonly box: PlateBox | null } | null
+  /** Rendered above the plate, inside the view — a guided story's steps, for one. */
+  readonly beforePlate?: React.ReactNode
 }
 
 export function PlateView({
@@ -82,7 +92,11 @@ export function PlateView({
   syncHash = false,
   slug = 'peta',
   examples = [],
-  mapKey = null,
+  showKey = false,
+  showTips = false,
+  narrowCentreX,
+  focus = null,
+  beforePlate = null,
 }: PlateViewProps) {
   const [hovered, setHovered] = useState<string | null>(null)
   const [selection, setSelection] = useState<PlateSelection>(initialSelection)
@@ -92,7 +106,7 @@ export function PlateView({
   const [scrollTo, setScrollTo] = useState<string | null>(null)
   const [hatching, setHatching] = useState(initialHatching)
   const [colourMode, setColourMode] = useState<ColourMode>('family')
-  const [tab, setTab] = useState<'map' | 'tree'>('map')
+  const [sheetOpen, setSheetOpen] = useState(false)
   const plateRef = useRef<SVGSVGElement | null>(null)
   const groundRef = useRef<SVGSVGElement | null>(null)
 
@@ -107,10 +121,18 @@ export function PlateView({
    * payload spent saying the same thing twice. Derived here beside searchEntries, which is
    * already derived the same way from the same model.
    */
-  const nameOf = useMemo(() => {
-    const names = new Map(model.rows.map((row) => [row.glottocode, row.name]))
-    return (glottocode: string): string => names.get(glottocode) ?? glottocode
-  }, [model.rows])
+  const rowByCode = useMemo(
+    () => new Map(model.rows.map((row) => [row.glottocode, row])),
+    [model.rows],
+  )
+  const nameOf = useCallback(
+    (glottocode: string): string => rowByCode.get(glottocode)?.name ?? glottocode,
+    [rowByCode],
+  )
+  const shapeByCode = useMemo(
+    () => new Map(model.shapes.map((shape) => [shape.glottocode, shape])),
+    [model.shapes],
+  )
 
   const searchEntries = useMemo<readonly SearchEntry[]>(
     () =>
@@ -122,20 +144,18 @@ export function PlateView({
         familyName:
           detail.ancestry[0] === undefined ? strings.tree.isolate : nameOf(detail.ancestry[0]),
         hasPolygon: detail.geometry.type === 'polygon',
+        colour: shapeByCode.get(detail.glottocode)?.colour,
       })),
-    [model.details, nameOf, strings.tree.isolate],
+    [model.details, nameOf, shapeByCode, strings.tree.isolate],
   )
 
   const scope = scopeOf(hovered, selection)
   const selectedLanguage = selection.kind === 'language' ? selection.glottocode : null
 
   const ancestryOf = useCallback(
-    (glottocode: string): readonly string[] => {
-      const shape = model.shapes.find((candidate) => candidate.glottocode === glottocode)
-      if (shape !== undefined) return shape.ancestors
-      return model.rows.find((row) => row.glottocode === glottocode)?.ancestors ?? []
-    },
-    [model],
+    (glottocode: string): readonly string[] =>
+      shapeByCode.get(glottocode)?.ancestors ?? rowByCode.get(glottocode)?.ancestors ?? [],
+    [shapeByCode, rowByCode],
   )
 
   // The hash is read once on mount, so a shared link opens on the view it names, and written as
@@ -193,17 +213,20 @@ export function PlateView({
     setScrollTo(null)
   }, [])
 
-  const selectBranch = useCallback((glottocode: string) => {
-    setSelection((current) =>
-      current.kind === 'branch' && current.glottocode === glottocode
-        ? NO_SELECTION
-        : { kind: 'branch', glottocode },
-    )
-    // Selecting a family anywhere opens it in the tree too — the two views are one object, so a
-    // choice made in either has to be visible in both.
-    setOpen((current) => new Set([...current, glottocode]))
-    setScrollTo(glottocode)
-  }, [])
+  const selectBranch = useCallback(
+    (glottocode: string) => {
+      setSelection((current) =>
+        current.kind === 'branch' && current.glottocode === glottocode
+          ? NO_SELECTION
+          : { kind: 'branch', glottocode },
+      )
+      // Selecting a family anywhere opens it in the tree too — the two views are one object, so
+      // a choice made in either has to be visible in both.
+      setOpen((current) => openAncestry(current, [...ancestryOf(glottocode), glottocode]))
+      setScrollTo(glottocode)
+    },
+    [ancestryOf],
+  )
 
   const toggle = useCallback((glottocode: string) => {
     setOpen((current) => toggleOpen(current, glottocode))
@@ -214,8 +237,65 @@ export function PlateView({
     setScrollTo(null)
   }, [])
 
-  const scopedRow = scope === null ? null : model.rows.find((row) => row.glottocode === scope)
   const selectedDetail = selectedLanguage === null ? undefined : model.details[selectedLanguage]
+
+  /** The selection, in the words the card states it in. A lookup over the model, nothing more. */
+  const summary = useMemo<SelectionSummary | null>(() => {
+    if (selection.kind === 'none') return null
+    const code = selection.glottocode
+    if (selection.kind === 'branch') {
+      const row = rowByCode.get(code)
+      if (row === undefined) return null
+      return {
+        kind: 'branch',
+        glottocode: code,
+        name: row.name,
+        colour: row.colour,
+        lineage: row.ancestors.map((ancestor) => ({ glottocode: ancestor, name: nameOf(ancestor) })),
+        languageCount: row.languageCount,
+        extentKm: row.extentKm,
+        hasArea: null,
+      }
+    }
+    const detail = model.details[code]
+    const shape = shapeByCode.get(code)
+    if (detail === undefined || shape === undefined) return null
+    return {
+      kind: 'language',
+      glottocode: code,
+      name: detail.name,
+      colour: colourMode === 'subgroup' ? shape.subgroupColour : shape.colour,
+      lineage: detail.ancestry.map((ancestor) => ({ glottocode: ancestor, name: nameOf(ancestor) })),
+      languageCount: null,
+      extentKm: null,
+      hasArea: detail.geometry.type === 'polygon',
+    }
+  }, [selection, rowByCode, model.details, shapeByCode, nameOf, colourMode])
+
+  /** The label under the pointer: a language on the plate, never a branch hovered in the tree. */
+  const hoverDetail = hovered === null ? undefined : model.details[hovered]
+  const hoverCard =
+    hoverDetail === undefined ? null : (
+      <div className="w-max max-w-[16rem] border border-boundary/30 bg-plate/95 px-2.5 py-1.5 shadow-lifted">
+        <p className="font-display text-body font-medium leading-tight">{hoverDetail.name}</p>
+        <p className="mt-0.5 text-micro text-ink-soft">
+          {hoverDetail.ancestry.length === 0
+            ? strings.tree.isolate
+            : hoverDetail.ancestry
+                .slice(0, 3)
+                .map(nameOf)
+                .join(' › ')}
+          {hoverDetail.ancestry.length > 3 ? ' › …' : ''}
+        </p>
+        <p className="figure mt-0.5 text-micro text-ink-soft">
+          {hoverDetail.glottocode} ·{' '}
+          {hoverDetail.geometry.type === 'polygon'
+            ? strings.workspace.hoverArea
+            : strings.workspace.hoverPoint}
+          {hoverDetail.aes === null ? '' : ` · ${strings.aes[hoverDetail.aes] ?? hoverDetail.aes}`}
+        </p>
+      </div>
+    )
 
   const announcement =
     selection.kind === 'none'
@@ -225,64 +305,45 @@ export function PlateView({
             name: model.details[selection.glottocode]?.name ?? selection.glottocode,
           })
         : format(strings.a11y.announceBranch, {
-            name:
-              model.rows.find((row) => row.glottocode === selection.glottocode)?.name ??
-              selection.glottocode,
-            count:
-              model.rows.find((row) => row.glottocode === selection.glottocode)?.languageCount ?? 0,
+            name: rowByCode.get(selection.glottocode)?.name ?? selection.glottocode,
+            count: rowByCode.get(selection.glottocode)?.languageCount ?? 0,
           })
+
+  const card = (className: string) =>
+    summary === null ? null : (
+      <SelectionCard
+        key={`${summary.kind}-${summary.glottocode}`}
+        summary={summary}
+        strings={strings}
+        locale={locale}
+        onSelectBranch={selectBranch}
+        onClear={clear}
+        className={className}
+      />
+    )
 
   return (
     <div className="space-y-4">
       <PlateToolbar
         strings={strings}
-        locale={locale}
         entries={searchEntries}
         onChoose={selectFromPlate}
         onSelectBranch={selectBranch}
         examples={examples}
-        hatching={hatching}
-        onToggleHatching={() => setHatching((current) => !current)}
-        colourMode={colourMode}
-        onColourMode={setColourMode}
-        hasSubgroups={model.subgroupLegend.length > model.legend.length}
-        selectionLabel={scopedRow?.name ?? selectedDetail?.name ?? null}
-        selectionCount={scopedRow?.languageCount ?? null}
-        selectionExtentKm={scopedRow?.extentKm ?? null}
-        onClear={clear}
       />
 
-      {/* A switch below lg only: the tree has to be beside the plate when there is room for it.
-          These used to carry role="tablist"/role="tab" and none of what those roles promise —
-          no tabpanel, no aria-controls, no arrow-key navigation, no roving tabindex. A screen
-          reader announced a tab widget and then the arrow keys did nothing.
-          Two buttons that swap a region are two buttons; aria-pressed says which one is on,
-          which is the whole truth here, so the roles are gone rather than propped up. */}
-      <div className="flex gap-1 lg:hidden">
-        {(['map', 'tree'] as const).map((candidate) => (
-          <button
-            key={candidate}
-            type="button"
-            aria-pressed={tab === candidate}
-            onClick={() => setTab(candidate)}
-            className={`btn flex-1 justify-center ${
-              tab === candidate ? 'border-boundary bg-boundary text-plate' : ''
-            }`}
-          >
-            {candidate === 'map' ? strings.guide.tabMap : strings.guide.tabTree}
-          </button>
-        ))}
-      </div>
+      {/* Above the map where there is room; below it on a phone, so the map comes first. The
+          two render the same strip, and dismissing either hides both. */}
+      {showTips ? <FirstVisitTips strings={strings} className="hidden lg:flex" /> : null}
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_21rem] xl:grid-cols-[minmax(0,1fr)_25rem]">
-        {/* Two groups, not six evenly-spaced blocks. The plate, its export row, the key and the
-            panel that answers a click are one thing — the map, and how to read it. The index and
-            the endangerment legend are reference tables *about* the map. Every one of them was
-            16px from the next, so the column read as an undifferentiated stack of cards and
-            nothing marked where the map ended. The two wash levels already distinguished them;
-            only the spacing did not. */}
-        <div className={`min-w-0 space-y-block-lg ${tab === 'map' ? '' : 'hidden lg:block'}`}>
-          <div className="space-y-4">
+      {beforePlate}
+
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_21rem] xl:grid-cols-[minmax(0,1fr)_24rem]">
+        {/* Two groups. The plate, its selection, export row and key are one thing — the map, and
+            how to read it. The index and the endangerment legend are reference tables *about*
+            the map, so they come after, separated by more space. */}
+        <div className="min-w-0 space-y-block-lg">
+          <div className="space-y-3">
             <Plate
               plateRef={plateRef}
               groundRef={groundRef}
@@ -300,7 +361,17 @@ export function PlateView({
               colourMode={colourMode}
               emphasis={emphasisSet}
               strings={strings}
+              narrowCentreX={narrowCentreX}
+              focus={focus}
+              hoverCard={hoverCard}
+              // Over the plate's sea on a wide screen — bottom left is the Indian Ocean. On a
+              // phone there is no sea to spare, so the card sits under the plate instead.
+              overlay={card('card-enter absolute bottom-3 left-3 hidden w-[20rem] max-w-[calc(100%-1.5rem)] lg:block')}
             />
+
+            {card('card-enter lg:hidden')}
+
+            {showTips ? <FirstVisitTips strings={strings} className="lg:hidden" /> : null}
 
             <ExportBar
               strings={strings}
@@ -309,21 +380,35 @@ export function PlateView({
               slug={slug}
             />
 
-            {mapKey}
-
             <p aria-live="polite" className="sr-only">
               {announcement}
             </p>
 
-            {/* The panel answers the click that produced it, so it sits with the plate. */}
+            {showKey ? (
+              <MapKey
+                strings={strings}
+                controls={
+                  <DisplayControls
+                    strings={strings}
+                    colourMode={colourMode}
+                    onColourMode={setColourMode}
+                    hasSubgroups={model.subgroupLegend.length > model.legend.length}
+                    hatching={hatching}
+                    onToggleHatching={() => setHatching((current) => !current)}
+                  />
+                }
+              />
+            ) : null}
+
+            {/* The full facts answer the click that produced them, so they sit with the plate. */}
             {selectedDetail !== undefined ? (
               <section className="sheet p-4 sm:p-5" aria-label={selectedDetail.name}>
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <p className="index-label">
                       {selectedDetail.ancestry[0] === undefined
-                      ? strings.tree.isolate
-                      : nameOf(selectedDetail.ancestry[0])}
+                        ? strings.tree.isolate
+                        : nameOf(selectedDetail.ancestry[0])}
                     </p>
                     <h2 className="mt-0.5 font-display text-title-m">{selectedDetail.name}</h2>
                   </div>
@@ -367,25 +452,50 @@ export function PlateView({
           </div>
         </div>
 
+        {/* The tree: a column beside the plate on a wide screen, a sheet pinned to the bottom of a
+            narrow one. One element either way, so the tree's state and scroll position survive a
+            resize. */}
         <div
-          className={`lg:sticky lg:top-4 lg:h-[calc(100dvh-2rem)] ${
-            tab === 'tree' ? 'h-[70dvh]' : 'hidden lg:block'
+          className={`tree-sheet fixed inset-x-0 bottom-0 z-30 flex flex-col border-t border-boundary/30 bg-plate shadow-lifted lg:sticky lg:top-4 lg:z-auto lg:h-[calc(100dvh-2rem)] lg:border-0 lg:bg-transparent lg:shadow-none ${
+            sheetOpen ? 'h-[72dvh]' : 'h-14'
           }`}
         >
-          <TreeColumn
-            rows={model.rows}
-            strings={strings}
-            open={open}
-            scope={scope}
-            selected={selection.kind === 'none' ? null : selection.glottocode}
-            onToggle={toggle}
-            onHover={setHovered}
-            onSelect={selectFromTree}
-            scrollTo={scrollTo}
-            barScale={model.largestFamily}
-          />
+          <button
+            type="button"
+            onClick={() => setSheetOpen((current) => !current)}
+            aria-expanded={sheetOpen}
+            className="flex h-14 shrink-0 flex-col items-center justify-center gap-1 px-4 lg:hidden"
+          >
+            <span aria-hidden="true" className="h-1 w-10 rounded-full bg-boundary/30" />
+            <span className="flex w-full items-baseline justify-between gap-3">
+              <span className="index-label text-boundary">{strings.tree.title}</span>
+              <span className="min-w-0 truncate text-body-s">
+                {summary === null ? '' : summary.name}
+              </span>
+              <span className="index-label">
+                {sheetOpen ? strings.workspace.treeClose : strings.workspace.treeOpen}
+              </span>
+            </span>
+          </button>
+          <div className={`min-h-0 flex-1 lg:h-full ${sheetOpen ? '' : 'hidden lg:block'}`}>
+            <TreeColumn
+              rows={model.rows}
+              strings={strings}
+              open={open}
+              scope={scope}
+              selected={selection.kind === 'none' ? null : selection.glottocode}
+              onToggle={toggle}
+              onHover={setHovered}
+              onSelect={selectFromTree}
+              scrollTo={scrollTo}
+              barScale={model.largestFamily}
+            />
+          </div>
         </div>
       </div>
+
+      {/* Room for the pinned sheet, so it never covers the last thing on the page. */}
+      <div aria-hidden="true" className="h-14 lg:hidden" />
     </div>
   )
 }

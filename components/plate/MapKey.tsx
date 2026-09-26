@@ -12,12 +12,26 @@ import type { Dictionary } from '@/lib/i18n'
  *
  * A server component: no interaction, so it costs nothing on the client.
  */
-export function MapKey({ strings }: { strings: Dictionary }) {
+export function MapKey({
+  strings,
+  controls = null,
+}: {
+  strings: Dictionary
+  /**
+   * The display controls — colour by family or subgroup, hatching on or off. They live on the key
+   * because they change what the key's first entries mean; a switch folded into a toolbar
+   * disclosure was one nobody found.
+   */
+  controls?: React.ReactNode
+}) {
   return (
     <section aria-labelledby="map-key" className="sheet-quiet p-4 sm:p-5">
-      <h2 id="map-key" className="index-label">
-        {strings.guide.title}
-      </h2>
+      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+        <h2 id="map-key" className="index-label">
+          {strings.guide.title}
+        </h2>
+        {controls}
+      </div>
 
       <dl className="mt-3 grid gap-x-8 gap-y-4 sm:grid-cols-2 xl:grid-cols-4">
         <Entry specimen={<FamilySpecimen />} term={strings.guide.colour}>

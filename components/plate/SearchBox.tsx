@@ -1,8 +1,9 @@
 'use client'
 
-import { useId, useMemo, useRef, useState } from 'react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { searchLanguages, type SearchEntry } from '@/lib/search'
 import { format, type Dictionary } from '@/lib/i18n'
+import { familyVarRef, type FamilyColourToken } from '@/lib/colour'
 
 /**
  * Search by name, alternate name, glottocode or ISO code. Choosing a result does what
@@ -31,6 +32,28 @@ export function SearchBox({ entries, strings, onChoose }: SearchBoxProps) {
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([])
 
   const results = useMemo(() => searchLanguages(entries, query), [entries, query])
+
+  // "/" focuses the search from anywhere on the page, the convention readers bring from other
+  // sites. Ignored while typing in a field, so a slash can still be typed.
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== '/' || event.metaKey || event.ctrlKey || event.altKey) return
+      const target = event.target as HTMLElement | null
+      if (
+        target !== null &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.tagName === 'SELECT' ||
+          target.isContentEditable)
+      ) {
+        return
+      }
+      event.preventDefault()
+      inputRef.current?.focus()
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [])
   const showing = isOpen && query.length >= 2
 
   const close = (): void => {
@@ -53,9 +76,14 @@ export function SearchBox({ entries, strings, onChoose }: SearchBoxProps) {
         close()
       }}
     >
-      <label className="index-label block" htmlFor={`${listId}-input`}>
-        {strings.search.label}
-      </label>
+      <div className="flex items-baseline justify-between gap-3">
+        <label className="index-label block" htmlFor={`${listId}-input`}>
+          {strings.search.label}
+        </label>
+        <span className="hidden text-micro text-ink-soft md:inline">
+          {strings.workspace.searchShortcut}
+        </span>
+      </div>
       <input
         ref={inputRef}
         id={`${listId}-input`}
@@ -127,6 +155,18 @@ export function SearchBox({ entries, strings, onChoose }: SearchBoxProps) {
                       }}
                       className="flex w-full items-baseline gap-2 px-2 py-1 text-left text-body-s hover:bg-accent/10 focus-visible:bg-accent/10"
                     >
+                      {result.entry.colour === undefined ? null : (
+                        <span
+                          aria-hidden="true"
+                          className="inline-block h-2.5 w-2.5 shrink-0 border border-boundary/40"
+                          style={{
+                            backgroundColor: familyVarRef(
+                              result.entry.colour as FamilyColourToken,
+                              'base',
+                            ),
+                          }}
+                        />
+                      )}
                       <span className="min-w-0 flex-1 truncate">{result.entry.name}</span>
                       {result.matched === 'altName' ? (
                         <span className="truncate text-micro text-ink-soft">

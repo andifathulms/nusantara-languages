@@ -4,6 +4,7 @@ import { PaletteVars } from '@/components/plate/PaletteVars'
 import { BRAND_INKS } from '@/lib/colour/brand'
 import { LOCALES, dictionary, isLocale, type Locale } from '@/lib/i18n'
 import { fontVariables } from '../../fonts'
+import { TIPS_SCRIPT } from '@/components/plate/FirstVisitTips'
 import '../../globals.css'
 
 /**
@@ -90,6 +91,9 @@ export default function LocaleRootLayout({
     <html lang={params.locale} className={fontVariables}>
       <head>
         <PaletteVars />
+        {/* Hides the first-visit tips before paint for a reader who already dismissed them. Inline
+            and tiny; it makes no request. */}
+        <script dangerouslySetInnerHTML={{ __html: TIPS_SCRIPT }} />
       </head>
       <body className="min-h-dvh antialiased">{children}</body>
     </html>

@@ -16,6 +16,8 @@ export type SearchEntry = {
   /** Shown beside the result so two similar names can be told apart. */
   readonly familyName: string
   readonly hasPolygon: boolean
+  /** The family's palette token, so a result carries the swatch the plate will light. */
+  readonly colour?: string
 }
 
 export type SearchResult = {

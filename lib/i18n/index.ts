@@ -288,6 +288,28 @@ export type Dictionary = {
     readonly backToPlate: string
     readonly backToHome: string
   }
+  /** The map workspace: first-visit tips, the selection card, the hover label, the tree sheet on a phone. */
+  readonly workspace: {
+    readonly tipsTitle: string
+    readonly tipTree: string
+    readonly tipPlate: string
+    readonly tipKey: string
+    readonly tipsDismiss: string
+    /** Shown beside the search field: the key that focuses it from anywhere on the page. */
+    readonly searchShortcut: string
+    readonly selectedLanguage: string
+    readonly lineage: string
+    /** The hover label's note for a language drawn as an area. */
+    readonly hoverArea: string
+    /** The hover label's note for a language drawn as a point. */
+    readonly hoverPoint: string
+    readonly treeOpen: string
+    readonly treeClose: string
+    /** Heading for the display controls on the key card. */
+    readonly display: string
+    /** One line under an extent figure on the selection card: the full rule is in the key and on the method page. */
+    readonly extentShort: string
+  }
   readonly a11y: {
     readonly skipToContent: string
     /** Names what the control does. Not the current language — that is its value, not its job. */
@@ -554,6 +576,22 @@ const id: Dictionary = {
     copied: 'Tautan disalin',
     failed: 'Gagal. Coba lagi atau gunakan tangkapan layar.',
   },
+  workspace: {
+    tipsTitle: 'Cara memakai peta',
+    tipTree: 'Arahkan kursor ke satu cabang di pohon: seluruh wilayah rumpunnya menyala.',
+    tipPlate: 'Klik satu wilayah: pohon membuka garis keturunan bahasanya.',
+    tipKey: 'Kunci di bawah peta menjelaskan warna, titik, dan arsir.',
+    tipsDismiss: 'Mengerti',
+    searchShortcut: 'Tekan / untuk mencari',
+    selectedLanguage: 'Bahasa terpilih',
+    lineage: 'Garis keturunan',
+    hoverArea: 'wilayah tercatat',
+    hoverPoint: 'hanya titik',
+    treeOpen: 'Buka pohon',
+    treeClose: 'Tutup pohon',
+    display: 'Tampilan',
+    extentShort: 'Membentang: jarak dua titik tercatat terjauh, diukur antartitik tengah — batas bawah.',
+  },
   a11y: {
     skipToContent: 'Lewati ke konten utama',
     chooseLanguage: 'Pilih bahasa tampilan',
@@ -810,6 +848,22 @@ const en: Dictionary = {
     copyLink: 'Copy a link to this view',
     copied: 'Link copied',
     failed: 'That did not work. Try again, or take a screenshot.',
+  },
+  workspace: {
+    tipsTitle: 'How to use the map',
+    tipTree: 'Point at a branch in the tree: every area of that family lights up.',
+    tipPlate: 'Click an area: the tree opens that language\'s line of descent.',
+    tipKey: 'The key under the map explains colour, points and hatching.',
+    tipsDismiss: 'Got it',
+    searchShortcut: 'Press / to search',
+    selectedLanguage: 'Selected language',
+    lineage: 'Line of descent',
+    hoverArea: 'recorded area',
+    hoverPoint: 'point only',
+    treeOpen: 'Open the tree',
+    treeClose: 'Close the tree',
+    display: 'Display',
+    extentShort: 'Spans: the distance between the two furthest recorded points, midpoint to midpoint — a floor.',
   },
   a11y: {
     skipToContent: 'Skip to main content',
