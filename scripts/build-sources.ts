@@ -30,6 +30,7 @@ import {
   DEFAULT_SIMPLIFY,
   INDONESIA_BBOX,
   boundsOverlap,
+  clipRing,
   containsPosition,
   intersectsBounds,
   ringBounds,
@@ -53,6 +54,7 @@ import {
   type MedLevel,
   type BasemapShape,
   type LandKind,
+  type ReferenceLayer,
   type Coverage,
   type FamilyCoverage,
   type GeometryEntry,
@@ -401,6 +403,167 @@ function readBasemap(source: BundledSource): { shapes: BasemapShape[]; problems:
   return { shapes, problems }
 }
 
+// ---------------------------------------------------------------------------- reference
+
+/**
+ * Reference layers are background, simplified harder still than the land: the deep-water edge is
+ * a context line, never something a reader measures against.
+ */
+const REFERENCE_SIMPLIFY = { tolerance: 0.03, decimals: 3, minRingExtent: 0.15 } as const
+
+/** Towns at or above this Natural Earth scalerank: about fifty, spread across the archipelago. */
+const TOWN_MAX_SCALERANK = 6
+
+/**
+ * Corrections to Natural Earth labels, stated rather than silent. Keyed on Natural Earth's English
+ * name, which is what the source carries.
+ *
+ * - "Bandjarmasin" is the Dutch-era spelling; the city is Banjarmasin.
+ * - "Ceram Sea" carries name_id "Seram", which reads as the island; the sea is Laut Seram.
+ */
+const LABEL_CORRECTIONS: Readonly<Record<string, string>> = {
+  Bandjarmasin: 'Banjarmasin',
+  'Ceram Sea': 'Laut Seram',
+}
+
+const SEA_KINDS = ['ocean', 'sea', 'strait', 'gulf', 'bay'] as const
+
+/** The plate's frame inset by 0.8°, where a sea label can sit whole. */
+const LABEL_FRAME = [
+  INDONESIA_BBOX[0] + 0.8,
+  INDONESIA_BBOX[1] + 0.8,
+  INDONESIA_BBOX[2] - 0.8,
+  INDONESIA_BBOX[3] - 0.8,
+] as const
+
+function polygonsOf(geometry: GeoJsonGeometry): Ring[][] | null {
+  if (geometry.type === 'Polygon') return [toRings(geometry.coordinates as number[][][])]
+  if (geometry.type === 'MultiPolygon') {
+    return (geometry.coordinates as number[][][][]).map((polygon) => toRings(polygon))
+  }
+  return null
+}
+
+/** A label point for a sea: the area-weighted centroid of its largest ring inside the frame. */
+function labelPoint(polygons: readonly (readonly Ring[])[]): Position | null {
+  let best: { area: number; point: Position } | null = null
+  for (const polygon of polygons) {
+    const outer = polygon[0]
+    if (outer === undefined) continue
+    const clipped = clipRing(outer, INDONESIA_BBOX)
+    if (clipped === null) continue
+    let area = 0
+    let cx = 0
+    let cy = 0
+    for (let index = 0; index < clipped.length - 1; index += 1) {
+      const [x0, y0] = clipped[index] as Position
+      const [x1, y1] = clipped[index + 1] as Position
+      const cross = x0 * y1 - x1 * y0
+      area += cross
+      cx += (x0 + x1) * cross
+      cy += (y0 + y1) * cross
+    }
+    if (Math.abs(area) < 1e-9) continue
+    const point: Position = [cx / (3 * area), cy / (3 * area)]
+    if (best === null || Math.abs(area) > best.area) best = { area: Math.abs(area), point }
+  }
+  return best?.point ?? null
+}
+
+function readReference(source: BundledSource): { layer: ReferenceLayer; problems: string[] } {
+  const problems: string[] = []
+  const collection = (key: string): GeoJsonFeature[] => {
+    const file = source.files.find((candidate) => candidate.key === key)
+    if (file === undefined) {
+      problems.push(`${source.id}: no "${key}" file declared`)
+      return []
+    }
+    return (JSON.parse(raw(file.path)) as { features?: GeoJsonFeature[] }).features ?? []
+  }
+  const round = (value: number) => Math.round(value * 1000) / 1000
+
+  const towns = collection('places')
+    .map((feature) => feature.properties ?? {})
+    .filter(
+      (properties) =>
+        properties.adm0_a3 === INDONESIA_A3 &&
+        typeof properties.scalerank === 'number' &&
+        properties.scalerank <= TOWN_MAX_SCALERANK,
+    )
+    .map((properties) => {
+      const name = String(properties.name ?? '')
+      return {
+        name: LABEL_CORRECTIONS[name] ?? name,
+        lon: round(Number(properties.longitude)),
+        lat: round(Number(properties.latitude)),
+      }
+    })
+    .filter((town) => town.name !== '' && containsPosition(INDONESIA_BBOX, [town.lon, town.lat]))
+    .sort((left, right) => left.name.localeCompare(right.name))
+
+  const seasByName = new Map<string, ReferenceLayer['seas'][number] & { area: number }>()
+  for (const feature of collection('marine')) {
+    const properties = feature.properties ?? {}
+    const kind = SEA_KINDS.find((candidate) => candidate === properties.featurecla)
+    if (kind === undefined || feature.geometry === null) continue
+    const rank = typeof properties.scalerank === 'number' ? properties.scalerank : 99
+    if (rank > 7) continue
+    const polygons = polygonsOf(feature.geometry)
+    if (polygons === null) continue
+    const point = labelPoint(polygons)
+    // Well inside the frame: a label at the edge is a sliver of a sea mostly off the plate (the
+    // Bay of Bengal, the Gulf of Thailand) and would be cut by the frame anyway.
+    if (point === null || !containsPosition(LABEL_FRAME, point)) continue
+    const nameEn = String(properties.name_en ?? properties.name ?? '')
+    const nameId = LABEL_CORRECTIONS[nameEn] ?? String(properties.name_id ?? nameEn)
+    // Size, by bounding-box area of the outer rings: enough to choose between two features.
+    const area = polygons.reduce((total, polygon) => {
+      if (polygon[0] === undefined) return total
+      const [minLon, minLat, maxLon, maxLat] = ringBounds(polygon[0])
+      return total + (maxLon - minLon) * (maxLat - minLat)
+    }, 0)
+    // The Pacific arrives as two features, north and south, with one Indonesian name: keep one.
+    const existing = seasByName.get(nameId)
+    if (existing !== undefined && existing.area >= area) continue
+    seasByName.set(nameId, {
+      nameId,
+      nameEn,
+      kind,
+      rank,
+      lon: round(point[0]),
+      lat: round(point[1]),
+      area,
+    })
+  }
+  const seas = [...seasByName.values()]
+    .map(({ area: _area, ...sea }) => sea)
+    .sort((left, right) => left.rank - right.rank || left.nameId.localeCompare(right.nameId))
+
+  const deep: Ring[][] = []
+  for (const feature of collection('deepWater')) {
+    if (feature.geometry === null) continue
+    const polygons = polygonsOf(feature.geometry)
+    if (polygons === null) continue
+    deep.push(...clipRingsToFrame(polygons))
+  }
+  const simplifiedDeep = simplifyGeometry({ type: 'polygon', polygons: deep }, REFERENCE_SIMPLIFY)
+  if (simplifiedDeep === null || simplifiedDeep.type !== 'polygon') {
+    problems.push(`${source.id}: the 200 m contour simplified away entirely`)
+  }
+
+  return {
+    layer: {
+      towns,
+      seas,
+      deepWater:
+        simplifiedDeep !== null && simplifiedDeep.type === 'polygon'
+          ? simplifiedDeep
+          : { type: 'polygon', polygons: [] },
+    },
+    problems,
+  }
+}
+
 // -------------------------------------------------------------------------------- build
 
 function stableJson(value: unknown, pretty: boolean): string {
@@ -535,6 +698,18 @@ function main(): void {
       `basemap: ${byKind('indonesia')} Indonesia, ${byKind('neighbour')} neighbouring, ` +
         `${byKind('island')} minor islands, ` +
         `${basemap.reduce((total, shape) => total + vertexCount(shape.geometry), 0)} vertices`,
+    )
+  }
+
+  // ---- Reference layers: towns, sea names, the 200 m contour. Background, never data.
+  let reference: ReferenceLayer = { towns: [], seas: [], deepWater: { type: 'polygon', polygons: [] } }
+  if (basemapSource !== undefined) {
+    const read = readReference(basemapSource)
+    if (read.problems.length > 0) fail('reference', read.problems)
+    reference = read.layer
+    console.log(
+      `reference: ${reference.towns.length} towns, ${reference.seas.length} seas, ` +
+        `${vertexCount(reference.deepWater)} vertices of deep water`,
     )
   }
 
@@ -678,6 +853,7 @@ function main(): void {
   writeFileSync(join(BUNDLE_DIR, 'languoids.json'), stableJson(languoids, false))
   writeFileSync(join(BUNDLE_DIR, 'geometry.json'), stableJson(geometry, false))
   writeFileSync(join(BUNDLE_DIR, 'basemap.json'), stableJson(basemap, false))
+  writeFileSync(join(BUNDLE_DIR, 'reference.json'), stableJson(reference, false))
   writeFileSync(join(BUNDLE_DIR, 'tree.json'), stableJson(tree, false))
   writeFileSync(join(BUNDLE_DIR, 'coverage.json'), stableJson(coverage, true))
   writeFileSync(join(BUNDLE_DIR, 'manifest.json'), stableJson(manifest, true))

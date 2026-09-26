@@ -14,7 +14,7 @@ import {
   type TreeIndex,
 } from '@/lib/tree'
 import { AES_STATUSES, MED_LEVELS, languoidsByCode } from '@/lib/bundle/types'
-import { basemap, coverage, geometry, languoids, tree } from './bundle'
+import { basemap, coverage, geometry, languoids, readBundleText, reference, tree } from './bundle'
 
 const byCode = languoidsByCode(languoids)
 
@@ -419,5 +419,44 @@ describe('known languages, as a sanity check on the whole chain', () => {
     if (balinese === undefined) throw new Error('Balinese is missing')
     // Its own Glottolog coordinate must land inside its own area.
     expect(hitTest(hitIndex, [balinese.lon, balinese.lat])).toBe('bali1278')
+  })
+})
+
+describe('the reference layers', () => {
+  it('carry no glottocode anywhere, so they can never be selected, searched or announced', () => {
+    expect(readBundleText('reference.json')).not.toMatch(/glottocode/i)
+    expect(readBundleText('reference.json')).not.toMatch(/"[a-z0-9]{4}\d{4}"/)
+  })
+
+  it('never ship a population figure, whatever Natural Earth carries', () => {
+    expect(readBundleText('reference.json')).not.toMatch(/pop_|population/i)
+  })
+
+  it('keep every town and every sea label inside the frame', () => {
+    for (const town of reference.towns) {
+      expect(town.lon, town.name).toBeGreaterThanOrEqual(INDONESIA_BBOX[0])
+      expect(town.lon, town.name).toBeLessThanOrEqual(INDONESIA_BBOX[2])
+      expect(town.lat, town.name).toBeGreaterThanOrEqual(INDONESIA_BBOX[1])
+      expect(town.lat, town.name).toBeLessThanOrEqual(INDONESIA_BBOX[3])
+    }
+    for (const sea of reference.seas) {
+      expect(sea.lon, sea.nameId).toBeGreaterThan(INDONESIA_BBOX[0])
+      expect(sea.lon, sea.nameId).toBeLessThan(INDONESIA_BBOX[2])
+    }
+  })
+
+  it('name the seas in Indonesian, with the documented corrections applied', () => {
+    const names = reference.seas.map((sea) => sea.nameId)
+    expect(names).toContain('Laut Jawa')
+    expect(names).toContain('Laut Seram')
+    expect(names).not.toContain('Seram')
+    expect(reference.towns.map((town) => town.name)).toContain('Banjarmasin')
+  })
+
+  it('closes every ring of the deep-water layer', () => {
+    expect(reference.deepWater.polygons.length).toBeGreaterThan(0)
+    for (const polygon of reference.deepWater.polygons) {
+      for (const ring of polygon) expect(ring[0]).toEqual(ring[ring.length - 1])
+    }
   })
 })

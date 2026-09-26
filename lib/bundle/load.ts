@@ -13,6 +13,7 @@ import {
   geometryByCode,
   languoidsByCode,
   type BasemapShape,
+  type ReferenceLayer,
   type BundleManifest,
   type Coverage,
   type GeometryEntry,
@@ -31,6 +32,8 @@ export type LoadedBundle = {
   readonly geometry: readonly GeometryEntry[]
   readonly geometryByCode: ReadonlyMap<string, GeometryEntry>
   readonly basemap: readonly BasemapShape[]
+  /** Towns, sea names and deep water: orientation only, never data. */
+  readonly reference: ReferenceLayer
   readonly tree: TreeData
   readonly treeIndex: TreeIndex
   readonly coverage: Coverage
@@ -51,6 +54,7 @@ export function loadBundle(): LoadedBundle {
   const languoids = read<Languoid[]>('languoids.json')
   const geometry = read<GeometryEntry[]>('geometry.json')
   const basemap = read<BasemapShape[]>('basemap.json')
+  const reference = read<ReferenceLayer>('reference.json')
   const tree = read<TreeData>('tree.json')
   const coverage = read<Coverage>('coverage.json')
   const manifest = read<BundleManifest>('manifest.json')
@@ -68,6 +72,7 @@ export function loadBundle(): LoadedBundle {
     geometry,
     geometryByCode: geometryByCode(geometry),
     basemap,
+    reference,
     tree,
     treeIndex: indexed.index,
     coverage,

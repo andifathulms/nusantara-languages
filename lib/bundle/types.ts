@@ -108,6 +108,28 @@ export type BasemapShape = {
   readonly geometry: PolygonGeometry
 }
 
+/**
+ * Reference layers from Natural Earth: orientation and context, never data about languages.
+ * Like the land, none of it carries a glottocode, and the plate draws all of it non-interactive.
+ */
+export type ReferenceLayer = {
+  /** Towns, by Natural Earth's own importance rank — not claimed to be capitals. */
+  readonly towns: readonly { readonly name: string; readonly lon: number; readonly lat: number }[]
+  /** Seas and straits, with a label point inside the frame. */
+  readonly seas: readonly {
+    /** Indonesian, from Natural Earth's name_id. */
+    readonly nameId: string
+    readonly nameEn: string
+    readonly kind: 'ocean' | 'sea' | 'strait' | 'gulf' | 'bay'
+    /** Natural Earth's label rank: lower is more important. */
+    readonly rank: number
+    readonly lon: number
+    readonly lat: number
+  }[]
+  /** Water deeper than 200 m. What it leaves out is the Sunda and Sahul shelves. */
+  readonly deepWater: PolygonGeometry
+}
+
 export type FamilyCoverage = {
   readonly glottocode: string
   readonly name: string

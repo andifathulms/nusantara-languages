@@ -279,6 +279,29 @@ export const MANIFEST: Manifest = {
           url: `${NATURAL_EARTH}/v5.1.2/geojson/ne_10m_minor_islands.geojson`,
           path: 'naturalearth/minor-islands.geojson',
         },
+        // Orientation and context, added 2026-09-27. Same release, same public-domain terms, so
+        // no new licence question: towns so a reader can find their home, sea names for the
+        // plate's hydrographic lettering, and the 200 m depth contour, which is the edge of the
+        // Sunda and Sahul shelves. All of it is drawn non-interactive, like the land.
+        //
+        // Provinces were considered and left out: this release's admin-1 layer has 33 provinces,
+        // predating North Kalimantan (2012) and the 2022 Papua split, and a boundary that puts a
+        // reader in the wrong province is worse than none.
+        {
+          key: 'places',
+          url: `${NATURAL_EARTH}/v5.1.2/geojson/ne_10m_populated_places_simple.geojson`,
+          path: 'naturalearth/places.geojson',
+        },
+        {
+          key: 'marine',
+          url: `${NATURAL_EARTH}/v5.1.2/geojson/ne_10m_geography_marine_polys.geojson`,
+          path: 'naturalearth/marine.geojson',
+        },
+        {
+          key: 'deepWater',
+          url: `${NATURAL_EARTH}/v5.1.2/geojson/ne_10m_bathymetry_K_200.geojson`,
+          path: 'naturalearth/bathymetry-200.geojson',
+        },
       ],
     },
     {
