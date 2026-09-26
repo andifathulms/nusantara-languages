@@ -2,11 +2,12 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { SiteFooter, SiteHeader } from '@/components/site/SiteChrome'
-import { PlateView } from '@/components/plate/PlateView'
+import { GuidedStory, type StoryStep } from '@/components/plate/GuidedStory'
 import { SeamContacts } from '@/components/plate/SeamContacts'
 import { loadBundle } from '@/lib/bundle/load'
 import { buildPlateModel } from '@/lib/plate/build'
-import { GUIDED, GUIDED_VIEWS, isGuidedView, type GuidedViewId } from '@/lib/plate/guided'
+import { GUIDED, GUIDED_VIEWS, countIn, isGuidedView, type GuidedViewId } from '@/lib/plate/guided'
+import { plateBoxFor } from '@/lib/plate/focus'
 import { seamReport } from '@/lib/plate/seam'
 import { LOCALES, dictionary, format, isLocale, localePath, type Dictionary, type Locale } from '@/lib/i18n'
 import { localeMetadata } from '@/lib/seo/locale-meta'
@@ -18,6 +19,13 @@ export function generateStaticParams() {
 }
 
 export const dynamicParams = false
+
+/** A story string by its computed key. A missing key is a build error, not a blank step. */
+function storyString(strings: Dictionary, key: string): string {
+  const value = (strings.story as Readonly<Record<string, string>>)[key]
+  if (value === undefined) throw new Error(`no story copy for ${key}`)
+  return value
+}
 
 function copyFor(strings: Dictionary, view: GuidedViewId) {
   switch (view) {
@@ -74,6 +82,33 @@ export default function GuidedViewPage({
 
   const emphasis = view.emphasise(bundle.languoids, bundle.coverage)
 
+  // Every step prepared here, at build time: its lit set, its frame in plate units, and its copy
+  // with the figures filled in from the same sets it lights.
+  const otherFamilies = bundle.coverage.families.filter(
+    (family) => family.glottocode !== 'aust1307',
+  ).length
+  const steps: StoryStep[] = view.steps.map((step) => {
+    const codes = step.emphasise(bundle.languoids, bundle.coverage)
+    const values = {
+      count: codes.length.toLocaleString(locale),
+      inBox:
+        step.countBox === null
+          ? ''
+          : countIn(bundle.languoids, codes, step.countBox).toLocaleString(locale),
+      families: otherFamilies.toLocaleString(locale),
+    }
+    const key = `${params.view}${step.id.charAt(0).toUpperCase()}${step.id.slice(1)}`
+    const title = storyString(strings, `${key}Title`)
+    const body = storyString(strings, `${key}Body`)
+    return {
+      id: step.id,
+      title,
+      body: format(body, values),
+      codes,
+      box: step.box === null ? null : plateBoxFor(view.frame, PLATE_WIDTH, step.box),
+    }
+  })
+
   // Only the seam view enumerates its contacts, and only at build time. The other two views ask
   // a different question, and computing this for them would be work nobody reads.
   const seam =
@@ -105,13 +140,13 @@ export default function GuidedViewPage({
         </div>
 
         <div className="mt-block">
-          <PlateView
+          <GuidedStory
+            steps={steps}
             model={model}
             coverage={bundle.coverage}
             strings={strings}
             locale={locale}
             manifest={bundle.manifest}
-            emphasis={emphasis}
             initialHatching={view.hatching}
             slug={params.view}
           />

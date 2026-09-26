@@ -151,7 +151,9 @@ function PointMark({
   onSelect: (glottocode: string) => void
 }) {
   const colour = state === 'selected' ? familyVarRef(colours, 'selected') : familyVarRef(colours, 'base')
-  const size = isSelected ? 4.2 : 3
+  // A lit point is a step larger than a muted one: a story that lights a single point-only
+  // language (Tambora) should not leave the reader hunting for a 3px ring.
+  const size = isSelected ? 4.2 : state === 'selected' ? 3.8 : 3
   return (
     <g
       transform={`translate(${shape.x} ${shape.y}) scale(${1 / zoom})`}

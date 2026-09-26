@@ -286,6 +286,32 @@ export type Dictionary = {
       readonly columnDistance: string
     }
   }
+  /** Guided views as short stories. Placeholders: {count} is the step's lit set, {inBox} how many of them sit in the step's frame, {families} the other top-level units. All computed from the bundle. */
+  readonly story: {
+    readonly label: string
+    readonly next: string
+    readonly previous: string
+    /** Template. Placeholders: {n}, {total}. */
+    readonly step: string
+    readonly jahitanAustronesianTitle: string
+    readonly jahitanAustronesianBody: string
+    readonly jahitanPapuanTitle: string
+    readonly jahitanPapuanBody: string
+    readonly jahitanHalmaheraTitle: string
+    readonly jahitanHalmaheraBody: string
+    readonly isolatAllTitle: string
+    readonly isolatAllBody: string
+    readonly isolatNewGuineaTitle: string
+    readonly isolatNewGuineaBody: string
+    readonly isolatTamboraTitle: string
+    readonly isolatTamboraBody: string
+    readonly terancamAllTitle: string
+    readonly terancamAllBody: string
+    readonly terancamMalukuTitle: string
+    readonly terancamMalukuBody: string
+    readonly terancamPapuaSouthTitle: string
+    readonly terancamPapuaSouthBody: string
+  }
   readonly search: {
     readonly label: string
     readonly placeholder: string
@@ -606,6 +632,30 @@ const id: Dictionary = {
     backToPlate: 'Buka peta',
     backToHome: 'Kembali ke depan',
   },
+  story: {
+    label: 'Cerita',
+    next: 'Berikutnya',
+    previous: 'Sebelumnya',
+    step: 'Langkah {n} dari {total}',
+    jahitanAustronesianTitle: 'Hampir di mana-mana, satu rumpun',
+    jahitanAustronesianBody: 'Austronesia: {count} bahasa di peta ini berasal dari satu nenek moyang, dari Sumatra sampai pesisir Papua.',
+    jahitanPapuanTitle: 'Di timur, puluhan rumpun',
+    jahitanPapuanBody: 'Sisanya, {count} bahasa, terbagi ke dalam {families} unit teratas lain. “Papua” adalah label letak, bukan satu rumpun.',
+    jahitanHalmaheraTitle: 'Halmahera: jahitannya',
+    jahitanHalmaheraBody: 'Di Halmahera dan pulau-pulau di sekitarnya, {inBox} bahasa dari dua rumpun yang tidak berkerabat hidup bersisian: North Halmahera di utara, Austronesia di selatan dan timur.',
+    isolatAllTitle: 'Satu bahasa, satu rumpun',
+    isolatAllBody: '{count} bahasa di peta ini tidak terbukti berkerabat dengan bahasa mana pun. Masing-masing adalah rumpunnya sendiri.',
+    isolatNewGuineaTitle: 'Hampir semuanya di Papua',
+    isolatNewGuineaBody: '{inBox} dari {count} ada di Papua, sebagian besar di bagian utara dan tengah pulau, di antara rumpun-rumpun kecil yang rapat.',
+    isolatTamboraTitle: 'Satu di luar Papua',
+    isolatTamboraBody: 'Tambora, di Sumbawa, kini punah: bahasa ini hilang bersama penuturnya dalam letusan Gunung Tambora tahun 1815.',
+    terancamAllTitle: 'Di ambang kepunahan',
+    terancamAllBody: '{count} bahasa di peta ini berstatus sekarat, hampir punah, atau sudah punah menurut penilaian AES Glottolog. Makin rapat arsirnya, makin dekat pada kepunahan.',
+    terancamMalukuTitle: 'Maluku',
+    terancamMalukuBody: '{inBox} dari {count} ada di Maluku dan pulau-pulau kecil di sekitarnya.',
+    terancamPapuaSouthTitle: 'Papua bagian selatan',
+    terancamPapuaSouthBody: '{inBox} lagi ada di Papua bagian selatan dan tengah.',
+  },
   search: {
     label: 'Cari bahasa',
     placeholder: 'Nama, nama lain, glottocode, atau kode ISO',
@@ -896,6 +946,30 @@ const en: Dictionary = {
     body: 'There is nothing at this address — a typo, most likely, or an old link to a code no longer in the current dataset.',
     backToPlate: 'Open the map',
     backToHome: 'Back to the front page',
+  },
+  story: {
+    label: 'Story',
+    next: 'Next',
+    previous: 'Previous',
+    step: 'Step {n} of {total}',
+    jahitanAustronesianTitle: 'One family, almost everywhere',
+    jahitanAustronesianBody: 'Austronesian: {count} languages on this map descend from one ancestor, from Sumatra to the coasts of New Guinea.',
+    jahitanPapuanTitle: 'In the east, dozens of families',
+    jahitanPapuanBody: 'The other {count} languages fall into {families} further top-level units. “Papuan” names a place, not a family.',
+    jahitanHalmaheraTitle: 'Halmahera: the seam',
+    jahitanHalmaheraBody: 'On Halmahera and the islands around it, {inBox} languages from two unrelated families sit side by side: North Halmahera in the north, Austronesian in the south and east.',
+    isolatAllTitle: 'One language, one family',
+    isolatAllBody: '{count} languages on this map have no demonstrated relative. Each is a family of one.',
+    isolatNewGuineaTitle: 'Almost all of them in Papua',
+    isolatNewGuineaBody: '{inBox} of the {count} are in Papua, most of them in the north and centre of the island, among closely packed small families.',
+    isolatTamboraTitle: 'One outside Papua',
+    isolatTamboraBody: 'Tambora, on Sumbawa, is extinct: it was lost with its speakers in the eruption of Mount Tambora in 1815.',
+    terancamAllTitle: 'On the edge',
+    terancamAllBody: '{count} languages on this map are moribund, nearly extinct or extinct in Glottolog\'s AES assessment. The denser the hatching, the closer to extinction.',
+    terancamMalukuTitle: 'Maluku',
+    terancamMalukuBody: '{inBox} of the {count} are in Maluku and the small islands around it.',
+    terancamPapuaSouthTitle: 'Southern Papua',
+    terancamPapuaSouthBody: 'Another {inBox} are in southern and central Papua.',
   },
   search: {
     label: 'Search languages',
