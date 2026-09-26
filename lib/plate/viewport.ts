@@ -18,9 +18,17 @@ export type Viewport = {
   readonly scale: number
 }
 
+/**
+ * `width`/`height` are the visible frame — the viewBox — in plate units. `contentWidth` and
+ * `contentHeight` are the whole plate. On a wide screen the two are the same. On a phone the frame
+ * is a narrower window onto the plate, because a 2.6:1 map at 390px wide is 149px tall whatever the
+ * zoom; there the reader pans across the content even at scale 1.
+ */
 export type ViewportLimits = {
   readonly width: number
   readonly height: number
+  readonly contentWidth: number
+  readonly contentHeight: number
   readonly minScale: number
   readonly maxScale: number
 }
@@ -30,10 +38,37 @@ export const IDENTITY: Viewport = { x: 0, y: 0, scale: 1 }
 /** One notch of the zoom buttons, and of a double-click. */
 export const ZOOM_STEP = 1.6
 
-export function limitsFor(width: number, height: number): ViewportLimits {
+export function limitsFor(
+  contentWidth: number,
+  contentHeight: number,
+  frameWidth: number = contentWidth,
+  frameHeight: number = contentHeight,
+): ViewportLimits {
   // 12× is where the simplified geometry starts to show its own tolerance; past that the reader
   // is looking at the simplification rather than at the data.
-  return { width, height, minScale: 1, maxScale: 12 }
+  return {
+    width: Math.min(frameWidth, contentWidth),
+    height: Math.min(frameHeight, contentHeight),
+    contentWidth,
+    contentHeight,
+    minScale: 1,
+    maxScale: 12,
+  }
+}
+
+/**
+ * The frame width that gives an element of the given pixel size the plate's full height: a
+ * window onto the plate with the element's own proportions. Never wider than the plate, so a
+ * wide element letterboxes rather than showing empty space.
+ */
+export function frameWidthFor(
+  contentWidth: number,
+  contentHeight: number,
+  elementWidth: number,
+  elementHeight: number,
+): number {
+  if (elementWidth <= 0 || elementHeight <= 0) return contentWidth
+  return Math.min(contentWidth, contentHeight * (elementWidth / elementHeight))
 }
 
 function clampScale(scale: number, limits: ViewportLimits): number {
@@ -42,12 +77,13 @@ function clampScale(scale: number, limits: ViewportLimits): number {
 
 /**
  * Keeps the plate covering the frame: at any scale the visible window stays inside the plate, so
- * the map can never be dragged off into empty space. At scale 1 that pins it exactly.
+ * the map can never be dragged off into empty space. When frame and content are the same size,
+ * scale 1 pins it exactly.
  */
 export function clampViewport(viewport: Viewport, limits: ViewportLimits): Viewport {
   const scale = clampScale(viewport.scale, limits)
-  const minX = limits.width * (1 - scale)
-  const minY = limits.height * (1 - scale)
+  const minX = Math.min(0, limits.width - limits.contentWidth * scale)
+  const minY = Math.min(0, limits.height - limits.contentHeight * scale)
   return {
     scale,
     x: Math.min(0, Math.max(minX, viewport.x)),
@@ -137,6 +173,29 @@ export function zoomToBox(
     },
     limits,
   )
+}
+
+/**
+ * A step between two viewports, for an animated change of frame. `t` runs 0–1 and is eased by
+ * the caller. Scale is interpolated geometrically, so a zoom from 1× to 8× feels even rather
+ * than rushing through the first doubling.
+ */
+export function interpolateViewport(from: Viewport, to: Viewport, t: number): Viewport {
+  const clamped = Math.min(1, Math.max(0, t))
+  const scale = from.scale * (to.scale / from.scale) ** clamped
+  // Keep the *centre* moving linearly in plate space, so the zoom does not swing sideways.
+  const lerp = (a: number, b: number): number => a + (b - a) * clamped
+  return { scale, x: lerp(from.x, to.x), y: lerp(from.y, to.y) }
+}
+
+/** Ease in and out, cubic: the curve used for every animated frame change on the plate. */
+export function easeInOutCubic(t: number): number {
+  return t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2
+}
+
+/** Centres the frame on a plate x coordinate at scale 1 — where a narrow frame opens. */
+export function centredOn(x: number, limits: ViewportLimits): Viewport {
+  return clampViewport({ scale: 1, x: limits.width / 2 - x, y: 0 }, limits)
 }
 
 export function isZoomed(viewport: Viewport): boolean {

@@ -2,8 +2,12 @@ import { describe, expect, it } from 'vitest'
 import {
   IDENTITY,
   ZOOM_STEP,
+  centredOn,
   clampViewport,
   counterScale,
+  easeInOutCubic,
+  frameWidthFor,
+  interpolateViewport,
   isZoomed,
   limitsFor,
   panBy,
@@ -169,5 +173,69 @@ describe('the transform', () => {
 describe('pinch', () => {
   it('measures the gap between two pointers', () => {
     expect(pinchDistance({ x: 0, y: 0 }, { x: 3, y: 4 })).toBe(5)
+  })
+})
+
+describe('a frame narrower than the plate, as on a phone', () => {
+  // A 390×470 element onto a 1600×600 plate: the plate's full height, a window of its width.
+  const frameWidth = frameWidthFor(1600, 600, 390, 470)
+  const narrow = limitsFor(1600, 600, frameWidth, 600)
+
+  it('keeps the full height and takes the element’s proportions', () => {
+    expect(frameWidth).toBeCloseTo(600 * (390 / 470))
+    expect(narrow.height).toBe(600)
+  })
+
+  it('never makes the frame wider than the plate', () => {
+    expect(frameWidthFor(1600, 600, 4000, 300)).toBe(1600)
+    expect(frameWidthFor(1600, 600, 0, 0)).toBe(1600)
+  })
+
+  it('lets the reader pan across the whole plate at scale 1', () => {
+    const farEast = clampViewport({ x: -5000, y: 0, scale: 1 }, narrow)
+    expect(farEast.x).toBeCloseTo(frameWidth - 1600)
+    const farWest = clampViewport({ x: 500, y: 0, scale: 1 }, narrow)
+    expect(farWest.x).toBe(0)
+  })
+
+  it('still never shows empty space above or below at scale 1', () => {
+    expect(clampViewport({ x: 0, y: -40, scale: 1 }, narrow).y).toBe(0)
+  })
+
+  it('opens centred where it is asked to, within the plate', () => {
+    const centred = centredOn(1100, narrow)
+    expect(centred.x).toBeCloseTo(frameWidth / 2 - 1100)
+    expect(centredOn(1590, narrow).x).toBeCloseTo(frameWidth - 1600)
+  })
+
+  it('leaves a full-size frame behaving exactly as before', () => {
+    const same = limitsFor(1600, 600, 1600, 600)
+    expect(same).toEqual(limitsFor(1600, 600))
+  })
+})
+
+describe('animating between frames', () => {
+  const from = { x: 0, y: 0, scale: 1 }
+  const to = { x: -800, y: -300, scale: 4 }
+
+  it('starts and ends exactly on the two frames', () => {
+    expect(interpolateViewport(from, to, 0)).toEqual(from)
+    expect(interpolateViewport(from, to, 1)).toEqual(to)
+  })
+
+  it('zooms geometrically, so each step feels the same size', () => {
+    expect(interpolateViewport(from, to, 0.5).scale).toBeCloseTo(2)
+  })
+
+  it('clamps t, so an overshooting animation cannot overshoot the frame', () => {
+    expect(interpolateViewport(from, to, 1.4)).toEqual(to)
+    expect(interpolateViewport(from, to, -1)).toEqual(from)
+  })
+
+  it('eases in and out', () => {
+    expect(easeInOutCubic(0)).toBe(0)
+    expect(easeInOutCubic(1)).toBe(1)
+    expect(easeInOutCubic(0.5)).toBe(0.5)
+    expect(easeInOutCubic(0.1)).toBeLessThan(0.1)
   })
 })
