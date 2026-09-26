@@ -1,7 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { exportFileName, mergeGround, toStandaloneSvg } from '@/lib/plate/export'
+import {
+  captionBandHeight,
+  exportFileName,
+  mergeGround,
+  toStandaloneSvg,
+  withCaption,
+  type ExportCaption,
+} from '@/lib/plate/export'
 import type { Dictionary } from '@/lib/i18n'
 
 /**
@@ -24,9 +31,18 @@ type ExportBarProps = {
   readonly getGround?: () => SVGSVGElement | null
   readonly slug: string
   readonly scale?: number
+  /** Sets the plate in a card with a caption band: title, selection, period. */
+  readonly caption?: ExportCaption
 }
 
-export function ExportBar({ strings, getPlate, getGround, slug, scale = 2 }: ExportBarProps) {
+export function ExportBar({
+  strings,
+  getPlate,
+  getGround,
+  slug,
+  scale = 2,
+  caption,
+}: ExportBarProps) {
   const [state, setState] = useState<'idle' | 'working' | 'downloaded' | 'copied' | 'failed'>(
     'idle',
   )
@@ -55,8 +71,16 @@ export function ExportBar({ strings, getPlate, getGround, slug, scale = 2 }: Exp
       return
     }
 
+    const card =
+      caption === undefined ? document_ : withCaption(document_, { width, height }, caption)
+    if (card === null) {
+      setState('failed')
+      return
+    }
+    const cardHeight = caption === undefined ? height : height + captionBandHeight(width)
+
     try {
-      const blob = await rasterise(document_, width, height)
+      const blob = await rasterise(card, width, cardHeight)
       const url = URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url

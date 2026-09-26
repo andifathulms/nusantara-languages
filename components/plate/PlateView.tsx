@@ -27,7 +27,7 @@ import { parseViewHash, toViewHash, type ColourMode } from '@/lib/plate/hash'
 import type { PlateBox } from '@/lib/plate/focus'
 import type { SearchEntry } from '@/lib/search'
 import type { PlateModel, TreeRow } from '@/lib/plate/build'
-import type { BundleManifest, Coverage } from '@/lib/bundle/types'
+import { atlasPeriod, type BundleManifest, type Coverage } from '@/lib/bundle/types'
 import { format, type Dictionary, type Locale } from '@/lib/i18n'
 
 /**
@@ -399,6 +399,29 @@ export function PlateView({
     }
   }
 
+  /** The caption the exported card carries: what is on the plate, and when the sources are from. */
+  const period = atlasPeriod(coverage)
+  const exportCaption = {
+    title: strings.plate.title,
+    selection:
+      compare !== null && compare.second !== null
+        ? `${model.details[compare.first]?.name ?? compare.first} × ${
+            model.details[compare.second]?.name ?? compare.second
+          }`
+        : summary === null
+          ? null
+          : summary.languageCount === null
+            ? summary.name
+            : `${summary.name} · ${format(strings.tree.languages, {
+                count: summary.languageCount.toLocaleString(locale),
+              })}`,
+    period:
+      period === null
+        ? strings.plate.periodCaveat
+        : format(strings.plate.periodShort, { fromYear: period.fromYear, toYear: period.toYear }),
+    site: 'andifathulms.github.io/nusantara-languages',
+  }
+
   const card = (className: string) => {
     if (compare !== null) {
       const first = sideOf(compare.first)
@@ -503,6 +526,7 @@ export function PlateView({
               getPlate={() => plateRef.current}
               getGround={() => groundRef.current}
               slug={slug}
+              caption={exportCaption}
             />
 
             <p aria-live="polite" className="sr-only">

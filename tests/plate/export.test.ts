@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { exportFileName, mergeGround, paletteStyleBlock, toStandaloneSvg } from '@/lib/plate/export'
+import {
+  exportFileName,
+  mergeGround,
+  paletteStyleBlock,
+  toStandaloneSvg,
+  withCaption,
+} from '@/lib/plate/export'
 import { ALL_FAMILY_COLOURS, PLATE_COLOURS } from '@/lib/colour'
 
 const options = { width: 1600, height: 620, title: 'Peta rumpun bahasa' }
@@ -94,5 +100,38 @@ describe('putting the ground back under the plate', () => {
   it('refuses markup that is not an svg rather than producing an empty export', () => {
     expect(mergeGround('<div></div>', ground)).toBeNull()
     expect(mergeGround(plate, '<div></div>')).toBeNull()
+  })
+})
+
+describe('the export card', () => {
+  const plate = toStandaloneSvg(
+    '<svg viewBox="0 0 10 10"><text>Glottolog 5.3 (CC-BY-4.0)</text></svg>',
+    options,
+  ) as string
+  const caption = {
+    title: 'Peta rumpun bahasa',
+    selection: 'North Halmahera · 15 bahasa',
+    period: 'Sumber atlas 1990–2020, bukan sensus penutur hari ini.',
+    site: 'andifathulms.github.io/nusantara-languages',
+  }
+
+  it('carries the plate unchanged, attribution included', () => {
+    expect(withCaption(plate, options, caption)).toContain('Glottolog 5.3 (CC-BY-4.0)')
+  })
+
+  it('adds a caption band below, stating the selection and the period', () => {
+    const card = withCaption(plate, options, caption) ?? ''
+    expect(card).toContain('North Halmahera')
+    expect(card).toContain('bukan sensus penutur hari ini')
+    const height = Number(card.match(/^<svg[^>]*height="(\d+)"/)?.[1])
+    expect(height).toBeGreaterThan(options.height)
+  })
+
+  it('escapes what it writes, so a name cannot break the document', () => {
+    expect(withCaption(plate, options, { ...caption, selection: 'A & <B>' })).toContain('A &amp; &lt;B&gt;')
+  })
+
+  it('refuses anything that is not an svg', () => {
+    expect(withCaption('<div/>', options, caption)).toBeNull()
   })
 })

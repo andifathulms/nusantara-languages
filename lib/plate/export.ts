@@ -94,6 +94,58 @@ export function mergeGround(plateMarkup: string, groundMarkup: string): string |
   return `${plateMarkup.slice(0, plateOpen + 1)}${inner}${plateMarkup.slice(plateOpen + 1)}`
 }
 
+/** How much taller the card is than the plate: the caption band, in pixels. */
+export function captionBandHeight(width: number): number {
+  return Math.round(width * 0.09)
+}
+
+export type ExportCaption = {
+  /** The plate's title. */
+  readonly title: string
+  /** What is selected, in words — or null for the plain plate. */
+  readonly selection: string | null
+  /** The atlas period and what it is not, as the plate states it (invariant 6). */
+  readonly period: string
+  /** The site, for a picture that travels without its page. */
+  readonly site: string
+}
+
+/**
+ * Sets the plate in a card: the plate above, a caption band below with the title, the selection
+ * and the period, ready to post. Takes a standalone plate document (from `toStandaloneSvg`) and
+ * nests it, so the plate — attribution line included — is carried unchanged. Pure.
+ *
+ * The attribution stays inside the plate, where a layout change cannot remove it; the band adds
+ * context, never replaces it.
+ */
+export function withCaption(
+  plateDocument: string,
+  size: { readonly width: number; readonly height: number },
+  caption: ExportCaption,
+): string | null {
+  if (!plateDocument.trimStart().startsWith('<svg')) return null
+  const band = captionBandHeight(size.width)
+  const pad = Math.round(band * 0.28)
+  // The plate's own stylesheet sets every <text> in the label face; the title overrides it with
+  // an inline style, which outranks a stylesheet rule. The two smaller lines keep the label face.
+  const titleSize = Math.round(band * 0.26)
+  const small = Math.round(band * 0.14)
+  const height = size.height + band
+  const inner = plateDocument.replace(/^<svg/, `<svg x="0" y="0"`)
+  return (
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${size.width}" height="${height}" viewBox="0 0 ${size.width} ${height}">` +
+    `<rect x="0" y="0" width="${size.width}" height="${height}" fill="${PLATE_COLOURS.plate}"/>` +
+    inner +
+    `<line x1="0" y1="${size.height + 0.5}" x2="${size.width}" y2="${size.height + 0.5}" stroke="${PLATE_COLOURS.boundary}" stroke-opacity="0.35"/>` +
+    `<text x="${pad}" y="${size.height + pad + titleSize * 0.85}" style="font-family:Georgia,'Times New Roman',serif" font-size="${titleSize}" fill="${PLATE_COLOURS.ink}">${escapeXml(
+      caption.selection === null ? caption.title : `${caption.title} — ${caption.selection}`,
+    )}</text>` +
+    `<text x="${pad}" y="${height - pad}" font-size="${small}" fill="${PLATE_COLOURS.inkSoft}">${escapeXml(caption.period)}</text>` +
+    `<text x="${size.width - pad}" y="${height - pad}" text-anchor="end" font-size="${small}" fill="${PLATE_COLOURS.inkSoft}">${escapeXml(caption.site)}</text>` +
+    `</svg>`
+  )
+}
+
 /** `nusantara-bahasa-2026-08-12.png`-shaped, with the date passed in rather than read. */
 export function exportFileName(slug: string, isoDate: string): string {
   const safe = slug.replace(/[^a-z0-9-]+/gi, '-').toLowerCase()
