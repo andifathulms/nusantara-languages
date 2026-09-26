@@ -14,7 +14,16 @@ import {
   type TreeIndex,
 } from '@/lib/tree'
 import { AES_STATUSES, MED_LEVELS, languoidsByCode } from '@/lib/bundle/types'
-import { basemap, coverage, geometry, languoids, readBundleText, reference, tree } from './bundle'
+import {
+  basemap,
+  coverage,
+  geometry,
+  languoids,
+  readBundleText,
+  reference,
+  tree,
+  words,
+} from './bundle'
 
 const byCode = languoidsByCode(languoids)
 
@@ -458,5 +467,32 @@ describe('the reference layers', () => {
     for (const polygon of reference.deepWater.polygons) {
       for (const ring of polygon) expect(ring[0]).toEqual(ring[ring.length - 1])
     }
+  })
+})
+
+describe('the word layer', () => {
+  it('keys every form on a glottocode in the bundle', () => {
+    for (const concept of words.concepts) {
+      for (const code of Object.keys(concept.forms)) expect(byCode.has(code), `${concept.gloss} ${code}`).toBe(true)
+    }
+  })
+
+  it('lights a cognate set that actually occurs, for every concept', () => {
+    for (const concept of words.concepts) {
+      const sets = new Set(Object.values(concept.forms).map((entry) => entry.cognate))
+      expect(concept.widest === null || sets.has(concept.widest), concept.gloss).toBe(true)
+    }
+  })
+
+  it('never carries an empty form', () => {
+    for (const concept of words.concepts) {
+      for (const entry of Object.values(concept.forms)) expect(entry.form.trim()).not.toBe('')
+    }
+  })
+
+  it('finds the textbook case: lima, "five", in Javanese and Buginese, in one cognate set', () => {
+    const five = words.concepts.find((concept) => concept.gloss === 'FIVE')
+    expect(five?.forms.java1254?.form).toBe('lima')
+    expect(five?.forms.bugi1244?.cognate).toBe(five?.forms.java1254?.cognate)
   })
 })

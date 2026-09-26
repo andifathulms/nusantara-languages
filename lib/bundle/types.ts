@@ -130,6 +130,26 @@ export type ReferenceLayer = {
   readonly deepWater: PolygonGeometry
 }
 
+/**
+ * One word across the map: for a handful of concepts, the form each language on the map has in
+ * the Austronesian Basic Vocabulary Database, with its cognate set. ABVD is Austronesian-first, so
+ * most Papuan languages have no entry, and the page says so rather than implying absence of a word.
+ */
+export type WordLayer = {
+  readonly concepts: readonly {
+    /** ABVD's parameter id, e.g. `201_five`. */
+    readonly id: string
+    /** Concepticon gloss, e.g. FIVE. */
+    readonly gloss: string
+    /** Glottocode → the form, its cognate set, and whether ABVD marks it a loan. */
+    readonly forms: Readonly<
+      Record<string, { readonly form: string; readonly cognate: string | null; readonly loan: boolean }>
+    >
+    /** The cognate set with the most languages on this map: what the page lights. */
+    readonly widest: string | null
+  }[]
+}
+
 export type FamilyCoverage = {
   readonly glottocode: string
   readonly name: string
@@ -184,7 +204,7 @@ export type BundleManifestSource = {
   readonly homepage: string
   readonly decision: 'bundled' | 'refused'
   readonly citation?: string
-  readonly role?: 'catalogue' | 'geometry' | 'basemap'
+  readonly role?: 'catalogue' | 'geometry' | 'basemap' | 'lexicon'
   readonly reason?: string
   readonly period?: { readonly label: string; readonly fromYear: number; readonly toYear: number }
 }

@@ -16,6 +16,7 @@ import type {
   GeometryEntry,
   Languoid,
   ReferenceLayer,
+  WordLayer,
 } from '@/lib/bundle/types'
 
 const BUNDLE_DIR = join(process.cwd(), 'data', 'bundle')
@@ -25,6 +26,7 @@ export const BUNDLE_FILES = [
   'geometry.json',
   'basemap.json',
   'reference.json',
+  'words.json',
   'tree.json',
   'coverage.json',
   'manifest.json',
@@ -42,6 +44,7 @@ export const languoids = read<Languoid[]>('languoids.json')
 export const geometry = read<GeometryEntry[]>('geometry.json')
 export const basemap = read<BasemapShape[]>('basemap.json')
 export const reference = read<ReferenceLayer>('reference.json')
+export const words = read<WordLayer>('words.json')
 export const tree = read<TreeData>('tree.json')
 export const coverage = read<Coverage>('coverage.json')
 export const manifest = read<BundleManifest>('manifest.json')

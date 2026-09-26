@@ -55,6 +55,7 @@ import {
   type BasemapShape,
   type LandKind,
   type ReferenceLayer,
+  type WordLayer,
   type Coverage,
   type FamilyCoverage,
   type GeometryEntry,
@@ -608,6 +609,84 @@ function readReference(source: BundledSource): { layer: ReferenceLayer; problems
   }
 }
 
+// --------------------------------------------------------------------------------- words
+
+/**
+ * The concepts the word map offers. Chosen because each has a widespread Austronesian cognate set a
+ * reader can see at a glance — *lima "five", *duSa "two", *mata "eye", *hikan "fish", *kutu
+ * "louse", and "water", whose forms split into several sets. ABVD parameter ids.
+ */
+const WORD_CONCEPTS = ['201_five', '198_two', '45_eye', '111_fish', '108_louse', '122_water'] as const
+
+function readWords(source: BundledSource, keep: ReadonlySet<string>): WordLayer {
+  const file = (key: string) => {
+    const found = source.files.find((candidate) => candidate.key === key)
+    if (found === undefined) fail('words', [`${source.id}: no "${key}" file declared`])
+    return raw(found.path)
+  }
+
+  // ABVD may hold several wordlists for one language. The lowest-numbered one with a form wins, so
+  // the choice is deterministic and does not depend on which list looks nicest.
+  const glottocodeOf = new Map<string, string>()
+  forEachCsvRow(file('languages'), (row) => {
+    const glottocode = row.Glottocode ?? ''
+    if (keep.has(glottocode)) glottocodeOf.set(row.ID ?? '', glottocode)
+  })
+
+  const concepts = new Set<string>(WORD_CONCEPTS)
+  const glosses = new Map<string, string>()
+  type Candidate = { list: number; formId: string; form: string; loan: boolean }
+  const candidates = new Map<string, Candidate>() // `${concept}|${glottocode}`
+  forEachCsvRow(file('forms'), (row) => {
+    const concept = row.Parameter_ID ?? ''
+    if (!concepts.has(concept)) return
+    const glottocode = glottocodeOf.get(row.Language_ID ?? '')
+    if (glottocode === undefined) return
+    const form = (row.Form ?? '').trim()
+    if (form === '') return
+    const list = Number(row.Language_ID)
+    const key = `${concept}|${glottocode}`
+    const existing = candidates.get(key)
+    if (existing !== undefined && existing.list <= list) return
+    candidates.set(key, { list, formId: row.ID ?? '', form, loan: row.Loan === 'true' })
+  })
+
+  const wanted = new Set([...candidates.values()].map((candidate) => candidate.formId))
+  const cognateOf = new Map<string, string>()
+  forEachCsvRow(file('cognates'), (row) => {
+    const formId = row.Form_ID ?? ''
+    if (!wanted.has(formId) || cognateOf.has(formId)) return
+    const set = row.Cognateset_ID ?? ''
+    if (set !== '') cognateOf.set(formId, set)
+  })
+
+  for (const concept of WORD_CONCEPTS) {
+    const gloss = concept.replace(/^\d+_/, '').toUpperCase()
+    glosses.set(concept, gloss)
+  }
+
+  return {
+    concepts: WORD_CONCEPTS.map((concept) => {
+      const forms: Record<string, { form: string; cognate: string | null; loan: boolean }> = {}
+      const counts = new Map<string, number>()
+      const codes = [...candidates.keys()]
+        .filter((key) => key.startsWith(`${concept}|`))
+        .map((key) => key.slice(concept.length + 1))
+        .sort()
+      for (const code of codes) {
+        const candidate = candidates.get(`${concept}|${code}`)
+        if (candidate === undefined) continue
+        const cognate = cognateOf.get(candidate.formId) ?? null
+        forms[code] = { form: candidate.form, cognate, loan: candidate.loan }
+        if (cognate !== null) counts.set(cognate, (counts.get(cognate) ?? 0) + 1)
+      }
+      const widest =
+        [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]?.[0] ?? null
+      return { id: concept, gloss: glosses.get(concept) ?? concept, forms, widest }
+    }),
+  }
+}
+
 // -------------------------------------------------------------------------------- build
 
 function stableJson(value: unknown, pretty: boolean): string {
@@ -757,6 +836,16 @@ function main(): void {
     )
   }
 
+  // ---- Words: one form per language for a few concepts, from the lexicon source if it cleared.
+  const lexiconSource = gate.bundled.find((candidate) => candidate.role === 'lexicon')
+  const words: WordLayer =
+    lexiconSource === undefined ? { concepts: [] } : readWords(lexiconSource, keepSet)
+  console.log(
+    `words: ${words.concepts
+      .map((concept) => `${concept.gloss} ${Object.keys(concept.forms).length}`)
+      .join(', ')}`,
+  )
+
   // ---- Languoids.
   const altNames = readAlternateNames(keepSet)
   const languoids: Languoid[] = kept.map((row) => {
@@ -898,6 +987,7 @@ function main(): void {
   writeFileSync(join(BUNDLE_DIR, 'geometry.json'), stableJson(geometry, false))
   writeFileSync(join(BUNDLE_DIR, 'basemap.json'), stableJson(basemap, false))
   writeFileSync(join(BUNDLE_DIR, 'reference.json'), stableJson(reference, false))
+  writeFileSync(join(BUNDLE_DIR, 'words.json'), stableJson(words, false))
   writeFileSync(join(BUNDLE_DIR, 'tree.json'), stableJson(tree, false))
   writeFileSync(join(BUNDLE_DIR, 'coverage.json'), stableJson(coverage, true))
   writeFileSync(join(BUNDLE_DIR, 'manifest.json'), stableJson(manifest, true))

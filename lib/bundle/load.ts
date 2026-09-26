@@ -14,6 +14,7 @@ import {
   languoidsByCode,
   type BasemapShape,
   type ReferenceLayer,
+  type WordLayer,
   type BundleManifest,
   type Coverage,
   type GeometryEntry,
@@ -34,6 +35,8 @@ export type LoadedBundle = {
   readonly basemap: readonly BasemapShape[]
   /** Towns, sea names and deep water: orientation only, never data. */
   readonly reference: ReferenceLayer
+  /** One word across the map, from ABVD. */
+  readonly words: WordLayer
   readonly tree: TreeData
   readonly treeIndex: TreeIndex
   readonly coverage: Coverage
@@ -55,6 +58,7 @@ export function loadBundle(): LoadedBundle {
   const geometry = read<GeometryEntry[]>('geometry.json')
   const basemap = read<BasemapShape[]>('basemap.json')
   const reference = read<ReferenceLayer>('reference.json')
+  const words = read<WordLayer>('words.json')
   const tree = read<TreeData>('tree.json')
   const coverage = read<Coverage>('coverage.json')
   const manifest = read<BundleManifest>('manifest.json')
@@ -73,6 +77,7 @@ export function loadBundle(): LoadedBundle {
     geometryByCode: geometryByCode(geometry),
     basemap,
     reference,
+    words,
     tree,
     treeIndex: indexed.index,
     coverage,

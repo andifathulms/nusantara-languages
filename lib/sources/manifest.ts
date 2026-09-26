@@ -106,7 +106,11 @@ const BundledSource = z.object({
   licenceUrl: z.string().url(),
   homepage: z.string().url(),
   citation: z.string().min(1),
-  role: z.enum(['catalogue', 'geometry', 'basemap']),
+  /**
+   * `lexicon` added 2026-09-27 for the word map: forms and cognate sets, joined to the catalogue
+   * by glottocode like every other source.
+   */
+  role: z.enum(['catalogue', 'geometry', 'basemap', 'lexicon']),
   /** What era the source describes. Rendered on the plate, not only the method page. */
   period: SourcePeriod,
   files: z.array(SourceFile).min(1),
@@ -143,6 +147,7 @@ export type Manifest = z.infer<typeof ManifestSchema>
 const GLOTTOLOG_CLDF = 'https://raw.githubusercontent.com/glottolog/glottolog-cldf'
 const GLOTTOGRAPHY = 'https://raw.githubusercontent.com/Glottography'
 const NATURAL_EARTH = 'https://raw.githubusercontent.com/nvkelso/natural-earth-vector'
+const LEXIBANK = 'https://raw.githubusercontent.com/lexibank'
 
 export const MANIFEST: Manifest = {
   bundleLicence: BUNDLE_LICENCE,
@@ -301,6 +306,43 @@ export const MANIFEST: Manifest = {
           key: 'deepWater',
           url: `${NATURAL_EARTH}/v5.1.2/geojson/ne_10m_bathymetry_K_200.geojson`,
           path: 'naturalearth/bathymetry-200.geojson',
+        },
+      ],
+    },
+    {
+      decision: 'bundled',
+      id: 'abvd',
+      title: 'CLDF dataset derived from Greenhill et al.\'s "Austronesian Basic Vocabulary Database"',
+      // Licence verified 2026-09-27 in both the repository's LICENSE (CC Attribution 4.0
+      // International) and the CLDF metadata (dc:license https://creativecommons.org/licenses/by/4.0/),
+      // at the pinned tag. CC-BY-4.0 carries into the CC-BY-SA-4.0 bundle with attribution.
+      version: 'v0.1',
+      licence: 'CC-BY-4.0',
+      licenceUrl: 'https://creativecommons.org/licenses/by/4.0/',
+      homepage: 'https://abvd.eva.mpg.de/austronesian/',
+      citation:
+        'Greenhill, S.J., Blust, R. & Gray, R.D. (2008). The Austronesian Basic Vocabulary Database: From Bioinformatics to Lexomics. Evolutionary Bioinformatics, 4:271-283. CLDF edition: lexibank/abvd v0.1.',
+      role: 'lexicon',
+      period: {
+        label: 'daftar kata dari banyak sumber, dihimpun 2008–2020',
+        fromYear: 2008,
+        toYear: 2020,
+      },
+      files: [
+        {
+          key: 'languages',
+          url: `${LEXIBANK}/abvd/v0.1/cldf/languages.csv`,
+          path: 'abvd/languages.csv',
+        },
+        {
+          key: 'forms',
+          url: `${LEXIBANK}/abvd/v0.1/cldf/forms.csv`,
+          path: 'abvd/forms.csv',
+        },
+        {
+          key: 'cognates',
+          url: `${LEXIBANK}/abvd/v0.1/cldf/cognates.csv`,
+          path: 'abvd/cognates.csv',
         },
       ],
     },

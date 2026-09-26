@@ -43,6 +43,7 @@ function checkBundlePresent(): Check {
     'coverage.json',
     'basemap.json',
     'reference.json',
+    'words.json',
   ]
   const missing = required.filter((file) => !existsSync(join(BUNDLE_DIR, file)))
   return {
