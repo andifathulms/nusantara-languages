@@ -333,6 +333,25 @@ describe('the plate furniture', () => {
     }
   })
 
+  it('never lets deep water be read as a family, and keeps it a quiet step from the shelf', () => {
+    for (const vision of VISIONS) {
+      for (const colour of ALL_FAMILY_COLOURS) {
+        expect(
+          distance(seenAs(PLATE_COLOURS.seaDeep, vision), seenAs(colour.base, vision)),
+          `deep/${colour.token} under ${vision}`,
+        ).toBeGreaterThan(5.9)
+      }
+    }
+    const step = distance(PLATE_COLOURS.seaDeep, PLATE_COLOURS.sea)
+    expect(step).toBeGreaterThan(1.5)
+    expect(step).toBeLessThan(4)
+  })
+
+  it('sets sea names legibly on the water', () => {
+    expect(contrast(PLATE_COLOURS.seaLabel, PLATE_COLOURS.sea)).toBeGreaterThanOrEqual(4.5)
+    expect(contrast(PLATE_COLOURS.seaLabel, PLATE_COLOURS.seaDeep)).toBeGreaterThanOrEqual(4.5)
+  })
+
   it('never lets blank land be read as a family, in any of the four visions', () => {
     for (const vision of VISIONS) {
       for (const colour of ALL_FAMILY_COLOURS) {

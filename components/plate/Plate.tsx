@@ -26,7 +26,7 @@ import { prefersReducedMotion } from '@/lib/dom/motion'
 import type { PlateModel, PlateShape, ShapeColour } from '@/lib/plate/build'
 import type { Dictionary } from '@/lib/i18n'
 import { familyVarRef } from '@/lib/colour'
-import { Coastline, LandFill, WaterLines } from './Ground'
+import { Coastline, DeepWater, LandFill, SeaNames, Towns, WaterLines } from './Ground'
 
 /**
  * The plate. Flat spot colours, hairline boundaries, a 5° graticule for reference, and
@@ -81,6 +81,10 @@ type PlateProps = {
    * names; placed here, which knows where the pointer is. Mouse only — touch has no hover.
    */
   readonly hoverCard?: React.ReactNode
+  /** Sea names in English rather than Indonesian. */
+  readonly english?: boolean
+  /** Towns, for orientation. Off by default. */
+  readonly showTowns?: boolean
 }
 
 const HATCH_IDS = ['hatch-1', 'hatch-2', 'hatch-3', 'hatch-4', 'hatch-5', 'hatch-6'] as const
@@ -206,6 +210,8 @@ export function Plate({
   narrowCentreX,
   focus = null,
   hoverCard = null,
+  english = false,
+  showTowns = false,
 }: PlateProps) {
   const [viewport, setViewport] = useState<Viewport>(IDENTITY)
   const [isFullscreen, setIsFullscreen] = useState(false)
@@ -472,8 +478,16 @@ export function Plate({
               gap in coverage reads as unrecorded rather than as sea. The land is drawn through
               <use>, which is what lets the same coastline be stroked three times for the
               water-lines without shipping it three times. */}
+          <DeepWater d={model.reference.deepWater} />
           <WaterLines prefix="plate" />
           <LandFill prefix="plate" />
+          <SeaNames
+            seas={model.reference.seas}
+            english={english}
+            size={14 * (model.width / 1600)}
+            zoom={viewport.scale}
+            width={model.width}
+          />
 
           {/* The graticule sits over the land but under the data: a printed plate carries its
               grid quietly. */}
@@ -683,6 +697,24 @@ export function Plate({
         Glottolog 5.3 (CC-BY-4.0) · Glottography (CC-BY-4.0) · Natural Earth · CC-BY-SA-4.0
       </text>
       </svg>
+
+      {/* Towns, above the language areas so the fills cannot hide them, and like the ground never
+          interactive. Its own layer, so switching it on repaints nothing else. */}
+      {showTowns ? (
+        <svg
+          viewBox={viewBox}
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 h-full w-full"
+        >
+          <g transform={transform}>
+            <Towns
+              towns={model.reference.towns}
+              size={11 * (model.width / 1600)}
+              zoom={viewport.scale}
+            />
+          </g>
+        </svg>
+      ) : null}
 
       {/* The hover label: positioned by placeCard, shown only while a mouse is over the plate and
           a language is under it. aria-hidden, because the same name is announced by the live

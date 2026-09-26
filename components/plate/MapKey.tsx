@@ -47,6 +47,9 @@ export function MapKey({
           {strings.guide.landNote}
         </Entry>
       </dl>
+      <p className="mt-4 border-t border-boundary/15 pt-3 text-micro text-ink-soft">
+        {strings.workspace.shelfNote}
+      </p>
     </section>
   )
 }

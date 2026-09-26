@@ -1,6 +1,6 @@
 import type { PlateModel } from '@/lib/plate/build'
 import { familyVarRef } from '@/lib/colour'
-import { Coastline, LandFill, WaterLines } from './Ground'
+import { Coastline, DeepWater, LandFill, SeaNames, WaterLines } from './Ground'
 
 /**
  * A still of the plate, for the front page. Server-rendered, no interaction, no client cost.
@@ -17,12 +17,16 @@ export function PlateThumbnail({
   label,
   className,
   idPrefix = 'still',
+  showSeaNames = false,
+  english = false,
 }: {
   model: PlateModel
   label: string
   className?: string
   /** Unique per still on a page, so the coastline defs do not collide. */
   idPrefix?: string
+  showSeaNames?: boolean
+  english?: boolean
 }) {
   return (
     <svg
@@ -38,8 +42,21 @@ export function PlateThumbnail({
       <rect x={0} y={0} width={model.width} height={model.height} fill="var(--plate-sea)" />
 
       <g aria-hidden="true">
+        <DeepWater d={model.reference.deepWater} />
         <WaterLines prefix={idPrefix} />
         <LandFill prefix={idPrefix} />
+        {/* Major seas only on a still: at this size the straits would sit on the coasts. */}
+        {showSeaNames ? (
+          <SeaNames
+            // The archipelago's own seas: names in the frame's top band are the Philippine seas,
+            // which on the front page sit under the cartouche.
+            seas={model.reference.seas.filter((sea) => sea.y > model.height * 0.2)}
+            english={english}
+            size={11 * (model.width / 1100)}
+            maxRank={2}
+            width={model.width}
+          />
+        ) : null}
       </g>
 
       <g aria-hidden="true">

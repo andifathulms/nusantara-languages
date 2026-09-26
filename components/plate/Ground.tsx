@@ -115,3 +115,104 @@ export function LandFill({ prefix }: Prefixed) {
     </>
   )
 }
+
+/**
+ * Water deeper than 200 m, a quiet step darker than the shelf seas. What it leaves pale is the
+ * Sunda shelf in the west and the Sahul shelf in the east — land in the last glacial maximum. Drawn
+ * straight after the sea, under the water-lines and the land.
+ */
+export function DeepWater({ d }: { readonly d: string }) {
+  return d === '' ? null : <path d={d} fill="var(--plate-seaDeep)" />
+}
+
+/**
+ * Sea names in hydrographic italic, spaced, in a darker water tone — the convention every printed
+ * atlas follows, so water and land are lettered differently. `scale` holds them at their drawn
+ * size while the map zooms; less important seas appear only once zoomed in.
+ */
+export function SeaNames({
+  seas,
+  english,
+  size,
+  zoom = 1,
+  maxRank,
+  width,
+}: {
+  readonly seas: PlateModel['reference']['seas']
+  /** English names instead of Indonesian. */
+  readonly english: boolean
+  /** Label size in plate units at scale 1. */
+  readonly size: number
+  readonly zoom?: number
+  /** A fixed rank limit, for a still that never zooms; otherwise zoom decides. */
+  readonly maxRank?: number
+  /** The plate's width, so a long name near the edge is moved in rather than cut off. */
+  readonly width: number
+}) {
+  const rankLimit = maxRank ?? (zoom >= 2.5 ? 99 : zoom >= 1.5 ? 5 : 4)
+  return (
+    <g aria-hidden="true" className="pointer-events-none">
+      {seas
+        .filter((sea) => sea.rank <= rankLimit)
+        .map((sea) => {
+          const important = sea.rank <= 1
+          const name = (english ? sea.nameEn : sea.nameId).toUpperCase()
+          const fontSize = ((important ? 1.25 : 1) * size) / zoom
+          const spacing = (important ? 0.34 : 0.22) * (size / zoom)
+          // Estimated set width: italic serif capitals plus the tracking. Enough to keep a name
+          // inside the frame; a near miss only shifts a label a little further from the edge.
+          const half = (name.length * (fontSize * 0.68 + spacing)) / 2
+          const x = Math.min(Math.max(sea.x, half + size), width - half - size)
+          return (
+            <text
+              key={sea.nameId}
+              x={x}
+              y={sea.y}
+              textAnchor="middle"
+              fontStyle="italic"
+              fontSize={fontSize}
+              letterSpacing={spacing}
+              fill="var(--plate-seaLabel)"
+              fillOpacity={important ? 0.7 : 0.85}
+              className="font-display"
+            >
+              {name}
+            </text>
+          )
+        })}
+    </g>
+  )
+}
+
+/** Towns: a dot and a name, for orientation. Off by default; switched on from the key. */
+export function Towns({
+  towns,
+  size,
+  zoom = 1,
+}: {
+  readonly towns: PlateModel['reference']['towns']
+  readonly size: number
+  readonly zoom?: number
+}) {
+  return (
+    <g aria-hidden="true" className="pointer-events-none">
+      {towns.map((town) => (
+        <g key={town.name} transform={`translate(${town.x} ${town.y}) scale(${1 / zoom})`}>
+          <rect x={-2} y={-2} width={4} height={4} fill="var(--plate-boundary)" />
+          <text
+            x={5}
+            y={size * 0.35}
+            fontSize={size}
+            fill="var(--plate-boundary)"
+            stroke="var(--plate-land)"
+            strokeWidth={size * 0.28}
+            paintOrder="stroke"
+            className="font-label"
+          >
+            {town.name}
+          </text>
+        </g>
+      ))}
+    </g>
+  )
+}

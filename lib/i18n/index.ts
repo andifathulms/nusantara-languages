@@ -390,6 +390,8 @@ export type Dictionary = {
     readonly compareCaveat: string
     readonly compareDone: string
     readonly random: string
+    readonly townsToggle: string
+    readonly shelfNote: string
   }
   readonly a11y: {
     readonly skipToContent: string
@@ -739,6 +741,8 @@ const id: Dictionary = {
     compareCaveat: 'Pohon ini tidak punya panjang cabang: yang ditunjukkan adalah titik temu dua garis keturunan, bukan seberapa lama keduanya berpisah.',
     compareDone: 'Selesai',
     random: 'Bahasa acak',
+    townsToggle: 'tampilkan kota',
+    shelfNote: 'Laut yang lebih terang adalah paparan dangkal, kurang dari 200 m: Paparan Sunda di barat, Paparan Sahul di timur, daratan pada zaman es terakhir. Latar geografi, bukan klaim tentang sejarah bahasa. Nama laut, kota, dan kedalaman dari Natural Earth.',
   },
   a11y: {
     skipToContent: 'Lewati ke konten utama',
@@ -1079,6 +1083,8 @@ const en: Dictionary = {
     compareCaveat: 'The tree carries no branch lengths: this shows where two lines of descent meet, not how long ago they parted.',
     compareDone: 'Done',
     random: 'Random language',
+    townsToggle: 'show towns',
+    shelfNote: 'The paler sea is shallow shelf, under 200 m: the Sunda Shelf in the west, the Sahul Shelf in the east, dry land in the last ice age. Geography as background, not a claim about the history of languages. Sea names, towns and depth from Natural Earth.',
   },
   a11y: {
     skipToContent: 'Skip to main content',

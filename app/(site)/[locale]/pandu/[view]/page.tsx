@@ -72,6 +72,7 @@ export default function GuidedViewPage({
     languoids: bundle.languoids,
     geometry: bundle.geometry,
     basemap: bundle.basemap,
+    reference: bundle.reference,
     tree: bundle.tree,
     treeIndex: bundle.treeIndex,
     coverage: bundle.coverage,

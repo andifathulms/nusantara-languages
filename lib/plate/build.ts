@@ -32,6 +32,7 @@ import {
   type LandKind,
   type Languoid,
   type MedLevel,
+  type ReferenceLayer,
 } from '../bundle/types'
 import type { FamilyColourToken } from '../colour'
 import type { SerialTreeNode, TreeData, TreeIndex } from '../tree'
@@ -174,6 +175,21 @@ export type PlateModel = {
   readonly shapes: readonly PlateShape[]
   /** Drawn first, under everything, and never interactive. */
   readonly land: readonly LandShape[]
+  /**
+   * Orientation, projected: water deeper than 200 m, sea names, towns. Like the land it carries no
+   * glottocode and is drawn non-interactive, so it cannot be selected, searched or announced.
+   */
+  readonly reference: {
+    readonly deepWater: string
+    readonly seas: readonly {
+      readonly nameId: string
+      readonly nameEn: string
+      readonly rank: number
+      readonly x: number
+      readonly y: number
+    }[]
+    readonly towns: readonly { readonly name: string; readonly x: number; readonly y: number }[]
+  }
   readonly graticule: readonly GraticuleLine[]
   readonly legend: readonly LegendEntry[]
   /** The same map read one level down. Empty when no family splits. */
@@ -242,6 +258,8 @@ export type BuildPlateInput = {
   readonly coverage: Coverage
   readonly colours: ColourAssignment
   readonly basemap?: readonly BasemapShape[]
+  /** Towns, sea names and deep water, projected for the plate. Orientation only. */
+  readonly reference?: ReferenceLayer
   readonly frame: BoundingBox
   readonly width: number
   /**
@@ -443,6 +461,20 @@ export function buildPlateModel(input: BuildPlateInput): PlateModel {
       const d = toPathData(shape.geometry, projection, input.pathDecimals ?? 1)
       return d === '' ? [] : [{ kind: shape.kind, d }]
     }),
+    reference: {
+      deepWater:
+        input.reference === undefined
+          ? ''
+          : toPathData(input.reference.deepWater, projection, input.pathDecimals ?? 1),
+      seas: (input.reference?.seas ?? []).map((sea) => {
+        const [x, y] = projection.project([sea.lon, sea.lat])
+        return { nameId: sea.nameId, nameEn: sea.nameEn, rank: sea.rank, x, y }
+      }),
+      towns: (input.reference?.towns ?? []).map((town) => {
+        const [x, y] = projection.project([town.lon, town.lat])
+        return { name: town.name, x, y }
+      }),
+    },
     graticule: buildGraticule(input.frame, projection.project),
     legend,
     subgroupLegend,

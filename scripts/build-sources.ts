@@ -444,31 +444,76 @@ function polygonsOf(geometry: GeoJsonGeometry): Ring[][] | null {
   return null
 }
 
-/** A label point for a sea: the area-weighted centroid of its largest ring inside the frame. */
-function labelPoint(polygons: readonly (readonly Ring[])[]): Position | null {
-  let best: { area: number; point: Position } | null = null
-  for (const polygon of polygons) {
-    const outer = polygon[0]
-    if (outer === undefined) continue
-    const clipped = clipRing(outer, INDONESIA_BBOX)
-    if (clipped === null) continue
-    let area = 0
-    let cx = 0
-    let cy = 0
-    for (let index = 0; index < clipped.length - 1; index += 1) {
-      const [x0, y0] = clipped[index] as Position
-      const [x1, y1] = clipped[index + 1] as Position
-      const cross = x0 * y1 - x1 * y0
-      area += cross
-      cx += (x0 + x1) * cross
-      cy += (y0 + y1) * cross
-    }
-    if (Math.abs(area) < 1e-9) continue
-    const point: Position = [cx / (3 * area), cy / (3 * area)]
-    if (best === null || Math.abs(area) > best.area) best = { area: Math.abs(area), point }
-  }
-  return best?.point ?? null
+/** Distance from a point to a segment, in degrees with longitude scaled by cos(latitude). */
+function segmentDistance(point: Position, from: Position, to: Position, stretch: number): number {
+  const px = point[0] * stretch
+  const ax = from[0] * stretch
+  const bx = to[0] * stretch
+  const dx = bx - ax
+  const dy = to[1] - from[1]
+  const length = dx * dx + dy * dy
+  const t = length === 0 ? 0 : Math.max(0, Math.min(1, ((px - ax) * dx + (point[1] - from[1]) * dy) / length))
+  return Math.hypot(px - (ax + t * dx), point[1] - (from[1] + t * dy))
 }
+
+function ringContains(ring: Ring, [lon, lat]: Position): boolean {
+  let inside = false
+  for (let index = 0, previous = ring.length - 1; index < ring.length; previous = index, index += 1) {
+    const [x0, y0] = ring[index] as Position
+    const [x1, y1] = ring[previous] as Position
+    if (y0 > lat !== y1 > lat && lon < ((x1 - x0) * (lat - y0)) / (y1 - y0) + x0) inside = !inside
+  }
+  return inside
+}
+
+/**
+ * A label point for a sea: the point in open water farthest from any shore — the pole of
+ * inaccessibility, found by a grid search over each ring clipped to the label frame. A centroid
+ * put "Laut Maluku" on Halmahera and "Samudra Pasifik" on the Bird's Head; this is how an atlas
+ * cartographer places a sea name, done deterministically. Land inside the sea's polygon (islands
+ * are holes) counts as shore.
+ */
+function labelPoint(
+  polygons: readonly (readonly Ring[])[],
+): { readonly point: Position; readonly clearance: number } | null {
+  let best: { clearance: number; point: Position } | null = null
+  for (const polygon of polygons) {
+    const [outer, ...holes] = polygon
+    if (outer === undefined) continue
+    const clipped = clipRing(outer, LABEL_FRAME)
+    if (clipped === null) continue
+    const [minLon, minLat, maxLon, maxLat] = ringBounds(clipped)
+    const stretch = Math.cos((((minLat + maxLat) / 2) * Math.PI) / 180)
+    const rings = [clipped, ...holes]
+    const steps = 48
+    for (let i = 0; i <= steps; i += 1) {
+      for (let j = 0; j <= steps; j += 1) {
+        const point: Position = [
+          minLon + ((maxLon - minLon) * i) / steps,
+          minLat + ((maxLat - minLat) * j) / steps,
+        ]
+        if (!ringContains(clipped, point) || holes.some((hole) => ringContains(hole, point))) continue
+        let clearance = Number.POSITIVE_INFINITY
+        for (const ring of rings) {
+          for (let k = 0; k < ring.length - 1; k += 1) {
+            clearance = Math.min(
+              clearance,
+              segmentDistance(point, ring[k] as Position, ring[k + 1] as Position, stretch),
+            )
+          }
+        }
+        if (best === null || clearance > best.clearance) best = { clearance, point }
+      }
+    }
+  }
+  return best
+}
+
+/**
+ * The open water a sea name needs, in degrees: less than this and the sea is a sliver at the frame's
+ * edge (the Bay of Bengal, the Gulf of Thailand), whose name would sit on the shore.
+ */
+const MIN_LABEL_CLEARANCE = 0.45
 
 function readReference(source: BundledSource): { layer: ReferenceLayer; problems: string[] } {
   const problems: string[] = []
@@ -510,10 +555,9 @@ function readReference(source: BundledSource): { layer: ReferenceLayer; problems
     if (rank > 7) continue
     const polygons = polygonsOf(feature.geometry)
     if (polygons === null) continue
-    const point = labelPoint(polygons)
-    // Well inside the frame: a label at the edge is a sliver of a sea mostly off the plate (the
-    // Bay of Bengal, the Gulf of Thailand) and would be cut by the frame anyway.
-    if (point === null || !containsPosition(LABEL_FRAME, point)) continue
+    const placed = labelPoint(polygons)
+    if (placed === null || placed.clearance < MIN_LABEL_CLEARANCE) continue
+    const point = placed.point
     const nameEn = String(properties.name_en ?? properties.name ?? '')
     const nameId = LABEL_CORRECTIONS[nameEn] ?? String(properties.name_id ?? nameEn)
     // Size, by bounding-box area of the outer rings: enough to choose between two features.

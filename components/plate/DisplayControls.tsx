@@ -11,6 +11,8 @@ export function DisplayControls({
   hasSubgroups,
   hatching,
   onToggleHatching,
+  towns = false,
+  onToggleTowns,
 }: {
   readonly strings: Dictionary
   readonly colourMode: ColourMode
@@ -19,6 +21,8 @@ export function DisplayControls({
   readonly hasSubgroups: boolean
   readonly hatching: boolean
   readonly onToggleHatching: () => void
+  readonly towns?: boolean
+  readonly onToggleTowns?: () => void
 }) {
   return (
     <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
@@ -59,6 +63,18 @@ export function DisplayControls({
         />
         {strings.plate.hatchingToggle}
       </label>
+
+      {onToggleTowns === undefined ? null : (
+        <label className="flex items-center gap-2 text-body-s">
+          <input
+            type="checkbox"
+            checked={towns}
+            onChange={onToggleTowns}
+            className="h-4 w-4 accent-boundary"
+          />
+          {strings.workspace.townsToggle}
+        </label>
+      )}
     </div>
   )
 }

@@ -51,6 +51,7 @@ export default function PlatePage({ params }: { params: { locale: string } }) {
     languoids: bundle.languoids,
     geometry: bundle.geometry,
     basemap: bundle.basemap,
+    reference: bundle.reference,
     tree: bundle.tree,
     treeIndex: bundle.treeIndex,
     coverage: bundle.coverage,

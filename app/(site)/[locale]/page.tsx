@@ -36,6 +36,7 @@ export default function HomePage({ params }: { params: { locale: string } }) {
     languoids: bundle.languoids,
     geometry: bundle.geometry,
     basemap: bundle.basemap,
+    reference: bundle.reference,
     tree: bundle.tree,
     treeIndex: bundle.treeIndex,
     coverage,
@@ -108,6 +109,8 @@ export default function HomePage({ params }: { params: { locale: string } }) {
                     })}`}
                     className="h-auto w-full"
                     idPrefix="hero"
+                    showSeaNames
+                    english={locale === 'en'}
                   />
                 </Link>
               </HeroTour>

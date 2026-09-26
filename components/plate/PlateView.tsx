@@ -112,6 +112,7 @@ export function PlateView({
   const [hatching, setHatching] = useState(initialHatching)
   const [colourMode, setColourMode] = useState<ColourMode>('family')
   const [sheetOpen, setSheetOpen] = useState(false)
+  const [showTowns, setShowTowns] = useState(false)
   /** Two languages being compared. `second` is null while the reader is choosing it. */
   const [compare, setCompare] = useState<{ first: string; second: string | null } | null>(null)
   const plateRef = useRef<SVGSVGElement | null>(null)
@@ -512,6 +513,8 @@ export function PlateView({
               narrowCentreX={narrowCentreX}
               focus={focus}
               hoverCard={hoverCard}
+              english={locale === 'en'}
+              showTowns={showTowns}
             />
 
             {/* Directly under the plate, at every width. It was laid over the plate's sea at
@@ -549,6 +552,8 @@ export function PlateView({
                     hasSubgroups={model.subgroupLegend.length > model.legend.length}
                     hatching={hatching}
                     onToggleHatching={() => setHatching((current) => !current)}
+                    towns={showTowns}
+                    onToggleTowns={() => setShowTowns((current) => !current)}
                   />
                 }
               />

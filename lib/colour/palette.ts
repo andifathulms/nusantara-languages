@@ -140,6 +140,14 @@ export const PLATE_COLOURS = {
    */
   sea: '#D6E2E2',
   /**
+   * Water deeper than 200 m, one faint step darker than the shelf seas. The Sunda and Sahul shelves
+   * are what it leaves at `sea`. Held at least 6 units from every family in all four visions —
+   * the darker it goes the closer it creeps to wedgwood, which is why the step is small.
+   */
+  seaDeep: '#CDDBDC',
+  /** Sea names: hydrographic italic, in a darker water tone. */
+  seaLabel: '#3E5F63',
+  /**
    * Engraved water-lining along the coast — three rings drawn from the Natural Earth coastline,
    * never from language areas (invariant 5a). Always drawn at low opacity.
    */
