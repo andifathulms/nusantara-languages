@@ -9,9 +9,13 @@ const familyColours = Object.fromEntries(
 )
 
 /**
- * The type scale. EB Garamond has a small x-height and a light stem, so body text sits at
- * 17px rather than the usual 16 and leading runs long; the condensed label face is set tight
- * and tracked out, the way an engraver letters a plate.
+ * The type scale. Newsreader's optical sizes let one face run from the 12px micro role to the
+ * 52px title; body sits at 17px with long leading. The condensed label face is tracked out the
+ * way an engraver letters a plate — 0.09em rather than the 0.14em Fira needed, because Plex
+ * Sans Condensed is already open-spaced.
+ *
+ * `micro` grew from 11px to 12px on 2026-09-26: it carries glosses, caveats and attribution,
+ * which are exactly the words a newcomer needs and the ones that were fading.
  *
  * Sizes are named by role, not by size, so a heading cannot be chosen for how big it looks.
  */
@@ -19,8 +23,8 @@ const fontSize: Record<
   string,
   [size: string, options: { lineHeight: string; letterSpacing?: string }]
 > = {
-  micro: ['0.6875rem', { lineHeight: '1rem', letterSpacing: '0.06em' }],
-  label: ['0.75rem', { lineHeight: '1.1rem', letterSpacing: '0.14em' }],
+  micro: ['0.75rem', { lineHeight: '1.1rem', letterSpacing: '0.02em' }],
+  label: ['0.75rem', { lineHeight: '1.1rem', letterSpacing: '0.09em' }],
   'body-s': ['0.9375rem', { lineHeight: '1.55' }],
   body: ['1.0625rem', { lineHeight: '1.65' }],
   lead: ['1.25rem', { lineHeight: '1.55' }],

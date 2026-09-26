@@ -44,7 +44,7 @@
       );
   }
 
-  /* Old-style figures read beautifully in Garamond prose, but a count has to be comparable,
+  /* Old-style figures read well in serif prose, but a count has to be comparable,
      so figures are lining and tabular wherever a number carries data. */
   h1,
   h2,

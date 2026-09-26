@@ -35,8 +35,8 @@ export function paletteStyleBlock(): string {
   return (
     `:root{${declarations}}` +
     // Generic stacks: the rasteriser has no access to the self-hosted faces.
-    `text{font-family:'Fira Sans Condensed',Helvetica,Arial,sans-serif}` +
-    `.font-label{font-family:'Fira Sans Condensed',Helvetica,Arial,sans-serif}`
+    `text{font-family:'IBM Plex Sans Condensed','Arial Narrow',Helvetica,Arial,sans-serif}` +
+    `.font-label{font-family:'IBM Plex Sans Condensed','Arial Narrow',Helvetica,Arial,sans-serif}`
   )
 }
 

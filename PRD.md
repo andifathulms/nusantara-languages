@@ -153,7 +153,7 @@ The material world is the **lithographic atlas plate** — flat spot colours, ha
 
 **Endangerment is hatching, not hue.** Density increases toward extinction. It composes over family colour instead of competing for the same channel.
 
-**Type.** **EB Garamond** for display and prose — the old-atlas register, and it carries an index page well. **Fira Sans Condensed** for map labels, with italics for hydrographic features per cartographic convention. **IBM Plex Mono** for glottocodes, ISO codes, and counts.
+**Type.** **Newsreader** for display and prose — a book serif with an optical-size axis, so it keeps display contrast at title sizes and stays sturdy in small captions; its italic sets hydrographic features per cartographic convention. **IBM Plex Sans Condensed** for map labels and the index. **IBM Plex Mono** for glottocodes, ISO codes, and counts. *(Revised 2026-09-26 from EB Garamond and Fira Sans Condensed: Garamond faded at the 11–13px caption sizes the site relies on.)*
 
 **Structure.** The plate takes the majority of the width; the tree sits as a scrolling column beside it, not beneath, because the linkage only works when both are visible at once. A printed index panel carries the legend, the atlas period, and the coverage figures — an atlas plate always states its sources on the face.
 
