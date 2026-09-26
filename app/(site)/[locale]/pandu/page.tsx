@@ -48,10 +48,21 @@ export default function GuidedIndexPage({ params }: { params: { locale: string }
       .filter(([, entry]) => entry.cognate !== null && entry.cognate === five?.widest)
       .map(([code]) => code),
   )
+  // The grammar map's picture lights verb-final order (GB133) — the seam, in grammar.
+  const verbFinal = bundle.features.features.find((feature) => feature.id === 'GB133')
+  const verbFinalLit = new Set(
+    Object.entries(verbFinal?.values ?? {})
+      .filter(([, value]) => value === 1)
+      .map(([code]) => code),
+  )
   const dims = Object.fromEntries(
     [...dimmedBy(languoids, coverage)].map(([code, views]) => [
       code,
-      fiveLit.has(code) ? views : [...views, 'kata'],
+      [
+        ...views,
+        ...(fiveLit.has(code) ? [] : ['kata']),
+        ...(verbFinalLit.has(code) ? [] : ['tata-bahasa']),
+      ],
     ]),
   )
   const viewBoxOf = (id: GuidedViewId): string => viewBoxFor(GUIDED[id].thumbnail)
@@ -94,7 +105,7 @@ export default function GuidedIndexPage({ params }: { params: { locale: string }
 
         <GuidedPlateDefs model={model} dims={dims} />
 
-        <ul className="mt-block-lg grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+        <ul className="mt-block-lg grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {views.map((view) => (
             <li key={view.id}>
               <Link
@@ -133,6 +144,29 @@ export default function GuidedIndexPage({ params }: { params: { locale: string }
                 <p className="mt-2 flex-1 text-body-s text-ink-soft">{strings.words.card}</p>
                 <p className="figure mt-4 text-micro text-ink-soft">
                   {format(strings.guided.emphasised, { count: fiveLit.size })}
+                </p>
+              </div>
+            </Link>
+          </li>
+          <li>
+            <Link
+              href={localePath(locale, 'pandu/tata-bahasa')}
+              className="sheet group flex h-full flex-col overflow-hidden transition-shadow hover:shadow-lifted"
+            >
+              <div className="aspect-[16/9] overflow-hidden border-b border-boundary/20 bg-sea">
+                <GuidedThumbnail
+                  view="tata-bahasa"
+                  viewBox={viewBoxFor([118.0, -10.5, 142.5, 3.0])}
+                  label={strings.grammar.title}
+                />
+              </div>
+              <div className="flex flex-1 flex-col p-5">
+                <h2 className="font-display text-title-s group-hover:text-accent">
+                  {strings.grammar.title}
+                </h2>
+                <p className="mt-2 flex-1 text-body-s text-ink-soft">{strings.grammar.card}</p>
+                <p className="figure mt-4 text-micro text-ink-soft">
+                  {format(strings.guided.emphasised, { count: verbFinalLit.size })}
                 </p>
               </div>
             </Link>

@@ -251,6 +251,29 @@ export type Dictionary = {
     readonly card: string
     readonly attribution: string
   }
+  /** The feature map: a few grammatical features from Grambank. Figures are placeholders filled from the bundle. */
+  readonly grammar: {
+    readonly title: string
+    readonly lead: string
+    readonly pick: string
+    readonly gb133: string
+    readonly gb133Note: string
+    readonly gb131: string
+    readonly gb131Note: string
+    readonly gb028: string
+    readonly gb028Note: string
+    readonly gb070: string
+    readonly gb070Note: string
+    readonly yes: string
+    readonly no: string
+    /** Template. Placeholders: {yes}, {total}. */
+    readonly split: string
+    readonly austronesian: string
+    readonly other: string
+    /** Template. Placeholders: {coded}, {total}. */
+    readonly coverage: string
+    readonly card: string
+  }
   readonly relatives: {
     readonly title: string
     readonly sharedAncestor: string
@@ -636,6 +659,26 @@ const id: Dictionary = {
     card: 'Kata lima, dua, mata: bentuk yang seasal dari Sumatra sampai Papua, bukti bahwa bahasa-bahasa ini satu rumpun.',
     attribution: 'Kata: Austronesian Basic Vocabulary Database (CC-BY-4.0)',
   },
+  grammar: {
+    title: 'Tata bahasa di peta',
+    lead: 'Rumpun tidak hanya soal kata. Bahasa-bahasa sekerabat sering juga menyusun kalimat dengan cara yang sama. Pilih satu ciri tata bahasa dan lihat di mana ciri itu ada.',
+    pick: 'Pilih ciri',
+    gb133: 'Kata kerja di akhir (S-O-V)',
+    gb133Note: 'Dalam kalimat biasa, kata kerja muncul paling akhir: "saya nasi makan".',
+    gb131: 'Kata kerja di awal',
+    gb131Note: 'Dalam kalimat biasa, kata kerja muncul paling awal: "makan saya nasi".',
+    gb028: 'Membedakan kita dan kami',
+    gb028Note: 'Ada dua kata untuk "kita": satu yang mencakup lawan bicara (kita) dan satu yang tidak (kami), seperti dalam bahasa Indonesia.',
+    gb070: 'Penanda kasus pada kata benda',
+    gb070Note: 'Kata benda berubah bentuk atau diberi penanda menurut perannya dalam kalimat, misalnya sebagai pelaku atau sasaran.',
+    yes: 'ya',
+    no: 'tidak',
+    split: '{yes} dari {total}',
+    austronesian: 'Rumpun Austronesia',
+    other: 'Rumpun-rumpun lain',
+    coverage: 'Grambank mengode {coded} dari {total} bahasa di peta ini untuk ciri ini, dari tata bahasa yang terbit. Yang tidak dikode, atau yang tata bahasanya tidak memastikan, tidak ditampilkan sebagai "tidak".',
+    card: 'Di mana kata kerja diletakkan, dan apakah "kita" dan "kami" dibedakan: jahitan Austronesia–Papua juga jahitan tata bahasa.',
+  },
   relatives: {
     title: 'Kerabat terdekat',
     sharedAncestor: 'Leluhur bersama terdekat',
@@ -998,6 +1041,26 @@ const en: Dictionary = {
     otherSet: 'other form',
     card: 'The words for five, two, eye: forms sharing one origin from Sumatra to Papua, the evidence that these languages are one family.',
     attribution: 'Words: Austronesian Basic Vocabulary Database (CC-BY-4.0)',
+  },
+  grammar: {
+    title: 'Grammar on the map',
+    lead: 'A family is not only a matter of words. Related languages often build their sentences the same way. Pick a grammatical feature and see where it occurs.',
+    pick: 'Pick a feature',
+    gb133: 'Verb last (S-O-V)',
+    gb133Note: 'In an ordinary sentence the verb comes last: "I rice eat".',
+    gb131: 'Verb first',
+    gb131Note: 'In an ordinary sentence the verb comes first: "eat I rice".',
+    gb028: 'Inclusive and exclusive "we"',
+    gb028Note: 'There are two words for "we": one that includes the listener and one that does not, as Indonesian has kita and kami.',
+    gb070: 'Case on nouns',
+    gb070Note: 'Nouns change form or take a marker according to their role in the clause, such as doer or target.',
+    yes: 'yes',
+    no: 'no',
+    split: '{yes} of {total}',
+    austronesian: 'Austronesian',
+    other: 'All other families',
+    coverage: 'Grambank codes {coded} of the {total} languages on this map for this feature, from published grammars. A language not coded, or whose grammar did not settle it, is not shown as "no".',
+    card: 'Where the verb goes, and whether "we" splits in two: the Austronesian–Papuan seam is a grammatical seam too.',
   },
   relatives: {
     title: 'Nearest relatives',
