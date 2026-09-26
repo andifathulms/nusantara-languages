@@ -32,6 +32,27 @@ export function aesStep(status: AesStatus | null): number {
   return AES_STATUSES.indexOf(status) + 1
 }
 
+/**
+ * Glottolog's MED — the most extensive description a language has — as Glottolog's own label,
+ * most extensive first. Derived by Glottolog from its own bibliography (CC-BY-4.0). Only the label
+ * ships; the reference behind it stays in Glottolog, where the language page links.
+ */
+export const MED_LEVELS = [
+  'long grammar',
+  'grammar',
+  'grammar sketch',
+  'phonology/text',
+  'wordlist or less',
+] as const
+
+export type MedLevel = (typeof MED_LEVELS)[number]
+
+/** 0 for the most extensive description, rising as the record thins; the plate's ramp step. */
+export function medStep(level: MedLevel | null): number {
+  if (level === null) return MED_LEVELS.length
+  return MED_LEVELS.indexOf(level)
+}
+
 export type LanguoidGeometryRef =
   /** A speaker area exists. Coordinates live in `geometry.json`. */
   | { readonly type: 'polygon'; readonly source: string }
@@ -51,6 +72,10 @@ export type Languoid = {
   /** Root first, immediate parent last, excluding the languoid itself. */
   readonly ancestors: readonly string[]
   readonly aes: AesStatus | null
+  /** Glottolog's most extensive description. Null where Glottolog records none. */
+  readonly med: MedLevel | null
+  /** Distinct Glottolog bibliography entries for this language. 0 where there are none. */
+  readonly referenceCount: number
   /** Alternate names, from providers that are not Ethnologue-derived. */
   readonly altNames: readonly string[]
   /** Representative point, always present — it is what search and the tree jump to. */
@@ -124,6 +149,8 @@ export type Coverage = {
    */
   readonly excluded: readonly { readonly reason: string; readonly count: number }[]
   readonly aes: readonly { readonly status: AesStatus | 'unknown'; readonly count: number }[]
+  /** Languages per MED level — how well documented the map is, counted from the bundle. */
+  readonly med: readonly { readonly level: MedLevel | 'none'; readonly count: number }[]
 }
 
 export type BundleManifestSource = {

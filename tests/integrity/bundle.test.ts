@@ -13,7 +13,7 @@ import {
   subtreeLanguages,
   type TreeIndex,
 } from '@/lib/tree'
-import { AES_STATUSES, languoidsByCode } from '@/lib/bundle/types'
+import { AES_STATUSES, MED_LEVELS, languoidsByCode } from '@/lib/bundle/types'
 import { basemap, coverage, geometry, languoids, tree } from './bundle'
 
 const byCode = languoidsByCode(languoids)
@@ -133,6 +133,20 @@ describe('referential integrity', () => {
     for (const languoid of languoids) {
       if (languoid.aes === null) continue
       expect(AES_STATUSES, languoid.glottocode).toContain(languoid.aes)
+    }
+  })
+
+  it('uses only Glottolog MED labels', () => {
+    for (const languoid of languoids) {
+      if (languoid.med === null) continue
+      expect(MED_LEVELS, languoid.glottocode).toContain(languoid.med)
+    }
+  })
+
+  it('carries reference counts as whole, non-negative numbers', () => {
+    for (const languoid of languoids) {
+      expect(Number.isInteger(languoid.referenceCount), languoid.glottocode).toBe(true)
+      expect(languoid.referenceCount, languoid.glottocode).toBeGreaterThanOrEqual(0)
     }
   })
 
@@ -286,6 +300,14 @@ describe('the coverage report', () => {
     )
   })
 
+  it('accounts for every MED level', () => {
+    for (const entry of coverage.med) {
+      const count = languoids.filter((languoid) => (languoid.med ?? 'none') === entry.level).length
+      expect(entry.count, entry.level).toBe(count)
+    }
+    expect(coverage.med.reduce((total, entry) => total + entry.count, 0)).toBe(languoids.length)
+  })
+
   it('publishes what was excluded, and by which reason', () => {
     expect(coverage.excluded.length).toBeGreaterThan(0)
     for (const entry of coverage.excluded) {
@@ -350,6 +372,11 @@ describe('known languages, as a sanity check on the whole chain', () => {
     expect(balinese?.iso639P3).toBe('ban')
     expect(balinese?.familyGlottocode).toBe('aust1307')
     expect(balinese?.geometry.type).toBe('polygon')
+  })
+
+  it('records a long grammar for Buru, as Glottolog does', () => {
+    expect(byCode.get('buru1303')?.med).toBe('long grammar')
+    expect(byCode.get('buru1303')?.referenceCount).toBeGreaterThan(0)
   })
 
   it('places Abui under Timor-Alor-Pantar, with its polygon from the regional study', () => {

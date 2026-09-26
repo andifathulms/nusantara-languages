@@ -48,7 +48,9 @@ import {
 } from '../lib/sources/manifest'
 import {
   AES_STATUSES,
+  MED_LEVELS,
   type AesStatus,
+  type MedLevel,
   type BasemapShape,
   type LandKind,
   type Coverage,
@@ -57,6 +59,19 @@ import {
   type Languoid,
   type BundleManifest,
 } from '../lib/bundle/types'
+
+/**
+ * Glottolog's MED code ids (codes.csv, Parameter_ID `med`) and the label each ships as. Stated
+ * rather than derived from the id, because codes.csv names the last one "Wordlist or less" and the
+ * bundle keeps one case. An id not listed here is not carried.
+ */
+const MED_CODES: ReadonlyMap<string, MedLevel> = new Map<string, MedLevel>([
+  ['long_grammar', 'long grammar'],
+  ['grammar', 'grammar'],
+  ['grammar_sketch', 'grammar sketch'],
+  ['phonology_or_text', 'phonology/text'],
+  ['wordlist_or_less', 'wordlist or less'],
+])
 
 const RAW_DIR = join(process.cwd(), 'data', 'raw')
 const BUNDLE_DIR = join(process.cwd(), 'data', 'bundle')
@@ -153,6 +168,9 @@ type GlottologValues = {
   /** Glottolog's `category`, e.g. "Spoken L1 Language". */
   readonly category: Map<string, string>
   readonly aes: Map<string, AesStatus>
+  readonly med: Map<string, MedLevel>
+  /** Distinct bibliography ids per languoid. */
+  readonly references: Map<string, number>
   /** Glottolog's own root-to-languoid path, as slash-separated glottocodes. */
   readonly classification: Map<string, string[]>
 }
@@ -160,6 +178,8 @@ type GlottologValues = {
 function readGlottologValues(): GlottologValues {
   const category = new Map<string, string>()
   const aes = new Map<string, AesStatus>()
+  const med = new Map<string, MedLevel>()
+  const references = new Map<string, number>()
   const classification = new Map<string, string[]>()
 
   forEachCsvRow(raw('glottolog/values.csv'), (row) => {
@@ -184,12 +204,27 @@ function readGlottologValues(): GlottologValues {
         if (status !== undefined) aes.set(language, status)
         return
       }
+      case 'med': {
+        // As with AES, the label comes from Code_ID (`med-grammar_sketch`), Glottolog's own
+        // vocabulary; Value is a rank and Source points at a bibliography entry that stays in
+        // Glottolog. Codes are matched against the codes table's names, not guessed.
+        const code = (row.Code_ID ?? '').replace(/^med-/, '')
+        const level = MED_CODES.get(code)
+        if (level !== undefined) med.set(language, level)
+        return
+      }
+      case 'bib': {
+        // Source lists bibliography ids, with repeats. Only the count of distinct ids ships.
+        const ids = new Set((row.Source ?? '').split(';').filter((id) => id !== ''))
+        references.set(language, ids.size)
+        return
+      }
       default:
         return
     }
   })
 
-  return { category, aes, classification }
+  return { category, aes, med, references, classification }
 }
 
 function readAlternateNames(keep: ReadonlySet<string>): Map<string, string[]> {
@@ -520,6 +555,8 @@ function main(): void {
       familyGlottocode: ancestors[0] ?? null,
       ancestors,
       aes: values.aes.get(row.glottocode) ?? null,
+      med: values.med.get(row.glottocode) ?? null,
+      referenceCount: values.references.get(row.glottocode) ?? 0,
       altNames: names,
       lon: Number(row.longitude),
       lat: Number(row.latitude),
@@ -578,6 +615,11 @@ function main(): void {
     ).length,
   }))
 
+  const medCounts = [...MED_LEVELS, 'none' as const].map((level) => ({
+    level,
+    count: languoids.filter((languoid) => (languoid.med ?? 'none') === level).length,
+  }))
+
   const coverage: Coverage = {
     glottologVersion: sourceById(gate.bundled, 'glottolog').version,
     languages: languoids.length,
@@ -597,6 +639,7 @@ function main(): void {
       .map(([reason, count]) => ({ reason, count }))
       .sort((left, right) => right.count - left.count || left.reason.localeCompare(right.reason)),
     aes: aesCounts,
+    med: medCounts,
   }
 
   const manifest: BundleManifest = {

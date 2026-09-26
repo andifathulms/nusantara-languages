@@ -476,5 +476,31 @@
       "status": "unknown",
       "count": 0
     }
+  ],
+  "med": [
+    {
+      "level": "long grammar",
+      "count": 94
+    },
+    {
+      "level": "grammar",
+      "count": 48
+    },
+    {
+      "level": "grammar sketch",
+      "count": 207
+    },
+    {
+      "level": "phonology/text",
+      "count": 212
+    },
+    {
+      "level": "wordlist or less",
+      "count": 165
+    },
+    {
+      "level": "none",
+      "count": 0
+    }
   ]
 }
