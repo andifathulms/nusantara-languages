@@ -150,6 +150,22 @@ export type WordLayer = {
   }[]
 }
 
+/**
+ * A few grammatical features from Grambank, each a yes/no question about a language, coded from
+ * its published grammars. Only the 0/1 code ships — never the coders' comments, and a "?" (not
+ * enough information) is left out rather than guessed.
+ */
+export type FeatureLayer = {
+  readonly features: readonly {
+    /** Grambank's id, e.g. GB133. */
+    readonly id: string
+    /** Grambank's own question, in English. */
+    readonly question: string
+    /** Glottocode → 1 (yes) or 0 (no). */
+    readonly values: Readonly<Record<string, 0 | 1>>
+  }[]
+}
+
 export type FamilyCoverage = {
   readonly glottocode: string
   readonly name: string
@@ -204,7 +220,7 @@ export type BundleManifestSource = {
   readonly homepage: string
   readonly decision: 'bundled' | 'refused'
   readonly citation?: string
-  readonly role?: 'catalogue' | 'geometry' | 'basemap' | 'lexicon'
+  readonly role?: 'catalogue' | 'geometry' | 'basemap' | 'lexicon' | 'typology'
   readonly reason?: string
   readonly period?: { readonly label: string; readonly fromYear: number; readonly toYear: number }
 }

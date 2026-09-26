@@ -23,6 +23,7 @@ import {
   reference,
   tree,
   words,
+  features,
 } from './bundle'
 
 const byCode = languoidsByCode(languoids)
@@ -494,5 +495,35 @@ describe('the word layer', () => {
     const five = words.concepts.find((concept) => concept.gloss === 'FIVE')
     expect(five?.forms.java1254?.form).toBe('lima')
     expect(five?.forms.bugi1244?.cognate).toBe(five?.forms.java1254?.cognate)
+  })
+})
+
+describe('the grammatical features', () => {
+  it('ship only definite codes, 0 or 1, never a guess for "?"', () => {
+    for (const feature of features.features) {
+      for (const value of Object.values(feature.values)) expect([0, 1]).toContain(value)
+    }
+  })
+
+  it('key every value on a glottocode in the bundle', () => {
+    for (const feature of features.features) {
+      for (const code of Object.keys(feature.values)) expect(byCode.has(code), `${feature.id} ${code}`).toBe(true)
+    }
+  })
+
+  it('carry no coder comments or sources, only the codes', () => {
+    expect(readBundleText('features.json')).not.toMatch(/Comment|Source|Coders/)
+  })
+
+  it('show the seam in grammar: verb-final order is far commoner outside Austronesian', () => {
+    const verbFinal = features.features.find((feature) => feature.id === 'GB133')
+    if (verbFinal === undefined) throw new Error('GB133 missing')
+    const share = (austronesian: boolean) => {
+      const coded = Object.entries(verbFinal.values).filter(
+        ([code]) => (byCode.get(code)?.familyGlottocode === 'aust1307') === austronesian,
+      )
+      return coded.filter(([, value]) => value === 1).length / Math.max(1, coded.length)
+    }
+    expect(share(false)).toBeGreaterThan(share(true) + 0.4)
   })
 })

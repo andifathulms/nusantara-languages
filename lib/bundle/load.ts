@@ -15,6 +15,7 @@ import {
   type BasemapShape,
   type ReferenceLayer,
   type WordLayer,
+  type FeatureLayer,
   type BundleManifest,
   type Coverage,
   type GeometryEntry,
@@ -37,6 +38,8 @@ export type LoadedBundle = {
   readonly reference: ReferenceLayer
   /** One word across the map, from ABVD. */
   readonly words: WordLayer
+  /** A few grammatical features, from Grambank. */
+  readonly features: FeatureLayer
   readonly tree: TreeData
   readonly treeIndex: TreeIndex
   readonly coverage: Coverage
@@ -59,6 +62,7 @@ export function loadBundle(): LoadedBundle {
   const basemap = read<BasemapShape[]>('basemap.json')
   const reference = read<ReferenceLayer>('reference.json')
   const words = read<WordLayer>('words.json')
+  const features = read<FeatureLayer>('features.json')
   const tree = read<TreeData>('tree.json')
   const coverage = read<Coverage>('coverage.json')
   const manifest = read<BundleManifest>('manifest.json')
@@ -78,6 +82,7 @@ export function loadBundle(): LoadedBundle {
     basemap,
     reference,
     words,
+    features,
     tree,
     treeIndex: indexed.index,
     coverage,

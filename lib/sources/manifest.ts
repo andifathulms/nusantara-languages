@@ -110,7 +110,7 @@ const BundledSource = z.object({
    * `lexicon` added 2026-09-27 for the word map: forms and cognate sets, joined to the catalogue
    * by glottocode like every other source.
    */
-  role: z.enum(['catalogue', 'geometry', 'basemap', 'lexicon']),
+  role: z.enum(['catalogue', 'geometry', 'basemap', 'lexicon', 'typology']),
   /** What era the source describes. Rendered on the plate, not only the method page. */
   period: SourcePeriod,
   files: z.array(SourceFile).min(1),
@@ -148,6 +148,7 @@ const GLOTTOLOG_CLDF = 'https://raw.githubusercontent.com/glottolog/glottolog-cl
 const GLOTTOGRAPHY = 'https://raw.githubusercontent.com/Glottography'
 const NATURAL_EARTH = 'https://raw.githubusercontent.com/nvkelso/natural-earth-vector'
 const LEXIBANK = 'https://raw.githubusercontent.com/lexibank'
+const GRAMBANK = 'https://raw.githubusercontent.com/grambank/grambank'
 
 export const MANIFEST: Manifest = {
   bundleLicence: BUNDLE_LICENCE,
@@ -343,6 +344,33 @@ export const MANIFEST: Manifest = {
           key: 'cognates',
           url: `${LEXIBANK}/abvd/v0.1/cldf/cognates.csv`,
           path: 'abvd/cognates.csv',
+        },
+      ],
+    },
+    {
+      decision: 'bundled',
+      id: 'grambank',
+      title: 'Grambank',
+      // Licence verified 2026-09-27 in both the repository's LICENSE (CC Attribution 4.0
+      // International) and the CLDF metadata (dc:license https://creativecommons.org/licenses/by/4.0/),
+      // at the pinned tag.
+      version: 'v1.0.3',
+      licence: 'CC-BY-4.0',
+      licenceUrl: 'https://creativecommons.org/licenses/by/4.0/',
+      homepage: 'https://grambank.clld.org',
+      citation:
+        'Skirgård, H., Haynie, H.J., Blasi, D.E. et al. (2023). Grambank reveals the importance of genealogical constraints on linguistic diversity and highlights the impact of language loss. Science Advances 9(16). Data: grambank/grambank v1.0.3.',
+      role: 'typology',
+      period: {
+        label: 'tata bahasa terbit, dikode 2014–2023',
+        fromYear: 2014,
+        toYear: 2023,
+      },
+      files: [
+        {
+          key: 'values',
+          url: `${GRAMBANK}/v1.0.3/cldf/values.csv`,
+          path: 'grambank/values.csv',
         },
       ],
     },

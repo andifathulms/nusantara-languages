@@ -56,6 +56,7 @@ import {
   type LandKind,
   type ReferenceLayer,
   type WordLayer,
+  type FeatureLayer,
   type Coverage,
   type FamilyCoverage,
   type GeometryEntry,
@@ -687,6 +688,45 @@ function readWords(source: BundledSource, keep: ReadonlySet<string>): WordLayer 
   }
 }
 
+// ------------------------------------------------------------------------------ features
+
+/**
+ * The grammatical features the feature map offers, by Grambank id. Chosen because each is a yes/no
+ * question a reader can picture, and together they show that the Austronesian–Papuan seam is also
+ * a grammatical one: where the verb goes, whether "we" splits into inclusive and exclusive (kita
+ * and kami), and whether nouns carry case.
+ */
+const GRAMBANK_FEATURES: Readonly<Record<string, string>> = {
+  GB133: 'Is a pragmatically unmarked constituent order verb-final for transitive clauses?',
+  GB131: 'Is a pragmatically unmarked constituent order verb-initial for transitive clauses?',
+  GB028: 'Is there a distinction between inclusive and exclusive?',
+  GB070: 'Are there morphological cases for non-pronominal core arguments (i.e. S/A/P)?',
+}
+
+function readFeatures(source: BundledSource, keep: ReadonlySet<string>): FeatureLayer {
+  const file = source.files.find((candidate) => candidate.key === 'values')
+  if (file === undefined) fail('features', [`${source.id}: no "values" file declared`])
+  const values = new Map<string, Record<string, 0 | 1>>(
+    Object.keys(GRAMBANK_FEATURES).map((id) => [id, {}]),
+  )
+  forEachCsvRow(raw(file.path), (row) => {
+    const feature = values.get(row.Parameter_ID ?? '')
+    const language = row.Language_ID ?? ''
+    if (feature === undefined || !keep.has(language)) return
+    // Only a definite code ships. "?" means the grammar did not settle it; it is not a "no".
+    if (row.Value === '1') feature[language] = 1
+    else if (row.Value === '0') feature[language] = 0
+  })
+  return {
+    features: Object.entries(GRAMBANK_FEATURES).map(([id, question]) => {
+      const coded = values.get(id) ?? {}
+      const sorted: Record<string, 0 | 1> = {}
+      for (const code of Object.keys(coded).sort()) sorted[code] = coded[code] as 0 | 1
+      return { id, question, values: sorted }
+    }),
+  }
+}
+
 // -------------------------------------------------------------------------------- build
 
 function stableJson(value: unknown, pretty: boolean): string {
@@ -846,6 +886,16 @@ function main(): void {
       .join(', ')}`,
   )
 
+  // ---- Grammatical features, from the typology source if it cleared.
+  const typologySource = gate.bundled.find((candidate) => candidate.role === 'typology')
+  const features: FeatureLayer =
+    typologySource === undefined ? { features: [] } : readFeatures(typologySource, keepSet)
+  console.log(
+    `features: ${features.features
+      .map((feature) => `${feature.id} ${Object.keys(feature.values).length}`)
+      .join(', ')}`,
+  )
+
   // ---- Languoids.
   const altNames = readAlternateNames(keepSet)
   const languoids: Languoid[] = kept.map((row) => {
@@ -988,6 +1038,7 @@ function main(): void {
   writeFileSync(join(BUNDLE_DIR, 'basemap.json'), stableJson(basemap, false))
   writeFileSync(join(BUNDLE_DIR, 'reference.json'), stableJson(reference, false))
   writeFileSync(join(BUNDLE_DIR, 'words.json'), stableJson(words, false))
+  writeFileSync(join(BUNDLE_DIR, 'features.json'), stableJson(features, false))
   writeFileSync(join(BUNDLE_DIR, 'tree.json'), stableJson(tree, false))
   writeFileSync(join(BUNDLE_DIR, 'coverage.json'), stableJson(coverage, true))
   writeFileSync(join(BUNDLE_DIR, 'manifest.json'), stableJson(manifest, true))

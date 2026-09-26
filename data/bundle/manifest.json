@@ -1,7 +1,7 @@
 {
   "bundleLicence": "CC-BY-SA-4.0",
   "bundleLicenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
-  "attribution": "Hammarström, Harald & Forkel, Robert & Haspelmath, Martin & Bank, Sebastian. 2026. Glottolog 5.3. Leipzig: Max Planck Institute for Evolutionary Anthropology. | Asher, R. E. & Christopher J. Moseley (eds.) 2007. Atlas of the World's Languages. 2nd edn. Routledge. | Schapper, Antoinette. 2020. Introduction to The Papuan languages of Timor, Alor and Pantar. Volume 3. Berlin, Boston: De Gruyter Mouton. doi:10.1515/9781501511158-001. | Made with Natural Earth. Free vector and raster map data @ naturalearthdata.com. Public domain. | Greenhill, S.J., Blust, R. & Gray, R.D. (2008). The Austronesian Basic Vocabulary Database: From Bioinformatics to Lexomics. Evolutionary Bioinformatics, 4:271-283. CLDF edition: lexibank/abvd v0.1.",
+  "attribution": "Hammarström, Harald & Forkel, Robert & Haspelmath, Martin & Bank, Sebastian. 2026. Glottolog 5.3. Leipzig: Max Planck Institute for Evolutionary Anthropology. | Asher, R. E. & Christopher J. Moseley (eds.) 2007. Atlas of the World's Languages. 2nd edn. Routledge. | Schapper, Antoinette. 2020. Introduction to The Papuan languages of Timor, Alor and Pantar. Volume 3. Berlin, Boston: De Gruyter Mouton. doi:10.1515/9781501511158-001. | Made with Natural Earth. Free vector and raster map data @ naturalearthdata.com. Public domain. | Greenhill, S.J., Blust, R. & Gray, R.D. (2008). The Austronesian Basic Vocabulary Database: From Bioinformatics to Lexomics. Evolutionary Bioinformatics, 4:271-283. CLDF edition: lexibank/abvd v0.1. | Skirgård, H., Haynie, H.J., Blasi, D.E. et al. (2023). Grambank reveals the importance of genealogical constraints on linguistic diversity and highlights the impact of language loss. Science Advances 9(16). Data: grambank/grambank v1.0.3.",
   "sources": [
     {
       "id": "glottolog",
@@ -81,6 +81,22 @@
         "label": "daftar kata dari banyak sumber, dihimpun 2008–2020",
         "fromYear": 2008,
         "toYear": 2020
+      }
+    },
+    {
+      "id": "grambank",
+      "title": "Grambank",
+      "version": "v1.0.3",
+      "licence": "CC-BY-4.0",
+      "licenceUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "homepage": "https://grambank.clld.org",
+      "decision": "bundled",
+      "citation": "Skirgård, H., Haynie, H.J., Blasi, D.E. et al. (2023). Grambank reveals the importance of genealogical constraints on linguistic diversity and highlights the impact of language loss. Science Advances 9(16). Data: grambank/grambank v1.0.3.",
+      "role": "typology",
+      "period": {
+        "label": "tata bahasa terbit, dikode 2014–2023",
+        "fromYear": 2014,
+        "toYear": 2023
       }
     },
     {
