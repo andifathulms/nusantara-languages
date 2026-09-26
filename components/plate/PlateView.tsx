@@ -9,6 +9,7 @@ import { PlateToolbar } from './PlateToolbar'
 import { MapKey } from './MapKey'
 import { DisplayControls } from './DisplayControls'
 import { FirstVisitTips } from './FirstVisitTips'
+import { DocumentationKey } from './DocumentationKey'
 import { SelectionCard, type SelectionSummary } from './SelectionCard'
 import { CompareCard, type CompareSide } from './CompareCard'
 import { sharedAncestor } from '@/lib/tree'
@@ -187,7 +188,7 @@ export function PlateView({
       }
       if (withDisplay) {
         if (state.hatching) setHatching(true)
-        if (state.colourMode === 'subgroup') setColourMode('subgroup')
+        if (state.colourMode !== 'family') setColourMode(state.colourMode)
       }
     },
     [ancestryOf],
@@ -518,6 +519,10 @@ export function PlateView({
                 hid one of the two languages being compared. Here it moves only what is below it;
                 the map itself never shifts. */}
             {card('card-enter')}
+
+            {colourMode === 'documentation' ? (
+              <DocumentationKey coverage={coverage} strings={strings} locale={locale} />
+            ) : null}
 
             {showTips ? <FirstVisitTips strings={strings} className="lg:hidden" /> : null}
 

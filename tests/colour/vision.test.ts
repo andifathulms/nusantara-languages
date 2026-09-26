@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   ALL_FAMILY_COLOURS,
+  DOCUMENTATION_RAMP,
   FAMILY_COLOURS,
   ISOLATE_COLOUR,
   PINNED_FAMILY_COLOURS,
@@ -367,5 +368,34 @@ describe('the plate furniture', () => {
 
   it('keeps the sea pale enough to recede', () => {
     expect(contrast(PLATE_COLOURS.sea, PLATE_COLOURS.plate)).toBeLessThan(1.2)
+  })
+})
+
+describe('the documentation ramp', () => {
+  it('reads as a sequence: lightness rises step by step', () => {
+    const lightness = DOCUMENTATION_RAMP.map(oklabLightness)
+    for (let step = 1; step < lightness.length; step += 1) {
+      expect(lightness[step]! - lightness[step - 1]!).toBeGreaterThan(0.08)
+    }
+  })
+
+  it('keeps neighbouring steps apart in all four visions', () => {
+    for (const vision of VISIONS) {
+      for (let step = 1; step < DOCUMENTATION_RAMP.length; step += 1) {
+        expect(
+          distance(seenAs(DOCUMENTATION_RAMP[step - 1]!, vision), seenAs(DOCUMENTATION_RAMP[step]!, vision)),
+          `steps ${step - 1}/${step} under ${vision}`,
+        ).toBeGreaterThan(10)
+      }
+    }
+  })
+
+  it('never reads as sea or as blank land', () => {
+    for (const vision of VISIONS) {
+      for (const colour of DOCUMENTATION_RAMP) {
+        expect(distance(seenAs(colour, vision), seenAs(PLATE_COLOURS.sea, vision))).toBeGreaterThan(8)
+        expect(distance(seenAs(colour, vision), seenAs(PLATE_COLOURS.land, vision))).toBeGreaterThan(8)
+      }
+    }
   })
 })

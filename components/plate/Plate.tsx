@@ -21,6 +21,7 @@ import {
   type Viewport,
 } from '@/lib/plate/viewport'
 import type { PlateBox } from '@/lib/plate/focus'
+import type { ColourMode } from '@/lib/plate/hash'
 import { prefersReducedMotion } from '@/lib/dom/motion'
 import type { PlateModel, PlateShape, ShapeColour } from '@/lib/plate/build'
 import type { Dictionary } from '@/lib/i18n'
@@ -56,8 +57,8 @@ type PlateProps = {
   readonly onSelect: (glottocode: string) => void
   readonly label: string
   readonly showHatching: boolean
-  /** Which level of the classification carries colour. */
-  readonly colourMode: 'family' | 'subgroup'
+  /** What carries colour: family, subgroup, or documentation (its own mode). */
+  readonly colourMode: ColourMode
   /** A guided view's standing emphasis. Null when the reader is exploring freely. */
   readonly emphasis: ReadonlySet<string> | null
   /** The view holds this so the PNG export can serialise the plate that is on screen. */
@@ -90,6 +91,7 @@ function Area({
   isSelected,
   showHatching,
   colours,
+  ramp,
   onHover,
   onSelect,
 }: {
@@ -98,10 +100,13 @@ function Area({
   isSelected: boolean
   showHatching: boolean
   colours: ShapeColour
+  /** In documentation mode: the ramp colour, which replaces the family's colour outright. */
+  ramp: string | null
   onHover: (glottocode: string | null) => void
   onSelect: (glottocode: string) => void
 }) {
-  const fill = state === 'selected' ? familyVarRef(colours, 'selected') : familyVarRef(colours, 'base')
+  const fill =
+    ramp ?? (state === 'selected' ? familyVarRef(colours, 'selected') : familyVarRef(colours, 'base'))
   const hatch = showHatching && shape.aesStep > 0 ? HATCH_IDS[shape.aesStep - 1] : undefined
 
   return (
@@ -137,6 +142,7 @@ function PointMark({
   state,
   isSelected,
   colours,
+  ramp,
   zoom,
   onHover,
   onSelect,
@@ -145,12 +151,14 @@ function PointMark({
   state: 'base' | 'selected' | 'muted'
   isSelected: boolean
   colours: ShapeColour
+  ramp: string | null
   /** Current map scale, so the mark can hold its drawn size while the map grows under it. */
   zoom: number
   onHover: (glottocode: string | null) => void
   onSelect: (glottocode: string) => void
 }) {
-  const colour = state === 'selected' ? familyVarRef(colours, 'selected') : familyVarRef(colours, 'base')
+  const colour =
+    ramp ?? (state === 'selected' ? familyVarRef(colours, 'selected') : familyVarRef(colours, 'base'))
   // A lit point is a step larger than a muted one: a story that lights a single point-only
   // language (Tambora) should not leave the reader hunting for a 3px ring.
   const size = isSelected ? 4.2 : state === 'selected' ? 3.8 : 3
@@ -593,6 +601,14 @@ export function Plate({
         const isSelected =
           selectedLanguage === shape.glottocode || pairedLanguage === shape.glottocode
         const colours = colourMode === 'subgroup' ? shape.subgroupColour : shape.colour
+        // Documentation replaces family colour outright; the key says so. Nothing recorded is
+        // left as blank land rather than given a tone of its own.
+        const ramp =
+          colourMode !== 'documentation'
+            ? null
+            : shape.medStep < 5
+              ? `var(--doc-${shape.medStep})`
+              : 'var(--plate-land)'
         return shape.type === 'area' ? (
           <MemoArea
             key={shape.glottocode}
@@ -601,6 +617,7 @@ export function Plate({
             isSelected={isSelected}
             showHatching={showHatching}
             colours={colours}
+            ramp={ramp}
             onHover={onHover}
             onSelect={guardedSelect}
           />
@@ -611,6 +628,7 @@ export function Plate({
             state={state}
             isSelected={isSelected}
             colours={colours}
+            ramp={ramp}
             zoom={viewport.scale}
             onHover={onHover}
             onSelect={guardedSelect}

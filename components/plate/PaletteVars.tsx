@@ -1,4 +1,4 @@
-import { ALL_FAMILY_COLOURS, PLATE_COLOURS, cssVariable } from '@/lib/colour'
+import { ALL_FAMILY_COLOURS, DOCUMENTATION_RAMP, PLATE_COLOURS, cssVariable } from '@/lib/colour'
 
 /**
  * Emits the palette as CSS custom properties, from the same module Tailwind's tokens are
@@ -12,6 +12,7 @@ export function PaletteVars() {
       `${cssVariable(colour, 'selected')}: ${colour.selected};`,
     ]),
     ...Object.entries(PLATE_COLOURS).map(([token, value]) => `--plate-${token}: ${value};`),
+    ...DOCUMENTATION_RAMP.map((value, step) => `--doc-${step}: ${value};`),
   ].join('')
 
   return <style>{`:root{${declarations}}`}</style>

@@ -14,7 +14,7 @@
  * construction rather than by remembering to add it — which is the point of putting it there.
  */
 
-import { ALL_FAMILY_COLOURS, PLATE_COLOURS, cssVariable } from '../colour'
+import { ALL_FAMILY_COLOURS, DOCUMENTATION_RAMP, PLATE_COLOURS, cssVariable } from '../colour'
 
 export type ExportOptions = {
   readonly width: number
@@ -30,6 +30,7 @@ export function paletteStyleBlock(): string {
       `${cssVariable(colour, 'selected')}: ${colour.selected};`,
     ]),
     ...Object.entries(PLATE_COLOURS).map(([token, value]) => `--plate-${token}: ${value};`),
+    ...DOCUMENTATION_RAMP.map((value, step) => `--doc-${step}: ${value};`),
   ].join('')
 
   return (

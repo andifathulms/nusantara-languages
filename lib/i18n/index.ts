@@ -210,6 +210,24 @@ export type Dictionary = {
     readonly ladderScale: string
     readonly ladderIsolate: string
   }
+  /** The documentation layer: Glottolog's most extensive description per language, and its bibliography count. */
+  readonly docs: {
+    readonly colourBy: string
+    readonly keyTitle: string
+    readonly keyNote: string
+    readonly longGrammar: string
+    readonly grammar: string
+    readonly grammarSketch: string
+    readonly phonologyText: string
+    readonly wordlist: string
+    readonly none: string
+    readonly panelLabel: string
+    readonly panelHint: string
+    readonly references: string
+    /** Template. Placeholder: {count}. */
+    readonly referencesValue: string
+    readonly openGlottolog: string
+  }
   readonly relatives: {
     readonly title: string
     readonly sharedAncestor: string
@@ -557,6 +575,22 @@ const id: Dictionary = {
     ladderScale: 'Panjang batang: jumlah bahasa di peta ini, skala logaritmik dari 1 sampai {max}. Membentang: jarak dua titik tercatat terjauh, diukur antartitik tengah — batas bawah, bukan rentang wilayah.',
     ladderIsolate: 'Bahasa isolat: tidak ada tingkat di atasnya, karena belum ada kerabat yang terbukti.',
   },
+  docs: {
+    colourBy: 'Dokumentasi',
+    keyTitle: 'Seberapa terdokumentasi',
+    keyNote: 'Warna kini menunjukkan karya terlengkap yang pernah terbit tentang tiap bahasa menurut Glottolog, bukan rumpunnya. Makin gelap, makin lengkap. Ini bukan ukuran kebertahanan: bahasa yang terdokumentasi baik bisa saja terancam, dan sebaliknya.',
+    longGrammar: 'Tata bahasa panjang (lebih dari 300 halaman)',
+    grammar: 'Tata bahasa',
+    grammarSketch: 'Sketsa tata bahasa',
+    phonologyText: 'Fonologi, teks, atau kamus',
+    wordlist: 'Daftar kata atau kurang',
+    none: 'Tidak tercatat',
+    panelLabel: 'Deskripsi terlengkap',
+    panelHint: 'Menurut Glottolog: jenis karya terlengkap yang pernah terbit tentang bahasa ini.',
+    references: 'Rujukan di Glottolog',
+    referencesValue: '{count} entri bibliografi',
+    openGlottolog: 'Lihat bibliografinya di Glottolog',
+  },
   relatives: {
     title: 'Kerabat terdekat',
     sharedAncestor: 'Leluhur bersama terdekat',
@@ -881,6 +915,22 @@ const en: Dictionary = {
     ladderLead: 'Each step up adds relatives and widens the ground they cover. Click a step to see it light up on the map.',
     ladderScale: 'Bar length: languages on this map, on a log scale from 1 to {max}. Spans: the distance between the two furthest recorded points, midpoint to midpoint — a floor, not the true extent.',
     ladderIsolate: 'An isolate: there is nothing above it, because no relative has been shown.',
+  },
+  docs: {
+    colourBy: 'Documentation',
+    keyTitle: 'How well documented',
+    keyNote: 'Colour now shows the most extensive work ever published on each language, per Glottolog, not its family. The darker, the fuller. This is not a measure of vitality: a well-documented language can be endangered, and the reverse.',
+    longGrammar: 'Long grammar (300+ pages)',
+    grammar: 'Grammar',
+    grammarSketch: 'Grammar sketch',
+    phonologyText: 'Phonology, texts or dictionary',
+    wordlist: 'Wordlist or less',
+    none: 'None recorded',
+    panelLabel: 'Most extensive description',
+    panelHint: 'Per Glottolog: the fullest kind of work ever published on this language.',
+    references: 'References in Glottolog',
+    referencesValue: '{count} bibliography entries',
+    openGlottolog: 'See its bibliography on Glottolog',
   },
   relatives: {
     title: 'Nearest relatives',

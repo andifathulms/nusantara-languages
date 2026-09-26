@@ -174,3 +174,22 @@ export const PLATE_COLOURS = {
    */
   landEdge: '#6B7176',
 } as const
+
+/**
+ * The documentation ramp: Glottolog's most extensive description, most extensive first (long
+ * grammar) to least (wordlist or less). Used only when the plate is coloured by documentation, a
+ * mode that replaces family colour entirely and says so in its key — the two never share a plate.
+ *
+ * One hue, sepia, stepped in lightness (OKLab L 0.30 → 0.82): a sequence has to read as more and
+ * less, and lightness is the one channel every colour-vision deficiency keeps. Sepia rather than a
+ * cool ink because the palest step of a cool ramp read as sea. Asserted in tests/colour/vision:
+ * adjacent steps over 12 units apart in all four visions, every step clear of the sea and of blank
+ * land. A language with no recorded description is left as blank land.
+ */
+export const DOCUMENTATION_RAMP: readonly string[] = [
+  '#3A281B', // long grammar      L .30
+  '#67462D', // grammar           L .43
+  '#936D4A', // grammar sketch    L .57
+  '#BB9570', // phonology/text    L .70
+  '#DCBF98', // wordlist or less  L .82
+] as const

@@ -24,12 +24,14 @@ import {
 } from '../colour'
 import {
   aesStep,
+  medStep,
   type AesStatus,
   type BasemapShape,
   type Coverage,
   type GeometryEntry,
   type LandKind,
   type Languoid,
+  type MedLevel,
 } from '../bundle/types'
 import type { FamilyColourToken } from '../colour'
 import type { SerialTreeNode, TreeData, TreeIndex } from '../tree'
@@ -56,6 +58,11 @@ type ShapeCommon = {
   readonly aes: AesStatus | null
   /** 0 when unknown, rising toward extinction. Drives hatch density, never hue. */
   readonly aesStep: number
+  /**
+   * Documentation step, 0 for a long grammar to 4 for a wordlist or less, 5 for none recorded.
+   * Drives the documentation ramp, which is shown only in its own colour mode.
+   */
+  readonly medStep: number
   readonly colour: ShapeColour
   /**
    * The subgroup this language belongs to, at the family's first real branching, and the colour
@@ -141,6 +148,8 @@ export type LanguageDetail = {
   readonly iso639P3: string | null
   readonly aes: AesStatus | null
   readonly aesStep: number
+  readonly med: MedLevel | null
+  readonly referenceCount: number
   readonly lon: number
   readonly lat: number
   readonly geometry:
@@ -283,6 +292,7 @@ export function buildPlateModel(input: BuildPlateInput): PlateModel {
       ancestors: languoid.ancestors,
       aes: languoid.aes,
       aesStep: aesStep(languoid.aes),
+      medStep: medStep(languoid.med),
       colour: colourVars(input.colours, languoid.familyGlottocode ?? languoid.glottocode),
       subgroup: subgroupOf.get(languoid.glottocode) as string,
       subgroupColour: subgroupColourOf(
@@ -414,6 +424,8 @@ export function buildPlateModel(input: BuildPlateInput): PlateModel {
       iso639P3: languoid.iso639P3,
       aes: languoid.aes,
       aesStep: aesStep(languoid.aes),
+      med: languoid.med,
+      referenceCount: languoid.referenceCount,
       lon: languoid.lon,
       lat: languoid.lat,
       geometry: languoid.geometry,

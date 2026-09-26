@@ -9,8 +9,11 @@
 
 import { NO_SELECTION, type PlateSelection } from './select'
 
-/** Which level of the classification carries colour. */
-export type ColourMode = 'family' | 'subgroup'
+/**
+ * What carries colour: the family, the subgroup, or — in its own mode, which replaces family colour
+ * entirely — how well each language is documented.
+ */
+export type ColourMode = 'family' | 'subgroup' | 'documentation'
 
 export type ViewState = {
   readonly selection: PlateSelection
@@ -41,7 +44,12 @@ export function parseViewHash(hash: string): ViewState {
   return {
     selection,
     hatching: parameters.get('arsir') === '1',
-    colourMode: parameters.get('warna') === 'subrumpun' ? 'subgroup' : 'family',
+    colourMode:
+      parameters.get('warna') === 'subrumpun'
+        ? 'subgroup'
+        : parameters.get('warna') === 'dokumentasi'
+          ? 'documentation'
+          : 'family',
   }
 }
 
@@ -54,6 +62,7 @@ export function toViewHash(state: ViewState): string {
   }
   if (state.hatching) parameters.set('arsir', '1')
   if (state.colourMode === 'subgroup') parameters.set('warna', 'subrumpun')
+  if (state.colourMode === 'documentation') parameters.set('warna', 'dokumentasi')
 
   const encoded = parameters.toString()
   return encoded === '' ? '' : `#${encoded}`

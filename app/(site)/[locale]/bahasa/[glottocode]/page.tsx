@@ -61,6 +61,8 @@ function detailOf(glottocode: string) {
       iso639P3: languoid.iso639P3,
       aes: languoid.aes,
       aesStep: aesStep(languoid.aes),
+      med: languoid.med,
+      referenceCount: languoid.referenceCount,
       lon: languoid.lon,
       lat: languoid.lat,
       geometry: languoid.geometry,

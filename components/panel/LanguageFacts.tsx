@@ -3,6 +3,7 @@ import { formatCoordinate } from '@/lib/geo'
 import type { LanguageDetail } from '@/lib/plate/build'
 import type { BundleManifest } from '@/lib/bundle/types'
 import { format, localePath, type Dictionary, type Locale } from '@/lib/i18n'
+import { medLabel } from '@/components/plate/DocumentationKey'
 
 /**
  * The facts about one language, in one place: names, glottocode, ISO code, the full family
@@ -75,6 +76,33 @@ export function LanguageFacts({
             <HatchSwatch step={detail.aesStep} />
             {aesLabel}
           </span>
+        </Fact>
+
+        <Fact
+          label={strings.docs.panelLabel}
+          hint={compact ? undefined : strings.docs.panelHint}
+        >
+          {medLabel(strings, detail.med)}
+        </Fact>
+
+        <Fact label={strings.docs.references}>
+          <span className="figure text-body-s">
+            {format(strings.docs.referencesValue, {
+              count: detail.referenceCount.toLocaleString(locale),
+            })}
+          </span>
+          {compact ? null : (
+            <>
+              {' '}
+              <a
+                href={`https://glottolog.org/resource/languoid/id/${detail.glottocode}`}
+                className="link text-body-s"
+                rel="noreferrer"
+              >
+                {strings.docs.openGlottolog}
+              </a>
+            </>
+          )}
         </Fact>
 
         <Fact label={strings.panel.coordinates}>

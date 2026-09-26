@@ -1,6 +1,7 @@
 'use client'
 
 import type { Dictionary } from '@/lib/i18n'
+import type { ColourMode } from '@/lib/plate/hash'
 
 /** Colour by family or subgroup, and endangerment hatching. Set on the map key. */
 export function DisplayControls({
@@ -12,8 +13,8 @@ export function DisplayControls({
   onToggleHatching,
 }: {
   readonly strings: Dictionary
-  readonly colourMode: 'family' | 'subgroup'
-  readonly onColourMode: (mode: 'family' | 'subgroup') => void
+  readonly colourMode: ColourMode
+  readonly onColourMode: (mode: ColourMode) => void
   /** Hidden when nothing in the bundle actually splits — the control would be a no-op. */
   readonly hasSubgroups: boolean
   readonly hatching: boolean
@@ -21,11 +22,14 @@ export function DisplayControls({
 }) {
   return (
     <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-      {hasSubgroups ? (
+      {(
         <div className="flex items-center gap-2">
           <span className="index-label">{strings.plate.colourBy}</span>
           <div className="flex" role="group" aria-label={strings.plate.colourBy}>
-            {(['family', 'subgroup'] as const).map((mode) => (
+            {(hasSubgroups
+              ? (['family', 'subgroup', 'documentation'] as const)
+              : (['family', 'documentation'] as const)
+            ).map((mode) => (
               <button
                 key={mode}
                 type="button"
@@ -35,12 +39,16 @@ export function DisplayControls({
                   colourMode === mode ? 'border-boundary bg-boundary text-plate' : ''
                 }`}
               >
-                {mode === 'family' ? strings.plate.colourByFamily : strings.plate.colourBySubgroup}
+                {mode === 'family'
+                  ? strings.plate.colourByFamily
+                  : mode === 'subgroup'
+                    ? strings.plate.colourBySubgroup
+                    : strings.docs.colourBy}
               </button>
             ))}
           </div>
         </div>
-      ) : null}
+      )}
 
       <label className="flex items-center gap-2 text-body-s">
         <input

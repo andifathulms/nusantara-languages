@@ -214,3 +214,13 @@ describe('a random language, and the trail of a selection', () => {
     expect([...trail].sort()).toEqual(['aust1307', 'bugi1244', 'java1254', 'mala1545', 'sout2917'])
   })
 })
+
+describe('the documentation mode in the URL', () => {
+  it('round-trips as warna=dokumentasi, and an unknown mode falls back to family', async () => {
+    const { parseViewHash, toViewHash } = await import('@/lib/plate/hash')
+    const hash = toViewHash({ selection: { kind: 'none' }, hatching: false, colourMode: 'documentation' })
+    expect(hash).toBe('#warna=dokumentasi')
+    expect(parseViewHash(hash).colourMode).toBe('documentation')
+    expect(parseViewHash('#warna=pelangi').colourMode).toBe('family')
+  })
+})
