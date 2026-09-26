@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react'
 import type { PlateModel } from '@/lib/plate/build'
-import { dimBuckets, type GuidedViewId } from '@/lib/plate/guided'
+import { dimBuckets } from '@/lib/plate/guided'
 import { familyVarRef } from '@/lib/colour'
 import { Coastline, LandFill, WaterLines } from './Ground'
 
@@ -16,7 +16,7 @@ export function GuidedPlateDefs({
 }: {
   readonly model: PlateModel
   /** Glottocode → the views it is dimmed in, from `dimmedBy`. */
-  readonly dims: Readonly<Record<string, readonly GuidedViewId[]>>
+  readonly dims: Readonly<Record<string, readonly string[]>>
 }) {
   return (
     <svg width={0} height={0} aria-hidden="true" className="absolute">
@@ -65,7 +65,7 @@ export function GuidedThumbnail({
   viewBox,
   label,
 }: {
-  readonly view: GuidedViewId
+  readonly view: string
   readonly viewBox: string
   readonly label: string
 }) {
@@ -87,7 +87,7 @@ function Nested({
   views,
   children,
 }: {
-  readonly views: readonly GuidedViewId[]
+  readonly views: readonly string[]
   readonly children: React.ReactNode
 }) {
   return views.reduceRight<React.ReactNode>(

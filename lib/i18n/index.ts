@@ -228,6 +228,29 @@ export type Dictionary = {
     readonly referencesValue: string
     readonly openGlottolog: string
   }
+  /** The word map: one concept across the archipelago, from ABVD. Every figure is a placeholder filled from the bundle. */
+  readonly words: {
+    readonly title: string
+    readonly lead: string
+    readonly pick: string
+    readonly five: string
+    readonly two: string
+    readonly eye: string
+    readonly fish: string
+    readonly louse: string
+    readonly water: string
+    /** Template. Placeholders: {lit}, {withForm}. */
+    readonly lit: string
+    /** Template. Placeholders: {withForm}, {total}. */
+    readonly coverage: string
+    readonly cognate: string
+    readonly sample: string
+    readonly loan: string
+    readonly inSet: string
+    readonly otherSet: string
+    readonly card: string
+    readonly attribution: string
+  }
   readonly relatives: {
     readonly title: string
     readonly sharedAncestor: string
@@ -593,6 +616,26 @@ const id: Dictionary = {
     referencesValue: '{count} entri bibliografi',
     openGlottolog: 'Lihat bibliografinya di Glottolog',
   },
+  words: {
+    title: 'Satu kata, seluruh kepulauan',
+    lead: 'Bagaimana orang tahu bahwa bahasa-bahasa ini berkerabat? Salah satu buktinya ada pada kata-kata dasar: bentuk yang seasal, bunyinya berpadanan secara teratur. Pilih satu kata dan lihat di mana bentuk yang seasal dipakai.',
+    pick: 'Pilih kata',
+    five: 'lima',
+    two: 'dua',
+    eye: 'mata',
+    fish: 'ikan',
+    louse: 'kutu',
+    water: 'air',
+    lit: '{lit} dari {withForm} bahasa yang tercatat memakai bentuk dari satu himpunan seasal — itulah yang menyala di peta.',
+    coverage: 'ABVD berfokus pada rumpun Austronesia: {withForm} dari {total} bahasa di peta ini punya entri untuk kata ini. Bahasa tanpa entri bukan berarti tanpa kata — hanya tidak tercatat di sumber ini.',
+    cognate: 'Seasal (kognat) berarti diturunkan dari kata yang sama dalam bahasa leluhur, menurut penilaian para penyusun ABVD — bukan sekadar mirip bunyinya.',
+    sample: 'Contoh, dari barat ke timur',
+    loan: 'pinjaman',
+    inSet: 'seasal',
+    otherSet: 'bentuk lain',
+    card: 'Kata lima, dua, mata: bentuk yang seasal dari Sumatra sampai Papua, bukti bahwa bahasa-bahasa ini satu rumpun.',
+    attribution: 'Kata: Austronesian Basic Vocabulary Database (CC-BY-4.0)',
+  },
   relatives: {
     title: 'Kerabat terdekat',
     sharedAncestor: 'Leluhur bersama terdekat',
@@ -935,6 +978,26 @@ const en: Dictionary = {
     references: 'References in Glottolog',
     referencesValue: '{count} bibliography entries',
     openGlottolog: 'See its bibliography on Glottolog',
+  },
+  words: {
+    title: 'One word, across the archipelago',
+    lead: 'How does anyone know these languages are related? Part of the evidence is in basic words: forms that share an origin, their sounds corresponding regularly. Pick a word and see where the forms that share an origin are used.',
+    pick: 'Pick a word',
+    five: 'five',
+    two: 'two',
+    eye: 'eye',
+    fish: 'fish',
+    louse: 'louse',
+    water: 'water',
+    lit: '{lit} of the {withForm} recorded languages use a form from one cognate set — those are lit on the map.',
+    coverage: 'ABVD focuses on the Austronesian family: {withForm} of the {total} languages on this map have an entry for this word. No entry does not mean no word — only that this source does not record one.',
+    cognate: 'Cognate means descended from the same word in an ancestral language, as judged by ABVD\'s compilers — not merely similar in sound.',
+    sample: 'Examples, west to east',
+    loan: 'loan',
+    inSet: 'cognate',
+    otherSet: 'other form',
+    card: 'The words for five, two, eye: forms sharing one origin from Sumatra to Papua, the evidence that these languages are one family.',
+    attribution: 'Words: Austronesian Basic Vocabulary Database (CC-BY-4.0)',
   },
   relatives: {
     title: 'Nearest relatives',

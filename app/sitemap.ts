@@ -44,6 +44,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: 'pandu', priority: 0.6 },
     { path: 'metode', priority: 0.5 },
     ...GUIDED_VIEWS.map((view) => ({ path: `pandu/${view}`, priority: 0.6 })),
+    { path: 'pandu/kata', priority: 0.6 },
     // The long tail, and the reason this file exists.
     ...languoids.map((languoid) => ({
       path: `bahasa/${languoid.glottocode}`,

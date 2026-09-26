@@ -85,6 +85,8 @@ type PlateProps = {
   readonly english?: boolean
   /** Towns, for orientation. Off by default. */
   readonly showTowns?: boolean
+  /** A further source on this view — the word map's ABVD — added to the plate's own attribution. */
+  readonly attributionExtra?: string
 }
 
 const HATCH_IDS = ['hatch-1', 'hatch-2', 'hatch-3', 'hatch-4', 'hatch-5', 'hatch-6'] as const
@@ -212,6 +214,7 @@ export function Plate({
   hoverCard = null,
   english = false,
   showTowns = false,
+  attributionExtra,
 }: PlateProps) {
   const [viewport, setViewport] = useState<Viewport>(IDENTITY)
   const [isFullscreen, setIsFullscreen] = useState(false)
@@ -694,7 +697,8 @@ export function Plate({
         fill="var(--plate-boundary)"
         fillOpacity={0.6}
       >
-        Glottolog 5.3 (CC-BY-4.0) · Glottography (CC-BY-4.0) · Natural Earth · CC-BY-SA-4.0
+        Glottolog 5.3 (CC-BY-4.0) · Glottography (CC-BY-4.0) · Natural Earth
+        {attributionExtra === undefined ? '' : ` · ${attributionExtra}`} · CC-BY-SA-4.0
       </text>
       </svg>
 

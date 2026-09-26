@@ -209,11 +209,11 @@ export function dimmedBy(
  */
 export function dimBuckets<T extends { readonly glottocode: string }>(
   shapes: readonly T[],
-  dims: ReadonlyMap<string, readonly GuidedViewId[]> | Readonly<Record<string, readonly GuidedViewId[]>>,
-): readonly { readonly views: readonly GuidedViewId[]; readonly shapes: readonly T[] }[] {
-  const lookup = (code: string): readonly GuidedViewId[] =>
-    (dims instanceof Map ? dims.get(code) : (dims as Record<string, readonly GuidedViewId[]>)[code]) ?? []
-  const buckets = new Map<string, { views: readonly GuidedViewId[]; shapes: T[] }>()
+  dims: ReadonlyMap<string, readonly string[]> | Readonly<Record<string, readonly string[]>>,
+): readonly { readonly views: readonly string[]; readonly shapes: readonly T[] }[] {
+  const lookup = (code: string): readonly string[] =>
+    (dims instanceof Map ? dims.get(code) : (dims as Record<string, readonly string[]>)[code]) ?? []
+  const buckets = new Map<string, { views: readonly string[]; shapes: T[] }>()
   for (const shape of shapes) {
     const views = lookup(shape.glottocode)
     const key = views.join('+')

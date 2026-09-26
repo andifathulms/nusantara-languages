@@ -41,9 +41,22 @@ export default function GuidedIndexPage({ params }: { params: { locale: string }
     width: THUMB_WIDTH,
     pathDecimals: 0,
   })
-  const dims = Object.fromEntries(dimmedBy(languoids, coverage))
-  const viewBoxOf = (id: GuidedViewId): string => {
-    const box = plateBoxFor(INDONESIA_BBOX, THUMB_WIDTH, GUIDED[id].thumbnail)
+  // The word map's picture lights the widest cognate set for "five" — lima from Sumatra to Papua.
+  const five = bundle.words.concepts.find((concept) => concept.gloss === 'FIVE')
+  const fiveLit = new Set(
+    Object.entries(five?.forms ?? {})
+      .filter(([, entry]) => entry.cognate !== null && entry.cognate === five?.widest)
+      .map(([code]) => code),
+  )
+  const dims = Object.fromEntries(
+    [...dimmedBy(languoids, coverage)].map(([code, views]) => [
+      code,
+      fiveLit.has(code) ? views : [...views, 'kata'],
+    ]),
+  )
+  const viewBoxOf = (id: GuidedViewId): string => viewBoxFor(GUIDED[id].thumbnail)
+  function viewBoxFor(frame: typeof INDONESIA_BBOX): string {
+    const box = plateBoxFor(INDONESIA_BBOX, THUMB_WIDTH, frame)
     const round = (value: number) => Math.round(value * 10) / 10
     return `${round(box.minX)} ${round(box.minY)} ${round(box.maxX - box.minX)} ${round(box.maxY - box.minY)}`
   }
@@ -81,7 +94,7 @@ export default function GuidedIndexPage({ params }: { params: { locale: string }
 
         <GuidedPlateDefs model={model} dims={dims} />
 
-        <ul className="mt-block-lg grid gap-5 md:grid-cols-3">
+        <ul className="mt-block-lg grid gap-5 md:grid-cols-2 xl:grid-cols-4">
           {views.map((view) => (
             <li key={view.id}>
               <Link
@@ -101,6 +114,29 @@ export default function GuidedIndexPage({ params }: { params: { locale: string }
               </Link>
             </li>
           ))}
+          <li>
+            <Link
+              href={localePath(locale, 'pandu/kata')}
+              className="sheet group flex h-full flex-col overflow-hidden transition-shadow hover:shadow-lifted"
+            >
+              <div className="aspect-[16/9] overflow-hidden border-b border-boundary/20 bg-sea">
+                <GuidedThumbnail
+                  view="kata"
+                  viewBox={viewBoxFor(INDONESIA_BBOX)}
+                  label={strings.words.title}
+                />
+              </div>
+              <div className="flex flex-1 flex-col p-5">
+                <h2 className="font-display text-title-s group-hover:text-accent">
+                  {strings.words.title}
+                </h2>
+                <p className="mt-2 flex-1 text-body-s text-ink-soft">{strings.words.card}</p>
+                <p className="figure mt-4 text-micro text-ink-soft">
+                  {format(strings.guided.emphasised, { count: fiveLit.size })}
+                </p>
+              </div>
+            </Link>
+          </li>
         </ul>
       </main>
 

@@ -82,6 +82,10 @@ type PlateViewProps = {
   readonly focus?: { readonly key: string; readonly box: PlateBox | null } | null
   /** Rendered above the plate, inside the view — a guided story's steps, for one. */
   readonly beforePlate?: React.ReactNode
+  /** A line per language for the hover label — the word map shows the word itself. */
+  readonly hoverNotes?: Readonly<Record<string, React.ReactNode>>
+  /** A further source, added to the attribution on the plate. */
+  readonly attributionExtra?: string
 }
 
 export function PlateView({
@@ -102,6 +106,8 @@ export function PlateView({
   narrowCentreX,
   focus = null,
   beforePlate = null,
+  hoverNotes,
+  attributionExtra,
 }: PlateViewProps) {
   const [hovered, setHovered] = useState<string | null>(null)
   const [selection, setSelection] = useState<PlateSelection>(initialSelection)
@@ -358,6 +364,7 @@ export function PlateView({
     hoverDetail === undefined ? null : (
       <div className="w-max max-w-[16rem] border border-boundary/30 bg-plate/95 px-2.5 py-1.5 shadow-lifted">
         <p className="font-display text-body font-medium leading-tight">{hoverDetail.name}</p>
+        {hoverNotes?.[hoverDetail.glottocode] ?? null}
         <p className="mt-0.5 text-micro text-ink-soft">
           {hoverDetail.ancestry.length === 0
             ? strings.tree.isolate
@@ -515,6 +522,7 @@ export function PlateView({
               hoverCard={hoverCard}
               english={locale === 'en'}
               showTowns={showTowns}
+              attributionExtra={attributionExtra}
             />
 
             {/* Directly under the plate, at every width. It was laid over the plate's sea at
