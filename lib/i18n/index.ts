@@ -34,6 +34,19 @@ export type Dictionary = {
     readonly whatThisIs: string
     readonly whatThisIsNot: string
     readonly personalProject: string
+    /** The tour chip on the front-page plate: which family is lit. */
+    readonly tourNow: string
+    readonly tourPause: string
+    readonly tourPlay: string
+    /** The cartouche's eyebrow. Template. Placeholders: {fromYear}, {toYear}. */
+    readonly atlasEyebrow: string
+    readonly coverageTitle: string
+    /** Template. Placeholder: {count}. */
+    readonly coverageAreas: string
+    /** Template. Placeholder: {count}. */
+    readonly coveragePoints: string
+    /** Template. Placeholders: {families}, {isolates}. */
+    readonly coverageUnits: string
   }
   readonly plate: {
     readonly title: string
@@ -353,6 +366,14 @@ const id: Dictionary = {
       'Peta ini bukan sensus penutur hari ini, bukan produk resmi pemerintah, dan tidak memakai data Ethnologue dalam bentuk apa pun.',
     personalProject:
       'Proyek pribadi, sumber terbuka, untuk keperluan pendidikan. Bukan “Peta Bahasa” milik Badan Bahasa dan tidak berafiliasi dengan lembaga mana pun.',
+    tourNow: 'Menyala',
+    tourPause: 'Jeda tur',
+    tourPlay: 'Putar tur',
+    atlasEyebrow: 'Atlas bahasa · sumber {fromYear}–{toYear}',
+    coverageTitle: 'Cakupan, digambar',
+    coverageAreas: '{count} dengan wilayah',
+    coveragePoints: '{count} hanya titik',
+    coverageUnits: '{families} unit teratas · {isolates} isolat',
   },
   plate: {
     title: 'Peta rumpun bahasa',
@@ -627,6 +648,14 @@ const en: Dictionary = {
       'This is not a census of speakers today, not an official government product, and it uses no Ethnologue data in any field.',
     personalProject:
       'A personal, open-source, educational project. Not Badan Bahasa’s “Peta Bahasa”, and not affiliated with any institution.',
+    tourNow: 'Now lit',
+    tourPause: 'Pause the tour',
+    tourPlay: 'Play the tour',
+    atlasEyebrow: 'Language atlas · sources {fromYear}–{toYear}',
+    coverageTitle: 'Coverage, drawn',
+    coverageAreas: '{count} with an area',
+    coveragePoints: '{count} points only',
+    coverageUnits: '{families} top-level units · {isolates} isolates',
   },
   plate: {
     title: 'Language families',

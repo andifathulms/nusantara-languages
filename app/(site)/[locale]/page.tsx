@@ -8,6 +8,8 @@ import { buildPlateModel } from '@/lib/plate/build'
 import { atlasPeriod } from '@/lib/bundle/types'
 import { GUIDED } from '@/lib/plate/guided'
 import { exampleLadder } from '@/lib/plate/example'
+import { tourStops, tourStyles } from '@/lib/plate/tour'
+import { HeroTour } from '@/components/plate/HeroTour'
 import { INDONESIA_BBOX } from '@/lib/geo'
 import { dictionary, format, isLocale, localePath, type Locale } from '@/lib/i18n'
 import { localeMetadata } from '@/lib/seo/locale-meta'
@@ -75,67 +77,120 @@ export default function HomePage({ params }: { params: { locale: string } }) {
     },
   ]
 
-  const figures = [
-    { term: locale === 'id' ? 'Bahasa' : 'Languages', value: coverage.languages },
-    { term: locale === 'id' ? 'Rumpun' : 'Families', value: coverage.families.length },
-    { term: locale === 'id' ? 'Berwilayah' : 'With a territory', value: coverage.withPolygon },
-    { term: locale === 'id' ? 'Isolat' : 'Isolates', value: coverage.isolates },
-  ]
+  const stops = tourStops(model.rows)
 
   return (
     <>
       <SiteHeader locale={locale} current="home" />
 
       <main id="content">
-        {/* Hero: the plain sentence first, the map immediately under it. */}
-        <section className="mx-auto max-w-plate px-4 pt-section sm:px-6 sm:pt-section-lg">
-          <div className="max-w-prose">
-            {/* The h1 says what this is, not what it is called. The masthead prints the name two
-                lines above; spending the largest type on the page repeating it left a stranger —
-                who now lands here rather than on the plate — reading the same four words twice
-                before learning anything. The name is still the document title and the masthead. */}
-            <h1 className="font-display text-title-l sm:text-title-xl">{strings.siteTagline}</h1>
-            <p className="mt-4 text-lead">
-              {format(strings.guide.leadPlain, { total: coverage.languages })}
-            </p>
-            <p className="mt-3 text-ink-soft">{strings.guide.linkage}</p>
+        {/* Hero: the plate is the first thing on the page, with the title set in a cartouche over
+            the Pacific north of New Guinea — open sea on this frame, and where an atlas would put
+            it. On a phone there is no sea to spare, so the cartouche sits above the plate. */}
+        <section className="mx-auto max-w-plate px-4 pt-block sm:px-6 sm:pt-block-lg">
+          {/* Raw, not a text child: React escapes quotes in text, and a browser never decodes entities
+              inside <style>, so the attribute selectors would reach the page as &quot; and fail. */}
+          <style dangerouslySetInnerHTML={{ __html: tourStyles(stops, '.hero-plate') }} />
+          <div className="grid">
+            <div className="order-2 xl:order-none xl:col-start-1 xl:row-start-1">
+              <HeroTour stops={stops} strings={strings} locale={locale} className="plate-frame bg-sea">
+                <Link
+                  href={localePath(locale, 'peta')}
+                  className="block"
+                  aria-label={strings.home.openPlate}
+                >
+                  <PlateThumbnail
+                    model={model}
+                    label={`${strings.plate.title} — ${format(strings.plate.coverage, {
+                      withPolygon: coverage.withPolygon,
+                      total: coverage.languages,
+                      percent: coverage.polygonPercent,
+                    })}`}
+                    className="h-auto w-full"
+                    idPrefix="hero"
+                  />
+                </Link>
+              </HeroTour>
+            </div>
 
-            <div className="mt-block flex flex-wrap gap-3">
-              <Link href={localePath(locale, 'peta')} className="btn btn-primary btn-lg">
-                {strings.home.openPlate}
-              </Link>
-              <Link href={localePath(locale, 'pandu')} className="btn btn-lg">
-                {strings.guided.title}
-              </Link>
+            {/* Sized to the open Pacific between Halmahera and the frame's edge, measured at 1280
+                and 1440: wider or taller and it covers Halmahera, where the tour opens. */}
+            <div className="cartouche order-1 mb-block xl:z-10 xl:order-none xl:col-start-1 xl:row-start-1 xl:mb-0 xl:mr-5 xl:mt-5 xl:max-w-[18rem] xl:self-start xl:justify-self-end">
+              {period !== null ? (
+                <p className="index-label">
+                  {format(strings.home.atlasEyebrow, {
+                    fromYear: period.fromYear,
+                    toYear: period.toYear,
+                  })}
+                </p>
+              ) : null}
+              {/* The h1 says what this is, not what it is called: the masthead already prints the
+                  name, and spending the largest type repeating it taught a stranger nothing. */}
+              <h1 className="mt-1 font-display text-title-m sm:text-title-l xl:text-title-s">
+                {strings.siteTagline}
+              </h1>
+              <p className="mt-2 text-body-s text-ink-soft xl:hidden">
+                {format(strings.guide.leadPlain, { total: coverage.languages })}
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Link href={localePath(locale, 'peta')} className="btn btn-primary">
+                  {strings.home.openPlate}
+                </Link>
+                <Link href={localePath(locale, 'pandu')} className="btn">
+                  {strings.guided.title}
+                </Link>
+              </div>
             </div>
           </div>
 
-          <Link
-            href={localePath(locale, 'peta')}
-            className="mt-section block plate-frame bg-plate transition-shadow hover:shadow-lifted"
-            aria-label={strings.home.openPlate}
-          >
-            <PlateThumbnail
-              model={model}
-              label={`${strings.plate.title} — ${format(strings.plate.coverage, {
-                withPolygon: coverage.withPolygon,
-                total: coverage.languages,
-                percent: coverage.polygonPercent,
-              })}`}
-              className="h-auto w-full"
-            />
-          </Link>
-
-          <dl className="mt-block-lg grid grid-cols-2 gap-x-8 gap-y-6 sm:grid-cols-4">
-            {figures.map((figure) => (
-              <div key={figure.term}>
-                <dt className="index-label">{figure.term}</dt>
-                <dd className="figure mt-1 text-title-m leading-none">
-                  {figure.value.toLocaleString(locale)}
-                </dd>
+          {/* Coverage, drawn rather than listed: how much of the map is areas and how much is
+              points, to one scale. Every figure is read from coverage.json. */}
+          <div className="mt-block-lg grid gap-x-10 gap-y-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+            <div>
+              <p className="index-label">{strings.home.coverageTitle}</p>
+              <div
+                className="mt-2 flex h-3.5 border border-boundary/35"
+                role="img"
+                aria-label={format(strings.plate.coverage, {
+                  withPolygon: coverage.withPolygon,
+                  total: coverage.languages,
+                  percent: coverage.polygonPercent,
+                })}
+              >
+                <span
+                  className="block h-full bg-family-ochre"
+                  style={{ width: `${(coverage.withPolygon / coverage.languages) * 100}%` }}
+                />
+                <span className="tree-bar-points block h-full flex-1" />
               </div>
-            ))}
-          </dl>
+              <p className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-body-s">
+                <span className="flex items-center gap-2">
+                  <span aria-hidden="true" className="inline-block h-3 w-3 border border-boundary/40 bg-family-ochre" />
+                  <span className="figure">
+                    {format(strings.home.coverageAreas, { count: coverage.withPolygon.toLocaleString(locale) })}
+                  </span>
+                </span>
+                <span className="flex items-center gap-2">
+                  <span aria-hidden="true" className="tree-bar-points inline-block h-3 w-3 border border-boundary/40" />
+                  <span className="figure">
+                    {format(strings.home.coveragePoints, { count: coverage.pointOnly.toLocaleString(locale) })}
+                  </span>
+                </span>
+                <span className="figure text-ink-soft">
+                  {format(strings.home.coverageUnits, {
+                    families: coverage.families.length.toLocaleString(locale),
+                    isolates: coverage.isolates.toLocaleString(locale),
+                  })}
+                </span>
+              </p>
+            </div>
+            <div className="self-end space-y-2 text-body-s text-ink-soft">
+              <p className="hidden xl:block">
+                {format(strings.guide.leadPlain, { total: coverage.languages })}
+              </p>
+              <p>{strings.guide.linkage}</p>
+            </div>
+          </div>
         </section>
 
         {/* One language traced end to end, before the reader is asked to press anything. The

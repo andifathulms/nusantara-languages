@@ -61,6 +61,7 @@ export function PlateThumbnail({
         shape.type === 'area' ? (
           <path
             key={shape.glottocode}
+            data-family={shape.family ?? shape.glottocode}
             d={shape.d}
             fill={familyVarRef(shape.colour, 'base')}
             fillOpacity={0.95}
@@ -71,6 +72,7 @@ export function PlateThumbnail({
         ) : (
           <circle
             key={shape.glottocode}
+            data-family={shape.family ?? shape.glottocode}
             cx={shape.x}
             cy={shape.y}
             r={1.6}

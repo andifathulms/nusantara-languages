@@ -122,6 +122,21 @@
       0 12px 32px -24px rgb(42 38 32 / 0.6);
   }
 
+  /* A title block set on the plate, the way an atlas sets its title in a framed cartouche over
+     open sea: a hairline, a gap, a second hairline. Only where it overlays the plate — on a phone it
+     sits above the map as ordinary type. */
+  .cartouche {
+    @apply xl:border xl:border-boundary/40 xl:bg-plate/95 xl:px-4 xl:py-3.5;
+  }
+  @media (min-width: 1280px) {
+    .cartouche {
+      box-shadow:
+        inset 0 0 0 3px theme('colors.plate'),
+        inset 0 0 0 4px rgb(42 38 32 / 0.22),
+        0 18px 40px -28px rgb(42 38 32 / 0.55);
+    }
+  }
+
   /* --- Controls ------------------------------------------------------------------------ */
 
   .btn {
