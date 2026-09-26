@@ -168,6 +168,26 @@ export function isAncestorOf(
   return ancestors(index, descendant).includes(ancestor)
 }
 
+/**
+ * The deepest node two ancestry chains share — the closest common ancestor two languages have on
+ * record. Chains are root first, as the bundle stores them. Null when they share nothing: two
+ * families, or an isolate, whose chain is empty.
+ *
+ * "On record" is the whole claim. Glottolog's tree has no branch lengths, so this says where two
+ * lines of descent meet, never how long ago.
+ */
+export function sharedAncestor(
+  left: readonly string[],
+  right: readonly string[],
+): string | null {
+  let shared: string | null = null
+  for (let index = 0; index < Math.min(left.length, right.length); index += 1) {
+    if (left[index] !== right[index]) break
+    shared = left[index] ?? null
+  }
+  return shared
+}
+
 /** Depth from the root. A root is 0. */
 export function depthOf(index: TreeIndex, glottocode: string): number {
   return ancestors(index, glottocode).length
