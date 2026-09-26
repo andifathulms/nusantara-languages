@@ -1,4 +1,5 @@
 import type { PlateModel } from '@/lib/plate/build'
+import { landGroups } from '@/lib/plate/ground'
 
 /**
  * The ground under the plate: coastline, water-lining and land fill. Shared by the interactive
@@ -28,13 +29,15 @@ export function Coastline({
   /** The interactive plate zooms, and its lines hold their drawn width while it does. */
   readonly nonScaling?: boolean
 }) {
+  const groups = landGroups(land)
   return (
     <>
-      {(['indonesia', 'neighbour'] as const).map((kind) => (
+      {([
+        ['indonesia', groups.home],
+        ['neighbour', groups.neighbour],
+      ] as const).map(([kind, pieces]) => (
         <g key={kind} id={`${prefix}-coast-${kind}`}>
-          {land
-            .filter((shape) => shape.kind === kind)
-            .map((shape, index) => (
+          {pieces.map((shape, index) => (
               <path
                 key={index}
                 d={shape.d}
